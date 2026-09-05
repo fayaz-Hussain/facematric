@@ -51,8 +51,11 @@ Thumbs.db
 *.pkl
 *.pth
 
-# Node modules (if any)
+# Node modules
 node_modules/
+
+# Build output
+dist/
 
 # Environment variables
 .env
