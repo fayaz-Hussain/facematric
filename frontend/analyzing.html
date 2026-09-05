@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="FaceMetric - Analyzing your facial features">
+    <title>Analyzing... - FaceMetric</title>
+    
+    <!-- CSS Files -->
+    <link rel="stylesheet" href="./src/css/variables.css">
+    <link rel="stylesheet" href="./src/css/base.css">
+    <link rel="stylesheet" href="./src/css/header.css">
+    <link rel="stylesheet" href="./src/css/theme-toggle.css">
+    <link rel="stylesheet" href="./src/css/analyzing.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="logo-section">
+            <div class="logo-icon">
+                <img src="./src/assets/logo/logo.svg" alt="FaceMetric Logo">
+            </div>
+            <div class="logo-text">
+                <h1>Face<span class="logo-highlight">Metric</span></h1>
+                <p>Facial Symmetry & Golden Ratio Analysis</p>
+            </div>
+        </div>
+        <div class="header-actions">
+            <a href="index.html" class="about-link">← Back</a>
+            <div class="theme-toggle">
+                <span class="toggle-icon">☀️</span>
+                <div class="toggle-switch" onclick="toggleTheme()" aria-label="Toggle theme"></div>
+                <span class="toggle-icon">🌙</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="analyzing-content">
+        <div class="analyzing-container">
+            <!-- Status Header - Centered across both sections -->
+            <div class="status-header">
+                <h2>Analyzing Your Facial Features</h2>
+                <p class="subtitle">Please wait while we process your image...</p>
+            </div>
+
+            <!-- Progress Bar - Full Width -->
+            <div class="progress-container">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+                <div class="progress-text" id="progressText">0%</div>
+            </div>
+
+            <!-- Content Row with Image and Steps side by side -->
+            <div class="content-row">
+                <!-- Image Preview Section -->
+                <div class="image-section">
+                    <div class="image-container">
+                        <img id="uploadedImage" src="" alt="Uploaded image" />
+                        <div class="scanning-overlay">
+                            <div class="scan-line"></div>
+                            <div class="face-grid"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Analysis Status Section -->
+                <div class="status-section">
+                    <div class="analysis-steps">
+                        <div class="step" id="step1">
+                            <div class="step-icon">
+                                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
+                                    <path d="M9 12L11 14L15 10" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                            </div>
+                            <div class="step-content">
+                                <h3>Detecting Face</h3>
+                                <p>Identifying facial landmarks...</p>
+                            </div>
+                        </div>
+
+                        <div class="step" id="step2">
+                            <div class="step-icon">
+                                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
+                                    <path d="M9 12L11 14L15 10" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                            </div>
+                            <div class="step-content">
+                                <h3>Measuring Symmetry</h3>
+                                <p>Calculating bilateral symmetry...</p>
+                            </div>
+                        </div>
+
+                        <div class="step" id="step3">
+                            <div class="step-icon">
+                                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
+                                    <path d="M9 12L11 14L15 10" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                            </div>
+                            <div class="step-content">
+                                <h3>Golden Ratio Analysis</h3>
+                                <p>Comparing to ideal proportions...</p>
+                            </div>
+                        </div>
+
+                        <div class="step" id="step4">
+                            <div class="step-icon">
+                                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
+                                    <path d="M9 12L11 14L15 10" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                            </div>
+                            <div class="step-content">
+                                <h3>Generating Report</h3>
+                                <p>Compiling your analysis...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Security Note - Full Width Banner -->
+            <div class="security-note">
+                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                </svg>
+                Your image is being processed securely and will not be stored.
+            </div>
+        </div>
+    </main>
+
+    <!-- JavaScript Files -->
+    <script src="./src/js/theme.js"></script>
+    <script src="./src/js/analyzing.js"></script>
+</body>
+</html>

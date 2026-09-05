@@ -22,13 +22,13 @@
 
 [data-theme="dark"] {
     /* Dark Theme Colors */
-    --bg-gradient-start: #0a0e12;
-    --bg-gradient-end: #1a2430;
+    --bg-gradient-start: #1a1f2e;
+    --bg-gradient-end: #2d3748;
     --text-primary: #ffffff;
     --text-secondary: #a0a0a0;
     --accent-teal: #40cca2;
     --accent-teal-light: #1a3d32;
-    --white: #1e2938;
+    --white: #2d3748;
     --border-teal: #40cca2;
     
     /* Logo Colors - Dark Mode */
