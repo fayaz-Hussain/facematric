@@ -1,0 +1,361 @@
+{
+  "pbtResults": {},
+  "executionHistory": {
+    "1. Backend Infrastructure Setup": [
+      {
+        "executionId": "1212a03d-e4a5-4668-87ed-2e7f1b76e4d7",
+        "chatSessionId": "sess_41671a61-d078-47c0-bc72-f19f11dd28dd",
+        "timestamp": 1788557529591
+      },
+      {
+        "executionId": "1212a03d-e4a5-4668-87ed-2e7f1b76e4d7",
+        "chatSessionId": "sess_41671a61-d078-47c0-bc72-f19f11dd28dd",
+        "timestamp": 1788557568200
+      }
+    ],
+    "2.1 Create Pydantic request models (AnalyzeRequest with image_base64 and include_celebrity_match fields)": [
+      {
+        "executionId": "1212a03d-e4a5-4668-87ed-2e7f1b76e4d7",
+        "chatSessionId": "sess_41671a61-d078-47c0-bc72-f19f11dd28dd",
+        "timestamp": 1788557531383
+      },
+      {
+        "executionId": "1212a03d-e4a5-4668-87ed-2e7f1b76e4d7",
+        "chatSessionId": "sess_41671a61-d078-47c0-bc72-f19f11dd28dd",
+        "timestamp": 1788557569162
+      }
+    ],
+    "2.2 Create Pydantic response models (AnalysisResponse, AnalysisResultModel, FeatureBreakdownItem, etc.)": [
+      {
+        "executionId": "1212a03d-e4a5-4668-87ed-2e7f1b76e4d7",
+        "chatSessionId": "sess_41671a61-d078-47c0-bc72-f19f11dd28dd",
+        "timestamp": 1788557535053
+      },
+      {
+        "executionId": "1212a03d-e4a5-4668-87ed-2e7f1b76e4d7",
+        "chatSessionId": "sess_41671a61-d078-47c0-bc72-f19f11dd28dd",
+        "timestamp": 1788557570110
+      }
+    ],
+    "2.3 Create internal data structures (ImageData, Landmarks, SymmetryType, GoldenRatioResult, etc.)": [
+      {
+        "executionId": "1212a03d-e4a5-4668-87ed-2e7f1b76e4d7",
+        "chatSessionId": "sess_41671a61-d078-47c0-bc72-f19f11dd28dd",
+        "timestamp": 1788557535271
+      },
+      {
+        "executionId": "1212a03d-e4a5-4668-87ed-2e7f1b76e4d7",
+        "chatSessionId": "sess_41671a61-d078-47c0-bc72-f19f11dd28dd",
+        "timestamp": 1788557571083
+      }
+    ],
+    "3.1 Implement format detection and validation (JPEG, PNG, HEIC, WebP, BMP, GIF)": [
+      {
+        "executionId": "1212a03d-e4a5-4668-87ed-2e7f1b76e4d7",
+        "chatSessionId": "sess_41671a61-d078-47c0-bc72-f19f11dd28dd",
+        "timestamp": 1788557535421
+      }
+    ],
+    "3.2 Implement EXIF rotation handling using ImageOps.exif_transpose": [
+      {
+        "executionId": "1212a03d-e4a5-4668-87ed-2e7f1b76e4d7",
+        "chatSessionId": "sess_41671a61-d078-47c0-bc72-f19f11dd28dd",
+        "timestamp": 1788557535619
+      }
+    ],
+    "3.3 Implement color space normalization (CMYK→RGB, RGBA→RGB with white background)": [
+      {
+        "executionId": "1212a03d-e4a5-4668-87ed-2e7f1b76e4d7",
+        "chatSessionId": "sess_41671a61-d078-47c0-bc72-f19f11dd28dd",
+        "timestamp": 1788557535771
+      }
+    ],
+    "3.4 Implement aspect ratio-preserving resize (max 640px dimension, Lanczos resampling)": [
+      {
+        "executionId": "1212a03d-e4a5-4668-87ed-2e7f1b76e4d7",
+        "chatSessionId": "sess_41671a61-d078-47c0-bc72-f19f11dd28dd",
+        "timestamp": 1788557535936
+      }
+    ],
+    "3.5 Implement JPEG compression (85% quality) and validation checks": [
+      {
+        "executionId": "1212a03d-e4a5-4668-87ed-2e7f1b76e4d7",
+        "chatSessionId": "sess_41671a61-d078-47c0-bc72-f19f11dd28dd",
+        "timestamp": 1788557536135
+      }
+    ],
+    "4.1 Initialize MediaPipe Face Mesh with correct configuration": [
+      {
+        "executionId": "1212a03d-e4a5-4668-87ed-2e7f1b76e4d7",
+        "chatSessionId": "sess_41671a61-d078-47c0-bc72-f19f11dd28dd",
+        "timestamp": 1788557536365
+      }
+    ],
+    "4.2 Implement face detection with count validation": [
+      {
+        "executionId": "1212a03d-e4a5-4668-87ed-2e7f1b76e4d7",
+        "chatSessionId": "sess_41671a61-d078-47c0-bc72-f19f11dd28dd",
+        "timestamp": 1788557536520
+      }
+    ],
+    "4.3 Extract 468 3D landmark coordinates and validate confidence": [
+      {
+        "executionId": "1212a03d-e4a5-4668-87ed-2e7f1b76e4d7",
+        "chatSessionId": "sess_41671a61-d078-47c0-bc72-f19f11dd28dd",
+        "timestamp": 1788557536735
+      }
+    ],
+    "4.4 Implement occlusion detection for glasses and masks": [
+      {
+        "executionId": "1212a03d-e4a5-4668-87ed-2e7f1b76e4d7",
+        "chatSessionId": "sess_41671a61-d078-47c0-bc72-f19f11dd28dd",
+        "timestamp": 1788557536904
+      }
+    ],
+    "5.1 Implement facial dimension measurements (face length, width, jaw width, etc.)": [
+      {
+        "executionId": "1212a03d-e4a5-4668-87ed-2e7f1b76e4d7",
+        "chatSessionId": "sess_41671a61-d078-47c0-bc72-f19f11dd28dd",
+        "timestamp": 1788557537106
+      }
+    ],
+    "5.2 Implement symmetry type classification logic with decision tree": [
+      {
+        "executionId": "1212a03d-e4a5-4668-87ed-2e7f1b76e4d7",
+        "chatSessionId": "sess_41671a61-d078-47c0-bc72-f19f11dd28dd",
+        "timestamp": 1788557537294
+      }
+    ],
+    "6.1 Implement 8 facial ratio measurement functions": [
+      {
+        "executionId": "1212a03d-e4a5-4668-87ed-2e7f1b76e4d7",
+        "chatSessionId": "sess_41671a61-d078-47c0-bc72-f19f11dd28dd",
+        "timestamp": 1788557537454
+      }
+    ],
+    "6.2 Implement per-feature scoring with golden ratio formula": [
+      {
+        "executionId": "1212a03d-e4a5-4668-87ed-2e7f1b76e4d7",
+        "chatSessionId": "sess_41671a61-d078-47c0-bc72-f19f11dd28dd",
+        "timestamp": 1788557537737
+      }
+    ],
+    "6.3 Implement overall score calculation as arithmetic mean of 8 features": [
+      {
+        "executionId": "1212a03d-e4a5-4668-87ed-2e7f1b76e4d7",
+        "chatSessionId": "sess_41671a61-d078-47c0-bc72-f19f11dd28dd",
+        "timestamp": 1788557538175
+      }
+    ],
+    "6.4 Implement asymmetric feature handling for bilateral measurements": [
+      {
+        "executionId": "1212a03d-e4a5-4668-87ed-2e7f1b76e4d7",
+        "chatSessionId": "sess_41671a61-d078-47c0-bc72-f19f11dd28dd",
+        "timestamp": 1788557538382
+      }
+    ],
+    "7.1 Implement bootstrap normal distribution (mean=70, std=10)": [
+      {
+        "executionId": "1212a03d-e4a5-4668-87ed-2e7f1b76e4d7",
+        "chatSessionId": "sess_41671a61-d078-47c0-bc72-f19f11dd28dd",
+        "timestamp": 1788557538645
+      }
+    ],
+    "7.2 Implement score-to-percentile conversion using CDF": [
+      {
+        "executionId": "1212a03d-e4a5-4668-87ed-2e7f1b76e4d7",
+        "chatSessionId": "sess_41671a61-d078-47c0-bc72-f19f11dd28dd",
+        "timestamp": 1788557538882
+      }
+    ],
+    "7.3 Implement empirical distribution loading (future enhancement)": [
+      {
+        "executionId": "1212a03d-e4a5-4668-87ed-2e7f1b76e4d7",
+        "chatSessionId": "sess_41671a61-d078-47c0-bc72-f19f11dd28dd",
+        "timestamp": 1788557539245
+      }
+    ],
+    "8.1 Implement FaceNet embedding generation using DeepFace": [
+      {
+        "executionId": "1212a03d-e4a5-4668-87ed-2e7f1b76e4d7",
+        "chatSessionId": "sess_41671a61-d078-47c0-bc72-f19f11dd28dd",
+        "timestamp": 1788557539466
+      }
+    ],
+    "8.2 Implement cosine similarity calculation": [
+      {
+        "executionId": "1212a03d-e4a5-4668-87ed-2e7f1b76e4d7",
+        "chatSessionId": "sess_41671a61-d078-47c0-bc72-f19f11dd28dd",
+        "timestamp": 1788557539644
+      }
+    ],
+    "8.3 Implement celebrity database comparison and ranking": [
+      {
+        "executionId": "1212a03d-e4a5-4668-87ed-2e7f1b76e4d7",
+        "chatSessionId": "sess_41671a61-d078-47c0-bc72-f19f11dd28dd",
+        "timestamp": 1788557539821
+      }
+    ],
+    "8.4 Implement confidence thresholding (0.55 threshold)": [
+      {
+        "executionId": "1212a03d-e4a5-4668-87ed-2e7f1b76e4d7",
+        "chatSessionId": "sess_41671a61-d078-47c0-bc72-f19f11dd28dd",
+        "timestamp": 1788557540038
+      }
+    ],
+    "8.5 Implement celebrity database loading with error handling": [
+      {
+        "executionId": "1212a03d-e4a5-4668-87ed-2e7f1b76e4d7",
+        "chatSessionId": "sess_41671a61-d078-47c0-bc72-f19f11dd28dd",
+        "timestamp": 1788557540446
+      }
+    ],
+    "9.1 Implement 2D landmark extraction from 3D landmarks": [
+      {
+        "executionId": "1212a03d-e4a5-4668-87ed-2e7f1b76e4d7",
+        "chatSessionId": "sess_41671a61-d078-47c0-bc72-f19f11dd28dd",
+        "timestamp": 1788557540716
+      }
+    ],
+    "9.2 Implement golden ratio guide calculations": [
+      {
+        "executionId": "1212a03d-e4a5-4668-87ed-2e7f1b76e4d7",
+        "chatSessionId": "sess_41671a61-d078-47c0-bc72-f19f11dd28dd",
+        "timestamp": 1788557540931
+      }
+    ],
+    "10.1 Create FastAPI application with CORS middleware": [
+      {
+        "executionId": "1212a03d-e4a5-4668-87ed-2e7f1b76e4d7",
+        "chatSessionId": "sess_41671a61-d078-47c0-bc72-f19f11dd28dd",
+        "timestamp": 1788557541188
+      }
+    ],
+    "10.2 Implement /api/analyze endpoint with request validation": [
+      {
+        "executionId": "1212a03d-e4a5-4668-87ed-2e7f1b76e4d7",
+        "chatSessionId": "sess_41671a61-d078-47c0-bc72-f19f11dd28dd",
+        "timestamp": 1788557541410
+      }
+    ],
+    "10.3 Implement timeout middleware (30-second threshold)": [
+      {
+        "executionId": "1212a03d-e4a5-4668-87ed-2e7f1b76e4d7",
+        "chatSessionId": "sess_41671a61-d078-47c0-bc72-f19f11dd28dd",
+        "timestamp": 1788557541731
+      }
+    ],
+    "10.4 Implement component orchestration in _process_analysis": [
+      {
+        "executionId": "1212a03d-e4a5-4668-87ed-2e7f1b76e4d7",
+        "chatSessionId": "sess_41671a61-d078-47c0-bc72-f19f11dd28dd",
+        "timestamp": 1788557542008
+      }
+    ],
+    "10.5 Implement progressive degradation for celebrity matching failures": [
+      {
+        "executionId": "1212a03d-e4a5-4668-87ed-2e7f1b76e4d7",
+        "chatSessionId": "sess_41671a61-d078-47c0-bc72-f19f11dd28dd",
+        "timestamp": 1788557542158
+      }
+    ],
+    "10.6 Implement comprehensive error handling with user-friendly messages": [
+      {
+        "executionId": "1212a03d-e4a5-4668-87ed-2e7f1b76e4d7",
+        "chatSessionId": "sess_41671a61-d078-47c0-bc72-f19f11dd28dd",
+        "timestamp": 1788557542454
+      }
+    ],
+    "10.7 Implement privacy-preserving memory cleanup": [
+      {
+        "executionId": "1212a03d-e4a5-4668-87ed-2e7f1b76e4d7",
+        "chatSessionId": "sess_41671a61-d078-47c0-bc72-f19f11dd28dd",
+        "timestamp": 1788557542739
+      }
+    ],
+    "11. Checkpoint - Core backend complete": [
+      {
+        "executionId": "1212a03d-e4a5-4668-87ed-2e7f1b76e4d7",
+        "chatSessionId": "sess_41671a61-d078-47c0-bc72-f19f11dd28dd",
+        "timestamp": 1788557543040
+      }
+    ],
+    "12.1 Merge Pins Face Recognition and Bollywood datasets": [
+      {
+        "executionId": "1212a03d-e4a5-4668-87ed-2e7f1b76e4d7",
+        "chatSessionId": "sess_41671a61-d078-47c0-bc72-f19f11dd28dd",
+        "timestamp": 1788557543265
+      }
+    ],
+    "12.2 Generate FaceNet embeddings for all celebrity images": [
+      {
+        "executionId": "1212a03d-e4a5-4668-87ed-2e7f1b76e4d7",
+        "chatSessionId": "sess_41671a61-d078-47c0-bc72-f19f11dd28dd",
+        "timestamp": 1788557543617
+      }
+    ],
+    "12.3 Average embeddings per celebrity and save to pickle file": [
+      {
+        "executionId": "1212a03d-e4a5-4668-87ed-2e7f1b76e4d7",
+        "chatSessionId": "sess_41671a61-d078-47c0-bc72-f19f11dd28dd",
+        "timestamp": 1788557543893
+      }
+    ],
+    "13.1 Create api-client.js with API communication layer": [
+      {
+        "executionId": "1212a03d-e4a5-4668-87ed-2e7f1b76e4d7",
+        "chatSessionId": "sess_41671a61-d078-47c0-bc72-f19f11dd28dd",
+        "timestamp": 1788557544210
+      }
+    ],
+    "13.2 Create upload-handler.js for upload screen": [
+      {
+        "executionId": "1212a03d-e4a5-4668-87ed-2e7f1b76e4d7",
+        "chatSessionId": "sess_41671a61-d078-47c0-bc72-f19f11dd28dd",
+        "timestamp": 1788557544563
+      }
+    ],
+    "13.3 Create analyzing-handler.js for analyzing screen": [
+      {
+        "executionId": "1212a03d-e4a5-4668-87ed-2e7f1b76e4d7",
+        "chatSessionId": "sess_41671a61-d078-47c0-bc72-f19f11dd28dd",
+        "timestamp": 1788557544898
+      }
+    ],
+    "13.4 Create results-handler.js for results screen": [
+      {
+        "executionId": "1212a03d-e4a5-4668-87ed-2e7f1b76e4d7",
+        "chatSessionId": "sess_41671a61-d078-47c0-bc72-f19f11dd28dd",
+        "timestamp": 1788557545264
+      }
+    ],
+    "13.5 Add script tags to existing HTML files": [
+      {
+        "executionId": "1212a03d-e4a5-4668-87ed-2e7f1b76e4d7",
+        "chatSessionId": "sess_41671a61-d078-47c0-bc72-f19f11dd28dd",
+        "timestamp": 1788557545703
+      }
+    ],
+    "14.1 Configure backend deployment (Render/Railway)": [
+      {
+        "executionId": "1212a03d-e4a5-4668-87ed-2e7f1b76e4d7",
+        "chatSessionId": "sess_41671a61-d078-47c0-bc72-f19f11dd28dd",
+        "timestamp": 1788557546077
+      }
+    ],
+    "14.2 Configure frontend deployment (Vercel/Netlify)": [
+      {
+        "executionId": "1212a03d-e4a5-4668-87ed-2e7f1b76e4d7",
+        "chatSessionId": "sess_41671a61-d078-47c0-bc72-f19f11dd28dd",
+        "timestamp": 1788557546442
+      }
+    ],
+    "14.3 Test production deployment end-to-end": [
+      {
+        "executionId": "1212a03d-e4a5-4668-87ed-2e7f1b76e4d7",
+        "chatSessionId": "sess_41671a61-d078-47c0-bc72-f19f11dd28dd",
+        "timestamp": 1788557546790
+      }
+    ]
+  }
+}

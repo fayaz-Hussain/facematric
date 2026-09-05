@@ -1,0 +1,39 @@
+﻿/* 
+ * Variables.css
+ * Global CSS variables for theme management
+ */
+
+:root {
+    /* Light Theme Colors */
+    --bg-gradient-start: #e8f5f1;
+    --bg-gradient-end: #d4f0ea;
+    --text-primary: #1a1a1a;
+    --text-secondary: #666666;
+    --accent-teal: #40cca2;
+    --accent-teal-light: #e6f9f3;
+    --white: #ffffff;
+    --border-teal: #40cca2;
+    
+    /* Logo Colors - Light Mode */
+    --logo-face-text: #1a1a1a;
+    --logo-glow: none;
+}
+
+
+[data-theme="dark"] {
+    /* Dark Theme Colors */
+    --bg-gradient-start: #0a0e12;
+    --bg-gradient-end: #1a2430;
+    --text-primary: #ffffff;
+    --text-secondary: #a0a0a0;
+    --accent-teal: #40cca2;
+    --accent-teal-light: #1a3d32;
+    --white: #1e2938;
+    --border-teal: #40cca2;
+    
+    /* Logo Colors - Dark Mode */
+    --logo-face-text: #ffffff;
+    --logo-glow: drop-shadow(0 0 6px var(--accent-teal)) drop-shadow(0 0 12px var(--accent-teal-light));
+    --logo-icon-color: var(--accent-teal);
+    --logo-icon-bg: var(--white); /* dark badge background behind the icon */
+}

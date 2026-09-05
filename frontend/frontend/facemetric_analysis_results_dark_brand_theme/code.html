@@ -1,0 +1,219 @@
+﻿<!DOCTYPE html>
+<html class="dark" lang="en">
+<head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>FaceMetric - Results</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+<script id="tailwind-config">
+  tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        colors: {
+          "sky-mint": "#B8F7E4",
+          "dark-graphite": "#25272C",
+          "mint-glow": "rgba(184, 247, 228, 0.1)",
+        }
+      }
+    }
+  }
+</script>
+<style>
+  .material-symbols-outlined {
+    font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+  }
+  
+  /* Dark Mode Styles */
+  .dark body {
+    background-color: #25272C;
+  }
+  .dark .card-bg {
+    background-color: #B8F7E4;
+    color: #25272C;
+  }
+  .dark .text-primary {
+    color: #B8F7E4;
+  }
+  
+  /* Light Mode Styles */
+  .light body {
+    background-color: #f4fbf5;
+  }
+  .light .card-bg {
+    background-color: #ffffff;
+    border: 1px solid rgba(37, 39, 44, 0.1);
+    color: #25272C;
+  }
+  .light .text-primary {
+    color: #006c52;
+  }
+</style>
+</head>
+<body class="min-h-screen font-['Inter']">
+<!-- TopNavBar -->
+<nav class="fixed top-0 w-full z-50 bg-dark-graphite/80 dark:bg-dark-graphite/80 light:bg-white/80 backdrop-blur-md border-b border-sky-mint/10 px-6 py-4">
+  <div class="max-w-7xl mx-auto flex justify-between items-center">
+    <div class="flex items-center gap-3">
+      <h1 class="text-2xl font-bold text-sky-mint dark:text-sky-mint light:text-dark-graphite">FaceMetric</h1>
+    </div>
+    <div class="flex items-center gap-6">
+      <a href="#" class="text-sm uppercase tracking-wider text-sky-mint/70 dark:text-sky-mint/70 light:text-dark-graphite/70 hover:text-sky-mint dark:hover:text-sky-mint light:hover:text-dark-graphite transition-colors">About Project</a>
+      <button aria-label="Toggle Dark Mode" class="theme-toggle p-2 rounded-full hover:bg-sky-mint/10 transition-colors">
+        <span class="material-symbols-outlined text-sky-mint dark:text-sky-mint light:text-dark-graphite" data-icon="light_mode">light_mode</span>
+      </button>
+    </div>
+  </div>
+</nav>
+
+<!-- Main Content -->
+<main class="pt-24 px-6 pb-12 max-w-7xl mx-auto">
+  <div class="mb-8 flex justify-between items-center">
+    <div>
+      <h2 class="text-3xl font-bold text-sky-mint dark:text-sky-mint light:text-dark-graphite mb-2">Your Analysis Results</h2>
+      <p class="text-sky-mint/70 dark:text-sky-mint/70 light:text-dark-graphite/70">Detailed breakdown of facial geometry and proportions.</p>
+    </div>
+    <button class="bg-sky-mint dark:bg-sky-mint light:bg-dark-graphite text-dark-graphite dark:text-dark-graphite light:text-white px-6 py-3 rounded-lg font-semibold flex items-center gap-2 hover:opacity-90 transition-opacity">
+      <span class="material-symbols-outlined" data-icon="add">add</span>
+      NEW ANALYSIS
+    </button>
+  </div>
+
+  <!-- Summary Cards Grid -->
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+    <!-- Golden Ratio Score Card -->
+    <div class="card-bg rounded-xl p-6 shadow-lg">
+      <div class="text-xs font-semibold uppercase tracking-widest mb-4 opacity-70">Golden Ratio Score</div>
+      <div class="flex flex-col items-center justify-center py-4">
+        <svg width="120" height="120" class="transform -rotate-90">
+          <circle cx="60" cy="60" r="45" stroke="currentColor" stroke-width="8" fill="none" class="opacity-20"/>
+          <circle cx="60" cy="60" r="45" stroke="currentColor" stroke-width="8" fill="none" stroke-dasharray="283" stroke-dashoffset="70" class="transition-all duration-1000"/>
+        </svg>
+        <div class="text-5xl font-bold -mt-20">82</div>
+        <div class="text-base font-semibold mt-16">Great Balance</div>
+      </div>
+    </div>
+
+    <!-- Face Shape Card -->
+    <div class="card-bg rounded-xl p-6 shadow-lg">
+      <div class="text-xs font-semibold uppercase tracking-widest mb-4 opacity-70">Face Shape</div>
+      <div class="flex flex-col items-center justify-center py-8">
+        <div class="w-24 h-32 border-4 border-current rounded-full mb-4"></div>
+        <div class="text-xl font-semibold">Oval</div>
+        <div class="text-sm opacity-70 mt-1">Balanced & Proportioned</div>
+      </div>
+    </div>
+
+    <!-- Golden Ratio Detail Card -->
+    <div class="card-bg rounded-xl p-6 shadow-lg">
+      <div class="text-xs font-semibold uppercase tracking-widest mb-4 opacity-70">Golden Ratio</div>
+      <div class="flex flex-col items-center justify-center py-8">
+        <div class="text-5xl font-bold">82<span class="text-2xl opacity-70">/100</span></div>
+        <div class="text-base font-semibold mt-4">Well Proportioned</div>
+      </div>
+    </div>
+
+    <!-- Quality Checks Card -->
+    <div class="card-bg rounded-xl p-6 shadow-lg">
+      <div class="text-xs font-semibold uppercase tracking-widest mb-4 opacity-70">Quality Checks</div>
+      <div class="flex flex-col gap-2 py-2">
+        <div class="flex items-center gap-2">
+          <span class="material-symbols-outlined text-green-600">check_circle</span>
+          <span class="text-sm">Face Quality - Good</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <span class="material-symbols-outlined text-green-600">check_circle</span>
+          <span class="text-sm">Lighting - Good</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <span class="material-symbols-outlined text-green-600">check_circle</span>
+          <span class="text-sm">Angle - Straight</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <span class="material-symbols-outlined text-green-600">check_circle</span>
+          <span class="text-sm">Expression - Neutral</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Analysis Details -->
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+    <!-- Symmetry Analysis -->
+    <div class="card-bg rounded-xl p-6 shadow-lg">
+      <div class="text-xs font-semibold uppercase tracking-widest mb-4 opacity-70">Symmetry Analysis</div>
+      <div class="relative aspect-[3/4] rounded-lg overflow-hidden bg-dark-graphite">
+        <img src="https://via.placeholder.com/300x400" alt="Face Analysis" class="w-full h-full object-cover opacity-80">
+        <!-- SVG Overlay -->
+        <svg class="absolute inset-0 w-full h-full" preserveAspectRatio="none" viewBox="0 0 100 100">
+          <line x1="50" y1="0" x2="50" y2="100" stroke="#B8F7E4" stroke-width="0.5" stroke-dasharray="2,2" opacity="0.6"/>
+          <line x1="0" y1="33" x2="100" y2="33" stroke="#B8F7E4" stroke-width="0.3" opacity="0.4"/>
+          <line x1="0" y1="66" x2="100" y2="66" stroke="#B8F7E4" stroke-width="0.3" opacity="0.4"/>
+          <circle cx="35" cy="35" r="1.5" fill="#B8F7E4" opacity="0.8"/>
+          <circle cx="65" cy="35" r="1.5" fill="#B8F7E4" opacity="0.8"/>
+          <circle cx="50" cy="50" r="1.5" fill="#B8F7E4" opacity="0.8"/>
+          <circle cx="50" cy="70" r="1.5" fill="#B8F7E4" opacity="0.8"/>
+        </svg>
+      </div>
+    </div>
+
+    <!-- Proportion Breakdown -->
+    <div class="card-bg rounded-xl p-6 shadow-lg lg:col-span-2">
+      <div class="text-xs font-semibold uppercase tracking-widest mb-6 opacity-70">Proportion Breakdown</div>
+      <div class="flex flex-col gap-6">
+        <!-- Feature ratios will be populated by JavaScript -->
+        <div>
+          <div class="flex justify-between text-sm mb-2">
+            <span>Face Length ÷ Face Width</span>
+            <span class="opacity-70">Your: 1.58 | φ: 1.618</span>
+          </div>
+          <div class="w-full h-2 bg-current/10 rounded-full relative overflow-hidden">
+            <div class="absolute top-0 left-0 h-full bg-current/80 rounded-full" style="width: 85%"></div>
+            <div class="absolute top-0 right-[3%] w-0.5 h-full bg-current z-10"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Celebrity Matches -->
+  <div class="card-bg rounded-xl p-6 shadow-lg mt-8">
+    <div class="text-xs font-semibold uppercase tracking-widest mb-6 opacity-70">Geometric Matches</div>
+    <div class="flex items-center justify-center gap-8 py-8">
+      <div class="flex flex-col items-center opacity-60">
+        <div class="w-20 h-20 rounded-full bg-dark-graphite/20 mb-3"></div>
+        <div class="text-sm font-semibold">Match 2</div>
+        <div class="text-xs opacity-70">88%</div>
+      </div>
+      <div class="flex flex-col items-center scale-110">
+        <div class="w-32 h-32 rounded-full bg-dark-graphite/20 mb-4 ring-4 ring-current/20"></div>
+        <div class="text-lg font-bold">Tom Holland</div>
+        <div class="text-sm opacity-70">92% Match</div>
+      </div>
+      <div class="flex flex-col items-center opacity-60">
+        <div class="w-20 h-20 rounded-full bg-dark-graphite/20 mb-3"></div>
+        <div class="text-sm font-semibold">Match 3</div>
+        <div class="text-xs opacity-70">85%</div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<!-- Footer -->
+<footer class="py-8 px-6 text-center">
+  <p class="text-sm text-sky-mint/60 dark:text-sky-mint/60 light:text-dark-graphite/60 italic max-w-2xl mx-auto">
+    This analysis is based on facial geometry and proportions, not skin color, ethnicity, or beauty standards.
+  </p>
+</footer>
+
+<!-- Theme Manager -->
+<script src="../js/theme-manager.js"></script>
+
+<!-- API Integration Scripts -->
+<script src="../js/api-client.js"></script>
+<script src="../js/results-handler.js"></script>
+</body>
+</html>

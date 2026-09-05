@@ -1,0 +1,81 @@
+﻿<!DOCTYPE html><html class="dark" lang="en"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>FaceMetric - Facial Geometry Analysis</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script id="tailwind-config">tailwind.config = {darkMode: "class", theme: {extend: {colors: {"primary-fixed-dim": "#55ddb2", "on-surface": "#161d1a", "surface-dim": "#d5dcd6", "secondary-container": "#b9ead5", "on-tertiary-fixed-variant": "#763210", "inverse-surface": "#2b322f", "on-secondary-container": "#3d6b5a", "on-tertiary-container": "#773311", "surface-container-lowest": "#ffffff", "on-tertiary": "#ffffff", "on-primary": "#ffffff", "on-secondary-fixed-variant": "#204f3f", "inverse-primary": "#55ddb2", "surface-container-highest": "#dde4df", "on-primary-container": "#00523e", "secondary-fixed-dim": "#a0d1bc", "surface-container-low": "#eef5f0", "surface-container-high": "#e3eae4", "tertiary-fixed-dim": "#ffb596", "surface-tint": "#006c52", tertiary: "#944925", background: "#f4fbf6", "tertiary-fixed": "#ffdbcd", surface: "#f4fbf6", "on-error-container": "#93000a", "surface-variant": "#dde4df", "inverse-on-surface": "#ecf2ed", "on-surface-variant": "#3c4a44", "tertiary-container": "#ff9e73", "on-error": "#ffffff", error: "#ba1a1a", "on-secondary": "#ffffff", "surface-container": "#e9f0ea", "on-primary-fixed": "#002117", secondary: "#396756", "on-primary-fixed-variant": "#00513d", "primary-container": "#40cca2", "on-background": "#161d1a", "error-container": "#ffdad6", "primary-fixed": "#74facd", outline: "#6c7a73", "outline-variant": "#bbcac2", primary: "#006c52", "secondary-fixed": "#bcedd8", "on-secondary-fixed": "#002117", "on-tertiary-fixed": "#360f00", "surface-bright": "#f4fbf6"}, borderRadius: {DEFAULT: "0.25rem", lg: "0.5rem", xl: "0.75rem", full: "9999px"}, spacing: {xs: "4px", xl: "40px", md: "16px", margin: "24px", sm: "8px", unit: "8px", lg: "24px", gutter: "20px"}, fontFamily: {"body-md": ["Inter"], "label-caps": ["Inter"], "headline-lg": ["Manrope"], "headline-md": ["Manrope"], "headline-lg-mobile": ["Manrope"], "score-display": ["Manrope"], "body-lg": ["Inter"], headline: ["Inter"], display: ["Inter"], body: ["Inter"], label: ["Inter"]}, fontSize: {"body-md": ["16px", {lineHeight: "24px", fontWeight: "400"}], "label-caps": ["12px", {lineHeight: "16px", letterSpacing: "0.05em", fontWeight: "600"}], "headline-lg": ["32px", {lineHeight: "40px", letterSpacing: "-0.02em", fontWeight: "700"}], "headline-md": ["24px", {lineHeight: "32px", fontWeight: "600"}], "headline-lg-mobile": ["28px", {lineHeight: "34px", fontWeight: "700"}], "score-display": ["64px", {lineHeight: "1", letterSpacing: "-0.04em", fontWeight: "800"}], "body-lg": ["18px", {lineHeight: "28px", fontWeight: "400"}]}}}};</script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .fill-icon {
+            font-variation-settings: 'FILL' 1;
+        }
+    </style>
+</head>
+<body class="bg-primary-container text-on-surface min-h-screen flex flex-col font-body-md antialiased selection:bg-primary/20">
+<!-- TopNavBar -->
+<header class="bg-primary-container dark:bg-background text-primary dark:text-primary-fixed docked full-width top-0 border-b border-on-surface/10 dark:border-primary/15 flat no shadows flex justify-between items-center w-full px-gutter py-md max-w-7xl mx-auto z-50 relative">
+<div class="flex items-center gap-md">
+<img alt="FaceMetric Logo" class="h-10 w-10 object-contain mix-blend-multiply dark:mix-blend-normal" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCLg_A8RGXkF8MxRYjoKsYF7Liw9Rg3dJcTQTh5osMBbY5K4KgDdE_9xCwwbgr0WqN52jySD0FT0LUKXxOY3dqoCJIW8zUi-gBAvIF015uceIlb7YWG7DnBThNzinJDmtDo6Hc6zrGXAYEwAaSfqGLuL2MTYYAUzYpysV3EKsckVSgsZnZIOffZM5HVgCvF1-jW4Y4CL6zx4DRZoYOzJAJaSI3Kyqps65TwV-qZcijTL08NF6OHjVi6">
+<div>
+<h1 class="font-headline-md text-headline-md font-bold text-on-surface dark:text-on-surface leading-tight tracking-tight">FaceMetric</h1>
+<p class="font-label-caps text-label-caps text-on-surface-variant uppercase tracking-wider opacity-80">Facial Symmetry &amp; Golden Ratio Analysis</p>
+</div>
+</div>
+<nav class="flex items-center gap-lg">
+<a class="text-on-surface-variant dark:text-on-secondary-fixed-variant hover:text-primary dark:hover:text-primary-fixed transition-colors font-label-caps text-label-caps uppercase tracking-wider" href="#">About Project</a>
+<button aria-label="Toggle Dark Mode" class="text-on-surface-variant hover:text-primary transition-colors flex items-center justify-center p-2 rounded-full hover:bg-surface-variant/50">
+<span class="material-symbols-outlined" data-icon="dark_mode">dark_mode</span>
+</button>
+</nav>
+</header>
+<!-- Main Content -->
+<main class="flex-grow flex flex-col items-center justify-center px-gutter py-xl">
+<div class="max-w-3xl w-full text-center space-y-md mb-xl">
+<h2 class="font-score-display text-score-display text-on-surface">Discover Your Facial Geometry</h2>
+<p class="font-body-lg text-body-lg text-on-surface-variant max-w-2xl mx-auto">
+                Upload an image to receive a comprehensive, scientific analysis of your facial proportions, symmetry, and alignment with the Golden Ratio using advanced AI diagnostics.
+            </p>
+</div>
+<!-- Upload Card -->
+<div class="w-full max-w-2xl bg-surface/80 backdrop-blur-sm border border-outline-variant/50 rounded-xl shadow-[0px_4px_20px_rgba(37,39,44,0.08)] p-lg flex flex-col items-center justify-center text-center transition-all duration-300 hover:border-primary/30 group">
+<div class="w-full h-64 border-2 border-dashed border-outline-variant/60 rounded-lg flex flex-col items-center justify-center bg-surface-container-lowest/50 group-hover:bg-surface-container-low transition-colors mb-lg cursor-pointer">
+<span class="material-symbols-outlined text-[48px] text-primary mb-sm opacity-80 group-hover:opacity-100 transition-opacity" data-icon="cloud_upload">cloud_upload</span>
+<h3 class="font-headline-md text-headline-md text-on-surface mb-xs">Upload a Photo or Take a Picture</h3>
+<p class="font-label-caps text-label-caps text-on-surface-variant opacity-70">JPG, PNG, WEBP â€¢ Maximum 10MB</p>
+</div>
+<div class="flex flex-col sm:flex-row gap-md w-full sm:w-auto">
+<button class="bg-[#25272C] text-primary-container font-label-caps text-label-caps px-xl py-md rounded uppercase tracking-wider hover:bg-opacity-90 transition-opacity flex items-center justify-center gap-sm">
+<span class="material-symbols-outlined text-[18px]" data-icon="upload">upload</span>
+                    Upload Image
+                </button>
+<button class="bg-transparent border border-[#25272C] text-[#25272C] font-label-caps text-label-caps px-xl py-md rounded uppercase tracking-wider hover:bg-[#25272C]/5 transition-colors flex items-center justify-center gap-sm">
+<span class="material-symbols-outlined text-[18px]" data-icon="photo_camera">photo_camera</span>
+                    Use Camera
+                </button>
+</div>
+<div class="mt-md flex items-center gap-xs text-on-surface-variant opacity-80">
+<span class="material-symbols-outlined text-[16px]" data-icon="lock">lock</span>
+<p class="font-label-caps text-label-caps">Your image is processed securely and is not stored.</p>
+</div>
+</div>
+</main>
+<!-- Footer -->
+<footer class="bg-surface-container-low dark:bg-inverse-surface w-full py-md px-gutter text-center flex justify-center items-center border-t border-on-surface/10 dark:border-primary/15 mt-auto">
+<p class="font-body-md text-body-md text-on-surface-variant dark:text-on-tertiary-container max-w-4xl mx-auto">
+            This analysis is based on facial geometry and proportions, not skin color, ethnicity, or beauty standards.
+        </p>
+</footer>
+
+<!-- Theme Manager -->
+<script src="../js/theme-manager.js"></script>
+
+<!-- API Integration Scripts -->
+<script src="../js/api-client.js"></script>
+<script src="../js/upload-handler.js"></script>
+</body></html>
+

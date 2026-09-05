@@ -1,0 +1,255 @@
+﻿<!DOCTYPE html><html class="dark" lang="en"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>FaceMetric - Analyzing</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&amp;family=Manrope:wght@600;700;800&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "primary-fixed-dim": "#95d3c1",
+                      "on-secondary-container": "#b7b8be",
+                      "on-tertiary": "#003829",
+                      "primary-fixed": "#b0efdc",
+                      "sky-mint": "#B8F7E4",
+                      "inverse-on-surface": "#2b322e",
+                      "surface-container-high": "#252b28",
+                      "surface-container": "#1a211d",
+                      "dark-graphite": "#25272C",
+                      "on-tertiary-container": "#0f7257",
+                      "on-primary-fixed-variant": "#0b5043",
+                      "outline-variant": "#404945",
+                      "surface-container-low": "#161d19",
+                      "on-surface-variant": "#bfc9c4",
+                      "on-primary": "#00382d",
+                      "surface-bright": "#343b37",
+                      "on-background": "#dde4de",
+                      "on-error-container": "#ffdad6",
+                      "on-secondary-fixed-variant": "#45474c",
+                      "secondary-container": "#47494e",
+                      "surface-container-lowest": "#09100c",
+                      "on-tertiary-fixed-variant": "#00513d",
+                      "mint-low-opacity": "rgba(184, 247, 228, 0.1)",
+                      "tertiary-fixed-dim": "#82d7b7",
+                      "on-primary-fixed": "#002019",
+                      "inverse-primary": "#2b695a",
+                      "surface-variant": "#303632",
+                      "on-secondary": "#2e3035",
+                      "secondary-fixed-dim": "#c5c6cd",
+                      "surface-dim": "#0e1511",
+                      "on-primary-container": "#326f60",
+                      "on-secondary-fixed": "#191c20",
+                      "on-error": "#690005",
+                      "primary-container": "#b0efdc",
+                      "outline": "#89938f",
+                      "tertiary-container": "#9df4d2",
+                      "on-surface": "#dde4de",
+                      "on-tertiary-fixed": "#002117",
+                      "tertiary": "#ffffff",
+                      "error-container": "#93000a",
+                      "graphite-muted": "rgba(37, 39, 44, 0.7)",
+                      "tertiary-fixed": "#9df4d2",
+                      "error": "#ffb4ab",
+                      "primary": "#ffffff",
+                      "surface": "#0e1511",
+                      "secondary-fixed": "#e2e2e9",
+                      "secondary": "#c5c6cd",
+                      "surface-container-highest": "#303632",
+                      "background": "#0e1511",
+                      "inverse-surface": "#dde4de",
+                      "surface-tint": "#95d3c1"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.125rem",
+                      "lg": "0.25rem",
+                      "xl": "0.5rem",
+                      "full": "0.75rem"
+              },
+              "spacing": {
+                      "card-padding": "1.5rem",
+                      "gutter": "1rem",
+                      "section-gap": "2.5rem",
+                      "container-max": "1280px"
+              },
+              "fontFamily": {
+                      "body-md": [
+                              "Inter"
+                      ],
+                      "headline-lg": [
+                              "Manrope"
+                      ],
+                      "display-xl": [
+                              "Manrope"
+                      ],
+                      "label-xs-caps": [
+                              "Inter"
+                      ],
+                      "headline-md": [
+                              "Manrope"
+                      ]
+              },
+              "fontSize": {
+                      "body-md": [
+                              "16px",
+                              {
+                                      "lineHeight": "1.5",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "headline-lg": [
+                              "36px",
+                              {
+                                      "lineHeight": "1.2",
+                                      "fontWeight": "700"
+                              }
+                      ],
+                      "display-xl": [
+                              "48px",
+                              {
+                                      "lineHeight": "1",
+                                      "letterSpacing": "-0.05em",
+                                      "fontWeight": "800"
+                              }
+                      ],
+                      "label-xs-caps": [
+                              "12px",
+                              {
+                                      "lineHeight": "1",
+                                      "letterSpacing": "0.15em",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "headline-md": [
+                              "24px",
+                              {
+                                      "lineHeight": "1.3",
+                                      "fontWeight": "600"
+                              }
+                      ]
+              }
+      },
+          },
+        }
+      </script>
+<style>
+        .glow-overlay {
+            box-shadow: 0 0 8px #B8F7E4;
+        }
+        .scan-line {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background-color: #B8F7E4;
+            opacity: 0.7;
+            animation: scan 2s linear infinite;
+        }
+        @keyframes scan {
+            0% { top: 0%; opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { top: 100%; opacity: 0; }
+        }
+        .pulse-node {
+            animation: pulse 1.5s infinite;
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.5); opacity: 0.5; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+      </style>
+</head>
+<body class="bg-background text-on-background min-h-screen flex flex-col font-body-md text-body-md overflow-x-hidden">
+<!-- TopNavBar -->
+<nav class="bg-surface/80 dark:bg-surface/80 backdrop-blur-md bg-surface-container-low/50 border-b border-outline-variant/10 docked full-width top-0 fixed w-full z-50 flex justify-between items-center px-gutter py-4 max-w-container-max mx-auto">
+<div class="font-display-xl text-primary dark:text-primary tracking-tighter">
+            FaceMetric
+        </div>
+<div class="hidden md:flex gap-6 items-center">
+<a class="text-on-surface-variant font-body-md hover:text-sky-mint transition-colors duration-200 cursor-pointer active:opacity-70 font-label-xs-caps text-label-xs-caps" href="#">About Project</a>
+</div>
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-primary dark:text-primary hover:text-sky-mint transition-colors duration-200 cursor-pointer active:opacity-70" data-icon="dark_mode">dark_mode</span>
+</div>
+</nav>
+<!-- Main Content -->
+<main class="flex-grow pt-[100px] px-gutter max-w-container-max mx-auto w-full flex flex-col md:flex-row gap-8 items-center justify-center min-h-[calc(100vh-100px)]">
+<!-- Image & Technical Overlay Area -->
+<div class="relative w-full md:w-1/2 aspect-square max-w-[500px] rounded-xl overflow-hidden bg-dark-graphite border border-outline-variant/30 flex items-center justify-center">
+<img class="w-full h-full object-cover opacity-60" data-alt="A highly detailed close up of a human face in a dark, clinical studio setting. The lighting is dramatic and high-contrast, emphasizing facial structure. The style is hyper-realistic photography, cinematic and scientific. The background is pure black." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBTA5wR4EYb9_vUwcnGJsNTSr8DcAnlXJZ1ju1jD0bNFZ7FdLh6T_GBa9lR_NwsDq1bmQLfvfjlrzDth6YGX0D0I7xzL66VBcvdg1GfG9PFNBDIIaF3n-gqkgY_YrhZyJUx8FDhdGRztGlS4d9m9VVCmvuo6NyvMuzlVQSwAdpUp9IHZpf4X6epr-p9hojJkpwkacmN56wKGVphuo4eN-GGBmK776Yb6W8U1M6bC6GAxrs_FeeOxzWI">
+<!-- SVG Overlay for Geometry -->
+<svg class="absolute inset-0 w-full h-full" preserveAspectRatio="none" viewBox="0 0 100 100">
+<!-- Midline -->
+<line class="opacity-50" stroke="#B8F7E4" stroke-dasharray="1,1" stroke-width="0.2" x1="50" x2="50" y1="0" y2="100"></line>
+<!-- Geometric connections -->
+<polygon class="opacity-40" fill="none" points="30,40 70,40 50,70" stroke="#B8F7E4" stroke-width="0.3"></polygon>
+<line class="opacity-30" stroke="#B8F7E4" stroke-width="0.2" x1="30" x2="50" y1="40" y2="20"></line>
+<line class="opacity-30" stroke="#B8F7E4" stroke-width="0.2" x1="70" x2="50" y1="40" y2="20"></line>
+<!-- Nodes -->
+<circle class="pulse-node" cx="50" cy="20" fill="#B8F7E4" r="1"></circle>
+<circle class="opacity-80" cx="30" cy="40" fill="#B8F7E4" r="0.8"></circle>
+<circle class="opacity-80" cx="70" cy="40" fill="#B8F7E4" r="0.8"></circle>
+<circle class="pulse-node" cx="50" cy="70" fill="#B8F7E4" r="1"></circle>
+<circle class="opacity-60" cx="40" cy="55" fill="#B8F7E4" r="0.5"></circle>
+<circle class="opacity-60" cx="60" cy="55" fill="#B8F7E4" r="0.5"></circle>
+</svg>
+<!-- Scan Line -->
+<div class="scan-line"></div>
+</div>
+<!-- Analysis Progress Card -->
+<div class="w-full md:w-1/2 max-w-[500px] bg-sky-mint rounded-xl p-card-padding flex flex-col gap-6 shadow-[0_0_8px_rgba(184,247,228,0.1)] border border-dark-graphite/15">
+<h2 class="font-headline-md text-headline-md text-dark-graphite mb-2">Analyzing Your Face</h2>
+<div class="flex flex-col gap-4">
+<!-- Step 1: Completed -->
+<div class="flex items-center gap-4 text-dark-graphite opacity-100">
+<span class="material-symbols-outlined text-dark-graphite" data-icon="check_circle">check_circle</span>
+<span class="font-body-md text-body-md font-semibold">Detecting face</span>
+</div>
+<!-- Step 2: Completed -->
+<div class="flex items-center gap-4 text-dark-graphite opacity-100">
+<span class="material-symbols-outlined text-dark-graphite" data-icon="check_circle">check_circle</span>
+<span class="font-body-md text-body-md font-semibold">Extracting 468 facial landmarks</span>
+</div>
+<!-- Step 3: Active -->
+<div class="flex items-center gap-4 text-dark-graphite">
+<span class="material-symbols-outlined animate-spin text-dark-graphite" data-icon="sync">sync</span>
+<span class="font-body-md text-body-md font-bold">Analyzing facial geometry...</span>
+</div>
+<!-- Step 4: Pending -->
+<div class="flex items-center gap-4 text-dark-graphite opacity-50">
+<span class="material-symbols-outlined" data-icon="radio_button_unchecked">radio_button_unchecked</span>
+<span class="font-body-md text-body-md">Calculating proportions</span>
+</div>
+<!-- Step 5: Pending -->
+<div class="flex items-center gap-4 text-dark-graphite opacity-50">
+<span class="material-symbols-outlined" data-icon="radio_button_unchecked">radio_button_unchecked</span>
+<span class="font-body-md text-body-md">Finding similar faces</span>
+</div>
+</div>
+<div class="w-full bg-dark-graphite/20 h-1 rounded-full mt-4 overflow-hidden">
+<div class="bg-dark-graphite h-full rounded-full w-[60%] transition-all duration-1000 ease-in-out"></div>
+</div>
+</div>
+</main>
+<!-- Footer -->
+<footer class="bg-transparent w-full py-section-gap px-gutter flex justify-center items-center">
+<p class="font-body-md text-body-md text-center italic text-on-surface-variant opacity-60 max-w-2xl">
+            This analysis is based on facial geometry and proportions, not skin color, ethnicity, or beauty standards.
+        </p>
+</footer>
+
+<!-- Theme Manager -->
+<script src="../js/theme-manager.js"></script>
+
+<!-- API Integration Scripts -->
+<script src="../js/api-client.js"></script>
+<script src="../js/analyzing-handler.js"></script>
+</body></html>
+
