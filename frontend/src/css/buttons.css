@@ -32,18 +32,18 @@
 }
 
 .btn-primary {
-    background: #2d3e50;
+    background: var(--accent-teal);
     color: white;
 }
 
 [data-theme="dark"] .btn-primary {
-    background: #1a2430;
+    background: var(--accent-teal);
 }
 
 .btn-primary:hover {
-    background: #1a2430;
+    background: #36b890;
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 4px 12px rgba(64, 204, 162, 0.3);
 }
 
 .btn-secondary {

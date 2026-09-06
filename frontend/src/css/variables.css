@@ -1,39 +1,52 @@
 ﻿/* 
  * Variables.css
- * Global CSS variables for theme management
+ * Global CSS variables for theme management - FaceMetric Design System
  */
 
 :root {
     /* Light Theme Colors */
-    --bg-gradient-start: #e8f5f1;
-    --bg-gradient-end: #d4f0ea;
-    --text-primary: #1a1a1a;
-    --text-secondary: #666666;
-    --accent-teal: #40cca2;
-    --accent-teal-light: #e6f9f3;
-    --white: #ffffff;
-    --border-teal: #40cca2;
+    --bg-primary: #E8F7F2;
+    --bg-gradient-start: #E8F7F2;
+    --bg-gradient-end: #D8F3EA;
+    --surface-bg: rgba(255, 255, 255, 0.5);
+    --card-bg: rgba(255, 255, 255, 0.6);
+    --text-primary: #25272C;
+    --text-secondary: #5A5D63;
+    --text-muted: #8B8E95;
+    --accent-teal: #40CCA2;
+    --accent-teal-light: #D8F3EA;
+    --accent-teal-soft: rgba(64, 204, 162, 0.1);
+    --border-color: rgba(64, 204, 162, 0.2);
+    --border-subtle: rgba(64, 204, 162, 0.15);
+    --shadow-sm: 0 2px 8px rgba(64, 204, 162, 0.08);
+    --shadow-md: 0 4px 16px rgba(64, 204, 162, 0.12);
+    --white: #FFFFFF;
     
     /* Logo Colors - Light Mode */
-    --logo-face-text: #1a1a1a;
+    --logo-face-text: #25272C;
     --logo-glow: none;
 }
 
-
 [data-theme="dark"] {
     /* Dark Theme Colors */
-    --bg-gradient-start: #1a1f2e;
-    --bg-gradient-end: #2d3748;
-    --text-primary: #ffffff;
-    --text-secondary: #a0a0a0;
-    --accent-teal: #40cca2;
-    --accent-teal-light: #1a3d32;
-    --white: #2d3748;
-    --border-teal: #40cca2;
+    --bg-primary: #25272C;
+    --bg-gradient-start: #25272C;
+    --bg-gradient-end: #1F2125;
+    --surface-bg: rgba(45, 48, 54, 0.6);
+    --card-bg: #2D3036;
+    --text-primary: #F5F7F6;
+    --text-secondary: #C8CCCF;
+    --text-muted: #A8B0AE;
+    --accent-teal: #40CCA2;
+    --accent-teal-light: #163B34;
+    --accent-teal-soft: rgba(64, 204, 162, 0.15);
+    --border-color: rgba(64, 204, 162, 0.25);
+    --border-subtle: rgba(64, 204, 162, 0.15);
+    --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.2);
+    --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.3);
+    --white: #30343A;
     
     /* Logo Colors - Dark Mode */
-    --logo-face-text: #ffffff;
-    --logo-glow: drop-shadow(0 0 6px var(--accent-teal)) drop-shadow(0 0 12px var(--accent-teal-light));
-    --logo-icon-color: var(--accent-teal);
-    --logo-icon-bg: var(--white); /* dark badge background behind the icon */
+    --logo-face-text: #FFFFFF;
+    --logo-glow: drop-shadow(0 0 6px rgba(64, 204, 162, 0.4)) drop-shadow(0 0 12px rgba(64, 204, 162, 0.2));
 }

@@ -35,162 +35,372 @@
         </div>
     </header>
 
+    <!-- Background Decoration -->
+    <svg class="results-background-decoration" viewBox="0 0 1200 800" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <!-- Subtle geometric shapes -->
+        <circle cx="100" cy="150" r="2" fill="var(--accent-teal)" opacity="0.15"/>
+        <circle cx="1100" cy="200" r="2" fill="var(--accent-teal)" opacity="0.15"/>
+        <circle cx="150" cy="600" r="2" fill="var(--accent-teal)" opacity="0.15"/>
+        <circle cx="1050" cy="650" r="2" fill="var(--accent-teal)" opacity="0.15"/>
+        
+        <!-- Connecting lines -->
+        <line x1="100" y1="150" x2="150" y2="600" stroke="var(--accent-teal)" stroke-width="1" opacity="0.08"/>
+        <line x1="1100" y1="200" x2="1050" y2="650" stroke="var(--accent-teal)" stroke-width="1" opacity="0.08"/>
+        
+        <!-- Soft gradient circles -->
+        <circle cx="200" cy="100" r="150" fill="var(--accent-teal)" opacity="0.02"/>
+        <circle cx="1000" cy="700" r="180" fill="var(--accent-teal)" opacity="0.02"/>
+    </svg>
+
     <!-- Main Content -->
-    <main class="results-content">
+    <main class="results-main">
         <div class="results-container">
-            <!-- Results Header -->
-            <div class="results-header">
-                <h2>Your Facial Analysis Report</h2>
-                <p class="subtitle">Comprehensive analysis based on facial symmetry and golden ratio principles</p>
+            <!-- Page Hero -->
+            <div class="results-hero">
+                <div class="results-badge">SCIENCE. SYMMETRY. YOU.</div>
+                <h2 class="results-title">Your Analysis Results</h2>
             </div>
 
-            <!-- Overall Score Card -->
-            <div class="overall-score-card">
-                <div class="score-circle">
-                    <svg viewBox="0 0 200 200">
-                        <circle cx="100" cy="100" r="90" class="score-bg"></circle>
-                        <circle cx="100" cy="100" r="90" class="score-fill" id="scoreCircle"></circle>
-                    </svg>
-                    <div class="score-text">
-                        <span class="score-value" id="overallScore">85</span>
-                        <span class="score-label">Overall Score</span>
+            <!-- KPI Cards Row -->
+            <div class="kpi-grid">
+                <!-- Overall Score Card -->
+                <div class="kpi-card overall-score-card">
+                    <div class="kpi-card-header">
+                        <span class="kpi-card-title">Overall Score</span>
+                        <svg class="info-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
+                            <path d="M12 16V12M12 8H12.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                        </svg>
                     </div>
-                </div>
-                <div class="score-description">
-                    <h3>Excellent Facial Harmony</h3>
-                    <p>Your facial features demonstrate strong symmetry and alignment with golden ratio principles. The measurements indicate well-balanced proportions across key facial landmarks.</p>
-                </div>
-            </div>
-
-            <!-- Two Column Layout -->
-            <div class="results-grid">
-                <!-- Left Column - Image with Overlay -->
-                <div class="image-analysis-section">
-                    <div class="analyzed-image-container">
-                        <img id="analyzedImage" src="" alt="Analyzed face" />
-                        <canvas id="overlayCanvas"></canvas>
+                    <div class="score-circle-container">
+                        <svg class="score-circle-svg" viewBox="0 0 180 180">
+                            <circle cx="90" cy="90" r="80" class="score-bg-circle"></circle>
+                            <circle cx="90" cy="90" r="80" class="score-progress-circle" id="scoreCircle"></circle>
+                        </svg>
+                        <div class="score-value-container">
+                            <span class="score-value" id="overallScore">86</span>
+                            <span class="score-max">/100</span>
+                        </div>
                     </div>
+                    <div class="score-status">Great Balance!</div>
                 </div>
 
-                <!-- Right Column - Detailed Metrics -->
-                <div class="metrics-section">
-                    <!-- Symmetry Score -->
-                    <div class="metric-card">
-                        <div class="metric-header">
-                            <div class="metric-icon">
-                                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                    <path d="M12 2L12 22M12 2L8 6M12 2L16 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                                    <path d="M5 12L19 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                                </svg>
-                            </div>
-                            <div class="metric-title">
-                                <h4>Facial Symmetry</h4>
-                                <p>Bilateral balance measurement</p>
-                            </div>
-                        </div>
-                        <div class="metric-score">
-                            <span class="metric-value">88</span>
-                            <span class="metric-max">/100</span>
-                        </div>
-                        <div class="metric-bar">
-                            <div class="metric-fill" style="width: 88%"></div>
-                        </div>
+                <!-- Face Shape Card -->
+                <div class="kpi-card face-shape-card">
+                    <div class="kpi-card-header">
+                        <span class="kpi-card-title">Face Shape</span>
+                        <svg class="info-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
+                            <path d="M12 16V12M12 8H12.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                        </svg>
                     </div>
-
-                    <!-- Golden Ratio Score -->
-                    <div class="metric-card">
-                        <div class="metric-header">
-                            <div class="metric-icon">
-                                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                    <rect x="3" y="3" width="7" height="7" stroke="currentColor" stroke-width="2"/>
-                                    <rect x="10" y="3" width="11" height="11" stroke="currentColor" stroke-width="2"/>
-                                    <rect x="3" y="10" width="7" height="11" stroke="currentColor" stroke-width="2"/>
-                                </svg>
-                            </div>
-                            <div class="metric-title">
-                                <h4>Golden Ratio</h4>
-                                <p>Phi (φ) proportions alignment</p>
-                            </div>
-                        </div>
-                        <div class="metric-score">
-                            <span class="metric-value">82</span>
-                            <span class="metric-max">/100</span>
-                        </div>
-                        <div class="metric-bar">
-                            <div class="metric-fill" style="width: 82%"></div>
-                        </div>
+                    <div class="face-shape-visual">
+                        <svg viewBox="0 0 100 140" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <ellipse cx="50" cy="70" rx="32" ry="48" stroke="var(--accent-teal)" stroke-width="2.5" fill="var(--accent-teal-soft)"/>
+                        </svg>
                     </div>
-
-                    <!-- Facial Proportions -->
-                    <div class="metric-card">
-                        <div class="metric-header">
-                            <div class="metric-icon">
-                                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                    <circle cx="12" cy="8" r="4" stroke="currentColor" stroke-width="2"/>
-                                    <path d="M6 21C6 17.6863 8.68629 15 12 15C15.3137 15 18 17.6863 18 21" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                                </svg>
-                            </div>
-                            <div class="metric-title">
-                                <h4>Facial Proportions</h4>
-                                <p>Feature size and spacing</p>
-                            </div>
-                        </div>
-                        <div class="metric-score">
-                            <span class="metric-value">86</span>
-                            <span class="metric-max">/100</span>
-                        </div>
-                        <div class="metric-bar">
-                            <div class="metric-fill" style="width: 86%"></div>
-                        </div>
-                    </div>
+                    <div class="face-shape-name">Oval</div>
+                    <div class="face-shape-desc">Balanced & Proportioned</div>
                 </div>
-            </div>
 
-            <!-- Detailed Breakdown -->
-            <div class="breakdown-section">
-                <h3>Detailed Measurements</h3>
-                <div class="breakdown-grid">
-                    <div class="breakdown-item">
-                        <span class="breakdown-label">Face Width to Height Ratio</span>
-                        <span class="breakdown-value">1.618 <span class="breakdown-status good">Ideal</span></span>
+                <!-- Golden Ratio Score Card -->
+                <div class="kpi-card golden-ratio-card">
+                    <div class="kpi-card-header">
+                        <span class="kpi-card-title">Golden Ratio Score</span>
+                        <svg class="info-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
+                            <path d="M12 16V12M12 8H12.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                        </svg>
                     </div>
-                    <div class="breakdown-item">
-                        <span class="breakdown-label">Eye to Eye Distance</span>
-                        <span class="breakdown-value">1.0 <span class="breakdown-status good">Balanced</span></span>
+                    <div class="golden-ratio-value-container">
+                        <span class="golden-ratio-value">84</span>
+                        <span class="golden-ratio-max">/100</span>
                     </div>
-                    <div class="breakdown-item">
-                        <span class="breakdown-label">Nose Width Ratio</span>
-                        <span class="breakdown-value">0.95 <span class="breakdown-status moderate">Good</span></span>
+                    <div class="golden-ratio-wave">
+                        <svg viewBox="0 0 200 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M0 20 Q 25 10, 50 20 T 100 20 T 150 20 T 200 20" stroke="var(--accent-teal)" stroke-width="2" fill="none" opacity="0.5"/>
+                        </svg>
                     </div>
-                    <div class="breakdown-item">
-                        <span class="breakdown-label">Mouth to Nose Ratio</span>
-                        <span class="breakdown-value">1.5 <span class="breakdown-status good">Optimal</span></span>
+                    <div class="golden-ratio-status">Well Proportioned</div>
+                </div>
+
+                <!-- Quality Checks Card -->
+                <div class="kpi-card quality-checks-card">
+                    <div class="kpi-card-header">
+                        <span class="kpi-card-title">Quality Checks</span>
+                        <svg class="info-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
+                            <path d="M12 16V12M12 8H12.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                        </svg>
                     </div>
-                    <div class="breakdown-item">
-                        <span class="breakdown-label">Chin to Face Ratio</span>
-                        <span class="breakdown-value">0.32 <span class="breakdown-status good">Harmonious</span></span>
-                    </div>
-                    <div class="breakdown-item">
-                        <span class="breakdown-label">Facial Thirds</span>
-                        <span class="breakdown-value">33.3% <span class="breakdown-status good">Perfect</span></span>
+                    <div class="quality-checks-list">
+                        <div class="quality-check-item">
+                            <svg class="quality-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M9 12L11 14L15 10M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                            <span class="quality-label">Face Quality</span>
+                            <span class="quality-status good">Good</span>
+                        </div>
+                        <div class="quality-check-item">
+                            <svg class="quality-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <circle cx="12" cy="12" r="4" stroke="currentColor" stroke-width="2"/>
+                                <path d="M12 5V3M12 21V19M19 12H21M3 12H5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                            </svg>
+                            <span class="quality-label">Lighting</span>
+                            <span class="quality-status good">Good</span>
+                        </div>
+                        <div class="quality-check-item">
+                            <svg class="quality-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M15 12C15 13.6569 13.6569 15 12 15C10.3431 15 9 13.6569 9 12C9 10.3431 10.3431 9 12 9C13.6569 9 15 10.3431 15 12Z" stroke="currentColor" stroke-width="2"/>
+                            </svg>
+                            <span class="quality-label">Face Angle</span>
+                            <span class="quality-status good">Good</span>
+                        </div>
+                        <div class="quality-check-item">
+                            <svg class="quality-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <rect x="3" y="3" width="7" height="7" rx="1" stroke="currentColor" stroke-width="2"/>
+                                <rect x="14" y="3" width="7" height="7" rx="1" stroke="currentColor" stroke-width="2"/>
+                                <rect x="3" y="14" width="7" height="7" rx="1" stroke="currentColor" stroke-width="2"/>
+                                <rect x="14" y="14" width="7" height="7" rx="1" stroke="currentColor" stroke-width="2"/>
+                            </svg>
+                            <span class="quality-label">Landmarks</span>
+                            <span class="quality-status landmarks">468 / 468</span>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Action Buttons -->
-            <div class="action-buttons">
-                <button class="btn btn-secondary" onclick="downloadReport()">
-                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M21 15V19C21 19.5304 20.7893 20.0391 20.4142 20.4142C20.0391 20.7893 19.5304 21 19 21H5C4.46957 21 3.96086 20.7893 3.58579 20.4142C3.21071 20.0391 3 19.5304 3 19V15M7 10L12 15M12 15L17 10M12 15V3" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                    </svg>
-                    Download Report
-                </button>
-                <button class="btn btn-primary" onclick="window.location.href='index.html'">
-                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M4 16L4 17C4 18.6569 5.34315 20 7 20L17 20C18.6569 20 20 18.6569 20 17L20 16M16 8L12 4M12 4L8 8M12 4L12 15" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                    </svg>
-                    New Analysis
-                </button>
+            <!-- Bottom Grid: Three Cards Side-by-Side -->
+            <div class="bottom-grid">
+                <!-- Symmetry Analysis -->
+                <div class="symmetry-card">
+                    <div class="symmetry-card-header">
+                        <h3 class="symmetry-title">Symmetry Analysis</h3>
+                        <svg class="info-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
+                            <path d="M12 16V12M12 8H12.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                        </svg>
+                    </div>
+                    <div class="symmetry-legend">
+                        <div class="legend-item">
+                            <span class="legend-line midline"></span>
+                            <span>Midline</span>
+                        </div>
+                        <div class="legend-item">
+                            <span class="legend-line yourface"></span>
+                            <span>Your Face</span>
+                        </div>
+                        <div class="legend-item">
+                            <span class="legend-line mirror"></span>
+                            <span>Mirror</span>
+                        </div>
+                    </div>
+                    <div class="symmetry-image-wrapper">
+                        <img id="analyzedImage" src="" alt="Analyzed face" class="analyzed-face-image"/>
+                        <canvas id="overlayCanvas" class="overlay-canvas"></canvas>
+                    </div>
+                </div>
+
+                <!-- Proportion (Golden Ratio) Breakdown -->
+                <div class="proportion-card">
+                    <div class="proportion-card-header">
+                        <h3 class="proportion-title">Proportion (Golden Ratio) Breakdown</h3>
+                        <svg class="info-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
+                            <path d="M12 16V12M12 8H12.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                        </svg>
+                    </div>
+                    <div class="proportion-legend">
+                        <div class="proportion-legend-item">
+                            <span>Your Ratio</span>
+                        </div>
+                        <div class="proportion-legend-item">
+                            <span>Golden Ratio (φ=1.618)</span>
+                        </div>
+                    </div>
+                    <div class="proportions-list">
+                        <div class="proportion-row">
+                            <div class="proportion-header-row">
+                                <div class="proportion-icon-wrapper">
+                                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M12 3V21M3 12H21" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                                    </svg>
+                                </div>
+                                <span class="proportion-label">Face Length / Face Width</span>
+                            </div>
+                            <div class="proportion-comparison">
+                                <div class="proportion-bar-wrapper">
+                                    <div class="proportion-bar">
+                                        <div class="proportion-fill" style="width: 85%"></div>
+                                    </div>
+                                </div>
+                                <span class="proportion-percentage">85%</span>
+                            </div>
+                        </div>
+                        <div class="proportion-row">
+                            <div class="proportion-header-row">
+                                <div class="proportion-icon-wrapper">
+                                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <circle cx="9" cy="9" r="2" stroke="currentColor" stroke-width="2"/>
+                                        <circle cx="15" cy="9" r="2" stroke="currentColor" stroke-width="2"/>
+                                    </svg>
+                                </div>
+                                <span class="proportion-label">Eye Distance / Nose Width</span>
+                            </div>
+                            <div class="proportion-comparison">
+                                <div class="proportion-bar-wrapper">
+                                    <div class="proportion-bar">
+                                        <div class="proportion-fill" style="width: 90%"></div>
+                                    </div>
+                                </div>
+                                <span class="proportion-percentage">90%</span>
+                            </div>
+                        </div>
+                        <div class="proportion-row">
+                            <div class="proportion-header-row">
+                                <div class="proportion-icon-wrapper">
+                                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <ellipse cx="12" cy="12" rx="6" ry="3" stroke="currentColor" stroke-width="2"/>
+                                    </svg>
+                                </div>
+                                <span class="proportion-label">Mouth Width / Nose Width</span>
+                            </div>
+                            <div class="proportion-comparison">
+                                <div class="proportion-bar-wrapper">
+                                    <div class="proportion-bar">
+                                        <div class="proportion-fill" style="width: 80%"></div>
+                                    </div>
+                                </div>
+                                <span class="proportion-percentage">80%</span>
+                            </div>
+                        </div>
+                        <div class="proportion-row">
+                            <div class="proportion-header-row">
+                                <div class="proportion-icon-wrapper">
+                                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M8 4H16M8 20H16M12 4V20" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                                    </svg>
+                                </div>
+                                <span class="proportion-label">Face Width / Jaw Width</span>
+                            </div>
+                            <div class="proportion-comparison">
+                                <div class="proportion-bar-wrapper">
+                                    <div class="proportion-bar">
+                                        <div class="proportion-fill" style="width: 88%"></div>
+                                    </div>
+                                </div>
+                                <span class="proportion-percentage">88%</span>
+                            </div>
+                        </div>
+                        <div class="proportion-row">
+                            <div class="proportion-header-row">
+                                <div class="proportion-icon-wrapper">
+                                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M12 8V16M8 12H16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                                    </svg>
+                                </div>
+                                <span class="proportion-label">Nose Length / Nose Width</span>
+                            </div>
+                            <div class="proportion-comparison">
+                                <div class="proportion-bar-wrapper">
+                                    <div class="proportion-bar">
+                                        <div class="proportion-fill" style="width: 87%"></div>
+                                    </div>
+                                </div>
+                                <span class="proportion-percentage">87%</span>
+                            </div>
+                        </div>
+                        <div class="proportion-row">
+                            <div class="proportion-header-row">
+                                <div class="proportion-icon-wrapper">
+                                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M8 14C8 14 9 15 12 15C15 15 16 14 16 14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                                    </svg>
+                                </div>
+                                <span class="proportion-label">Lip Thickness / Mouth Width</span>
+                            </div>
+                            <div class="proportion-comparison">
+                                <div class="proportion-bar-wrapper">
+                                    <div class="proportion-bar">
+                                        <div class="proportion-fill" style="width: 92%"></div>
+                                    </div>
+                                </div>
+                                <span class="proportion-percentage">92%</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Look-Alike Match -->
+                <div class="lookalike-card">
+                    <div class="lookalike-card-header">
+                        <h3 class="lookalike-title">Look-Alike Match</h3>
+                        <svg class="info-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
+                            <path d="M12 16V12M12 8H12.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                        </svg>
+                    </div>
+                    <div class="lookalike-top-match">
+                        <div class="lookalike-rank-badge">#1</div>
+                        <div class="lookalike-image-container">
+                            <img src="https://via.placeholder.com/150" alt="Top Match" class="lookalike-image"/>
+                            <div class="lookalike-badge">92%</div>
+                        </div>
+                        <div class="lookalike-name">Tom Holland</div>
+                        <div class="lookalike-subtitle">Match Confidence</div>
+                    </div>
+                    <div class="lookalike-others">
+                        <div class="lookalike-item">
+                            <span class="lookalike-item-rank">2</span>
+                            <div class="lookalike-item-image-wrapper">
+                                <img src="https://via.placeholder.com/40" alt="Second Match" class="lookalike-item-image"/>
+                            </div>
+                            <div class="lookalike-item-info">
+                                <span class="lookalike-item-name">Timothée Chalamet</span>
+                                <span class="lookalike-item-match">88%</span>
+                            </div>
+                        </div>
+                        <div class="lookalike-item">
+                            <span class="lookalike-item-rank">3</span>
+                            <div class="lookalike-item-image-wrapper">
+                                <img src="https://via.placeholder.com/40" alt="Third Match" class="lookalike-item-image"/>
+                            </div>
+                            <div class="lookalike-item-info">
+                                <span class="lookalike-item-name">Shawn Mendes</span>
+                                <span class="lookalike-item-match">85%</span>
+                            </div>
+                        </div>
+                        <div class="lookalike-item">
+                            <span class="lookalike-item-rank">4</span>
+                            <div class="lookalike-item-image-wrapper">
+                                <img src="https://via.placeholder.com/40" alt="Fourth Match" class="lookalike-item-image"/>
+                            </div>
+                            <div class="lookalike-item-info">
+                                <span class="lookalike-item-name">Andrew Garfield</span>
+                                <span class="lookalike-item-match">82%</span>
+                            </div>
+                        </div>
+                        <div class="lookalike-item">
+                            <span class="lookalike-item-rank">5</span>
+                            <div class="lookalike-item-image-wrapper">
+                                <img src="https://via.placeholder.com/40" alt="Fifth Match" class="lookalike-item-image"/>
+                            </div>
+                            <div class="lookalike-item-info">
+                                <span class="lookalike-item-name">Tom Hardy</span>
+                                <span class="lookalike-item-match">80%</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Disclaimer -->
+            <div class="results-disclaimer">
+                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
+                    <path d="M12 8V12M12 16H12.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+                <p>This analysis is based on facial geometry and proportions, not skin color, ethnicity, or beauty standards.</p>
             </div>
         </div>
     </main>

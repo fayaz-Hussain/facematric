@@ -277,23 +277,23 @@
     display: flex;
     align-items: center;
     gap: 0.75rem;
-    padding: 1rem;
-    background: rgba(64, 204, 162, 0.1);
+    padding: 0.75rem 1.5rem;
+    background: var(--accent-teal);
     border-radius: 8px;
-    border: 1px solid rgba(64, 204, 162, 0.2);
+    border: 1px solid var(--accent-teal);
     width: 100%;
 }
 
 .security-note svg {
-    width: 20px;
-    height: 20px;
-    fill: var(--accent-teal);
+    width: 18px;
+    height: 18px;
+    fill: #FFFFFF;
     flex-shrink: 0;
 }
 
 .security-note span {
-    color: var(--text-secondary);
-    font-size: 0.9rem;
+    color: #FFFFFF;
+    font-size: 0.85rem;
 }
 
 /* Responsive Design */
