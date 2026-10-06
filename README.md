@@ -1,95 +1,67 @@
 # FaceMatric
 
-**Facial Symmetry & Golden Ratio Analysis**
+**Facial Symmetry Type & Golden Ratio Scoring App**
 
-An AI-powered web application for analyzing facial symmetry and golden ratio proportions using computer vision and deep learning.
-
-## Features
-
-- 🎭 Facial symmetry analysis
-- 📐 Golden ratio detection and scoring
-- 🎨 Modern, responsive UI with light/dark themes
-- 📊 Detailed analysis results with visualizations
-- 🖼️ Support for image uploads
-
-## Tech Stack
-
-- **Frontend**: HTML, CSS, JavaScript
-- **Build Tool**: Vite
-- **Styling**: Custom CSS with CSS variables for theming
-- **Design**: Modern, clean interface with teal accent color (#40CCA2)
-
-## Getting Started
-
-### Prerequisites
-
-- Node.js (v14 or higher)
-- npm or yarn
-
-### Installation
-
-1. Clone the repository:
-```bash
-git clone https://github.com/YOUR_USERNAME/facematric.git
-cd facematric
-```
-
-2. Install dependencies:
-```bash
-npm install
-```
-
-3. Start the development server:
-```bash
-npm run dev
-```
-
-4. Open your browser and navigate to `http://localhost:5173`
-
-## Project Structure
-
-```
-FaceMatric/
-├── frontend/
-│   ├── src/
-│   │   ├── assets/
-│   │   │   └── logo/
-│   │   ├── css/
-│   │   └── js/
-│   └── index.html
-├── .gitignore
-├── package.json
-└── README.md
-```
-
-## Development
-
-- `npm run dev` - Start development server
-- `npm run build` - Build for production
-- `npm run preview` - Preview production build
-
-## Dataset
-
-The celebrity dataset used for training is excluded from this repository due to its size. To use this project with the full dataset:
-
-1. Download the celebrity face dataset
-2. Place it in the `celebrity_dataset/` directory
-3. Follow the data preparation instructions in the documentation
-
-## Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request.
-
-## License
-
-This project is licensed under the MIT License - see the LICENSE file for details.
-
-## Acknowledgments
-
-- Facial recognition and analysis algorithms
-- Golden ratio mathematical principles
-- Modern web development best practices
+An AI-powered application that evaluates facial symmetry types and golden ratio (φ = 1.618) proportions using computer vision, landmark extraction, and deep learning.
 
 ---
 
-**Note**: This is an educational project for demonstrating facial analysis techniques.
+## 📌 Master Blueprint & PRD
+
+The complete project vision, methodology, architecture, API contract, and task breakdown are maintained in:
+- 📄 **`FaceMatric-prd.md`** *(Master Product Requirements Document & Task Breakdown)*
+
+Please refer to `FaceMatric-prd.md` when implementing backend features, landmark extraction, scoring formulas, and celebrity look-alike matching.
+
+---
+
+## 📁 Cleaned Project Structure
+
+```text
+FaceMatric/
+├── FaceMatric-prd.md            # Master PRD & Task Breakdown (CRITICAL)
+├── README.md                    # Project Documentation
+├── vite.config.js               # Dev server configuration
+├── package.json                 # Frontend dev dependencies
+├── celebrity_dataset/           # Merged celebrity image dataset (Pins + Bollywood)
+│   ├── Aamir_Khan/
+│   ├── pins_Adriana Lima/
+│   └── ...
+└── frontend/                    # Web Client (Vanilla HTML, CSS, JavaScript)
+    ├── index.html               # Upload & Landing Page
+    ├── analyzing.html           # Processing & Scan State Page
+    ├── results.html             # Detailed Results & Visual Overlay Page
+    └── src/
+        ├── assets/              # Logos and media assets
+        ├── css/                 # Modular design system (variables, components)
+        └── js/                  # Frontend logic (theme, upload, camera, results)
+```
+
+---
+
+## 🚀 Getting Started
+
+### Prerequisites
+- **Node.js**: v18 or higher
+
+### Frontend Development Server
+To launch the frontend preview with live reload:
+```bash
+npm run dev
+```
+Open `http://localhost:3000` in your browser.
+
+---
+
+## 🛠️ Planned Backend Architecture (from PRD)
+
+- **Framework**: Python FastAPI
+- **Landmark Detection**: MediaPipe Face Mesh (468 3D landmarks)
+- **Golden Ratio Scoring**: Math formulation calculating divergence from $\phi = 1.618$ across 8 key ratios
+- **Face Identity Matcher**: FaceNet embeddings evaluated against `celebrity_dataset/` via Cosine Similarity
+
+---
+
+## 🔒 Privacy First
+
+User uploaded images are processed transiently in memory and discarded immediately after scoring. No user photo is saved or stored server-side.

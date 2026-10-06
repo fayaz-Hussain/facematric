@@ -6,7 +6,7 @@ This task list implements FaceMatric - a facial geometry analysis application th
 
 ## Tasks
 
-- [-] 1. Backend Infrastructure Setup
+- [ ] 1. Backend Infrastructure Setup
   - Create Python FastAPI project structure with standard directories (app/, tests/, data/)
   - Install core dependencies: FastAPI, Uvicorn, Pydantic, NumPy, Pillow, MediaPipe, SciPy, DeepFace, OpenCV
   - Configure logging infrastructure with structured logging (JSON format, appropriate log levels)
@@ -16,18 +16,18 @@ This task list implements FaceMatric - a facial geometry analysis application th
   - _Requirements: 1.1, 1.2, 1.5, 1.6, 2.1, 2.3, 2.4, 2.5, 3.2, 12.1, 12.2, 12.3, 12.4, 13.1, 13.2, 13.3, 13.4, 15.1, 15.2, 15.3, 15.4, 15.5, 18.4, 20.1, 20.2, 20.3, 20.4_
 
 - [ ] 2. Data Models and Schemas
-  - [-] 2.1 Create Pydantic request models (AnalyzeRequest with image_base64 and include_celebrity_match fields)
+  - [ ] 2.1 Create Pydantic request models (AnalyzeRequest with image_base64 and include_celebrity_match fields)
     - Define base model with field validation and examples
     - Add support for both base64 string and multipart file upload
     - _Requirements: 14.1, 14.2_
 
-  - [-] 2.2 Create Pydantic response models (AnalysisResponse, AnalysisResultModel, FeatureBreakdownItem, etc.)
+  - [ ] 2.2 Create Pydantic response models (AnalysisResponse, AnalysisResultModel, FeatureBreakdownItem, etc.)
     - Implement success response schema with all required nested models
     - Implement error response schema with error codes and messages
     - Add JSON schema examples for API documentation
     - _Requirements: 14.3, 14.4, 14.5, 14.6, 14.7, 14.8, 15.1, 15.2, 15.3, 15.4, 15.5_
 
-  - [-] 2.3 Create internal data structures (ImageData, Landmarks, SymmetryType, GoldenRatioResult, etc.)
+  - [ ] 2.3 Create internal data structures (ImageData, Landmarks, SymmetryType, GoldenRatioResult, etc.)
     - Define dataclasses for internal component communication
     - Ensure type safety and validation at component boundaries
     - _Requirements: 1.2, 1.3, 2.2, 4.8, 5.1, 5.2, 5.3, 5.4, 5.5, 5.6, 5.7, 5.8, 6.4, 7.1, 7.2, 7.3_
@@ -39,29 +39,29 @@ This task list implements FaceMatric - a facial geometry analysis application th
     - _Requirements: 14.1, 14.2, 14.3, 14.4, 14.5, 14.6, 14.7, 14.8, 15.1, 15.2, 15.3, 15.4, 15.5_
 
 - [ ] 3. Image Processor Component
-  - [~] 3.1 Implement format detection and validation (JPEG, PNG, HEIC, WebP, BMP, GIF)
+  - [ ] 3.1 Implement format detection and validation (JPEG, PNG, HEIC, WebP, BMP, GIF)
     - Use PIL to open and validate image formats
     - Detect corrupt files and raise INVALID_IMAGE error
     - _Requirements: 1.1, 1.5_
 
-  - [~] 3.2 Implement EXIF rotation handling using ImageOps.exif_transpose
+  - [ ] 3.2 Implement EXIF rotation handling using ImageOps.exif_transpose
     - Apply rotation based on EXIF orientation metadata
     - Handle all 8 EXIF orientation values
     - _Requirements: 20.1_
 
-  - [~] 3.3 Implement color space normalization (CMYK→RGB, RGBA→RGB with white background)
+  - [ ] 3.3 Implement color space normalization (CMYK→RGB, RGBA→RGB with white background)
     - Convert CMYK images to RGB
     - Composite RGBA images onto white background using alpha channel
     - Handle grayscale and other color modes
     - _Requirements: 1.2, 20.2, 20.3_
 
-  - [~] 3.4 Implement aspect ratio-preserving resize (max 640px dimension, Lanczos resampling)
+  - [ ] 3.4 Implement aspect ratio-preserving resize (max 640px dimension, Lanczos resampling)
     - Calculate scale factor to fit within 640px maximum dimension
     - Apply high-quality Lanczos resampling
     - Maintain original aspect ratio
     - _Requirements: 1.3_
 
-  - [~] 3.5 Implement JPEG compression (85% quality) and validation checks
+  - [ ] 3.5 Implement JPEG compression (85% quality) and validation checks
     - Compress to JPEG at 85% quality
     - Validate minimum resolution (300x300px) and reject POOR_QUALITY
     - Validate aspect ratio (reject if >3:1) and raise POOR_QUALITY error
@@ -76,25 +76,25 @@ This task list implements FaceMatric - a facial geometry analysis application th
     - _Requirements: 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 20.1, 20.2, 20.3, 20.4_
 
 - [ ] 4. Face Detector and Landmark Extractor Component
-  - [~] 4.1 Initialize MediaPipe Face Mesh with correct configuration
+  - [ ] 4.1 Initialize MediaPipe Face Mesh with correct configuration
     - Load face_landmarker.task model file
     - Configure with max_num_faces=1, min_detection_confidence=0.5
     - Set up running mode for single image processing
     - _Requirements: 2.1_
 
-  - [~] 4.2 Implement face detection with count validation
+  - [ ] 4.2 Implement face detection with count validation
     - Process image through MediaPipe Face Mesh
     - Raise NO_FACE_DETECTED if zero faces found
     - Raise MULTIPLE_FACES if more than one face found
     - _Requirements: 2.1, 2.3, 2.4_
 
-  - [~] 4.3 Extract 468 3D landmark coordinates and validate confidence
+  - [ ] 4.3 Extract 468 3D landmark coordinates and validate confidence
     - Extract (x, y, z) coordinates for all 468 landmarks
     - Calculate average landmark confidence
     - Raise POOR_QUALITY if confidence < 0.6 threshold
     - _Requirements: 2.2, 2.5_
 
-  - [~] 4.4 Implement occlusion detection for glasses and masks
+  - [ ] 4.4 Implement occlusion detection for glasses and masks
     - Analyze eye region landmark patterns for glasses detection
     - Analyze mouth region visibility for mask detection
     - Raise OCCLUSION_DETECTED if significant obstruction found
@@ -109,13 +109,13 @@ This task list implements FaceMatric - a facial geometry analysis application th
     - _Requirements: 2.1, 2.2, 2.3, 2.4, 2.5, 3.1, 3.2_
 
 - [ ] 5. Symmetry Classifier Component
-  - [~] 5.1 Implement facial dimension measurements (face length, width, jaw width, etc.)
+  - [ ] 5.1 Implement facial dimension measurements (face length, width, jaw width, etc.)
     - Extract key landmark indices for face boundaries
     - Calculate Euclidean distances between landmark pairs
     - Compute jawline angle using three-point angle calculation
     - _Requirements: 4.1_
 
-  - [~] 5.2 Implement symmetry type classification logic with decision tree
+  - [ ] 5.2 Implement symmetry type classification logic with decision tree
     - Classify as oval: length/width ≈ 1.5, rounded jawline
     - Classify as rectangle: length > width, angular jawline
     - Classify as round: length ≈ width, soft angles
@@ -132,7 +132,7 @@ This task list implements FaceMatric - a facial geometry analysis application th
     - _Requirements: 4.1, 4.2, 4.3, 4.4, 4.5, 4.6, 4.7, 4.8_
 
 - [ ] 6. Golden Ratio Scorer Component
-  - [~] 6.1 Implement 8 facial ratio measurement functions
+  - [ ] 6.1 Implement 8 facial ratio measurement functions
     - Face length ÷ face width (landmarks 10, 152, 234, 454)
     - Face width ÷ jaw width (landmarks 234, 454, 172, 397)
     - Eye spacing ÷ eye width (landmarks 133, 362, 33)
@@ -143,21 +143,21 @@ This task list implements FaceMatric - a facial geometry analysis application th
     - Chin width ÷ nose width (landmarks 172, 397, 219, 439)
     - _Requirements: 5.1, 5.2, 5.3, 5.4, 5.5, 5.6, 5.7, 5.8_
 
-  - [~] 6.2 Implement per-feature scoring with golden ratio formula
+  - [ ] 6.2 Implement per-feature scoring with golden ratio formula
     - Apply formula: score = 100 × (1 - |ratio - 1.618| / 1.618)
     - Clamp scores to [0, 100] range
     - Record measured_ratio, ideal_ratio (1.618), score, and deviation
     - Assign score of 100 when ratio equals 1.618 exactly
     - _Requirements: 6.1, 6.2, 6.3, 6.4, 6.5_
 
-  - [~] 6.3 Implement overall score calculation as arithmetic mean of 8 features
+  - [ ] 6.3 Implement overall score calculation as arithmetic mean of 8 features
     - Sum all 8 feature scores
     - Divide by 8 to get arithmetic mean
     - Round to one decimal place
     - Ensure result is bounded [0, 100]
     - _Requirements: 7.1, 7.2, 7.3_
 
-  - [~] 6.4 Implement asymmetric feature handling for bilateral measurements
+  - [ ] 6.4 Implement asymmetric feature handling for bilateral measurements
     - Measure left and right sides separately for bilateral features
     - Compare measurements and detect asymmetry (>10% difference)
     - Score each side independently if asymmetric
@@ -173,19 +173,19 @@ This task list implements FaceMatric - a facial geometry analysis application th
     - _Requirements: 5.1, 5.2, 5.3, 5.4, 5.5, 5.6, 5.7, 5.8, 6.1, 6.2, 6.3, 6.4, 6.5, 7.1, 7.2, 7.3, 19.1, 19.2, 19.3, 19.4_
 
 - [ ] 7. Percentile Engine Component
-  - [~] 7.1 Implement bootstrap normal distribution (mean=70, std=10)
+  - [ ] 7.1 Implement bootstrap normal distribution (mean=70, std=10)
     - Initialize scipy.stats.norm distribution with bootstrap parameters
     - Document as placeholder until real data collected
     - _Requirements: 8.1_
 
-  - [~] 7.2 Implement score-to-percentile conversion using CDF
+  - [ ] 7.2 Implement score-to-percentile conversion using CDF
     - Clamp input score to [0, 100] range
     - Calculate percentile using distribution CDF
     - Round to integer and ensure [0, 100] bounds
     - Format as "You score higher than X% of people"
     - _Requirements: 8.1, 8.2, 8.3_
 
-  - [~] 7.3 Implement empirical distribution loading (future enhancement)
+  - [ ] 7.3 Implement empirical distribution loading (future enhancement)
     - Create method to load real user scores
     - Fit normal distribution to empirical data
     - Update mean and std parameters
@@ -199,32 +199,32 @@ This task list implements FaceMatric - a facial geometry analysis application th
     - _Requirements: 8.1, 8.2, 8.3_
 
 - [ ] 8. Celebrity Matcher Component
-  - [~] 8.1 Implement FaceNet embedding generation using DeepFace
+  - [ ] 8.1 Implement FaceNet embedding generation using DeepFace
     - Initialize DeepFace with Facenet model
     - Generate 128-dimensional embedding vector for input face
     - Handle embedding generation failures gracefully
     - _Requirements: 10.1_
 
-  - [~] 8.2 Implement cosine similarity calculation
+  - [ ] 8.2 Implement cosine similarity calculation
     - Compute dot product of embedding vectors
     - Calculate vector norms
     - Return cosine similarity in [-1, 1] range
     - _Requirements: 10.2_
 
-  - [~] 8.3 Implement celebrity database comparison and ranking
+  - [ ] 8.3 Implement celebrity database comparison and ranking
     - Load precomputed celebrity embeddings from pickle file
     - Compute similarity with all celebrities
     - Rank by similarity score in descending order
     - _Requirements: 10.2, 10.3_
 
-  - [~] 8.4 Implement confidence thresholding (0.55 threshold)
+  - [ ] 8.4 Implement confidence thresholding (0.55 threshold)
     - Identify highest-scoring celebrity
     - Return match if confidence ≥ 0.55 with name, confidence, dataset_source, thumbnail_url
     - Return null name with message if confidence < 0.55
     - Round confidence to 2 decimal places
     - _Requirements: 11.1, 11.2, 11.3, 11.4_
 
-  - [~] 8.5 Implement celebrity database loading with error handling
+  - [ ] 8.5 Implement celebrity database loading with error handling
     - Load celebrity_embeddings.pkl at startup
     - Log critical error and disable matching if file missing/corrupted
     - Allow golden ratio scoring to proceed even if celebrity matching disabled
@@ -238,12 +238,12 @@ This task list implements FaceMatric - a facial geometry analysis application th
     - _Requirements: 10.1, 10.2, 10.3, 11.1, 11.2, 11.3, 11.4, 18.1, 18.2, 18.3, 18.4_
 
 - [ ] 9. Overlay Generator Component
-  - [~] 9.1 Implement 2D landmark extraction from 3D landmarks
+  - [ ] 9.1 Implement 2D landmark extraction from 3D landmarks
     - Convert 468 3D landmarks to 2D by dropping z-coordinate
     - Format as list of [x, y] coordinate pairs
     - _Requirements: 9.1_
 
-  - [~] 9.2 Implement golden ratio guide calculations
+  - [ ] 9.2 Implement golden ratio guide calculations
     - Calculate vertical midline (center x-coordinate)
     - Calculate horizontal thirds using golden ratio divisions
     - Calculate phi spiral center (near nose bridge)
@@ -257,25 +257,25 @@ This task list implements FaceMatric - a facial geometry analysis application th
     - _Requirements: 9.1, 9.2, 9.3, 9.4, 9.5_
 
 - [ ] 10. API Gateway and Orchestration
-  - [~] 10.1 Create FastAPI application with CORS middleware
+  - [ ] 10.1 Create FastAPI application with CORS middleware
     - Initialize FastAPI app with title and version
     - Configure CORS for allowed origins (production + localhost)
     - Set up logging and error handlers
     - _Requirements: 14.1_
 
-  - [~] 10.2 Implement /api/analyze endpoint with request validation
+  - [ ] 10.2 Implement /api/analyze endpoint with request validation
     - Accept multipart file upload or base64 image string
     - Validate request parameters
     - Parse include_celebrity_match flag
     - _Requirements: 14.1, 14.2_
 
-  - [~] 10.3 Implement timeout middleware (30-second threshold)
+  - [ ] 10.3 Implement timeout middleware (30-second threshold)
     - Wrap processing in asyncio.wait_for with 30s timeout
     - Return HTTP 408 on timeout with PROCESSING_TIMEOUT error
     - Include retry flag in timeout response
     - _Requirements: 12.1, 12.2, 12.3, 12.4_
 
-  - [~] 10.4 Implement component orchestration in _process_analysis
+  - [ ] 10.4 Implement component orchestration in _process_analysis
     - Call ImageProcessor to normalize image
     - Call FaceDetector to extract landmarks
     - Run SymmetryClassifier, GoldenRatioScorer, OverlayGenerator in parallel (asyncio.create_task)
@@ -284,21 +284,21 @@ This task list implements FaceMatric - a facial geometry analysis application th
     - Assemble final AnalysisResult
     - _Requirements: 14.3, 14.4, 14.5, 14.6, 14.7, 14.8_
 
-  - [~] 10.5 Implement progressive degradation for celebrity matching failures
+  - [ ] 10.5 Implement progressive degradation for celebrity matching failures
     - Catch exceptions from CelebrityMatcher
     - Log warning but continue processing
     - Set celebrity_match to null in response
     - Return HTTP 200 with partial results
     - _Requirements: 17.1, 17.2, 17.3, 17.4_
 
-  - [~] 10.6 Implement comprehensive error handling with user-friendly messages
+  - [ ] 10.6 Implement comprehensive error handling with user-friendly messages
     - Catch ValidationError and return HTTP 400 with error details
     - Catch timeout and return HTTP 408
     - Catch unexpected errors and return HTTP 500
     - Log errors with metadata (no image data)
     - _Requirements: 15.1, 15.2, 15.3, 15.4, 15.5_
 
-  - [~] 10.7 Implement privacy-preserving memory cleanup
+  - [ ] 10.7 Implement privacy-preserving memory cleanup
     - Process images in-memory only (no disk writes)
     - Delete image data after processing
     - Force garbage collection
@@ -316,26 +316,26 @@ This task list implements FaceMatric - a facial geometry analysis application th
     - Test progressive degradation (celebrity matching fails)
     - _Requirements: 1.5, 1.6, 2.3, 2.4, 2.5, 3.2, 12.4, 14.1, 14.2, 14.3, 14.4, 14.5, 14.6, 14.7, 14.8, 15.1, 15.2, 15.3, 15.4, 15.5, 17.1, 17.2, 17.3, 17.4_
 
-- [~] 11. Checkpoint - Core backend complete
+- [ ] 11. Checkpoint - Core backend complete
   - Ensure all backend components pass unit tests
   - Verify API integration tests pass
   - Test end-to-end with Postman/curl before proceeding to frontend
 
 - [ ] 12. Celebrity Database Preprocessing
-  - [~] 12.1 Merge Pins Face Recognition and Bollywood datasets
+  - [ ] 12.1 Merge Pins Face Recognition and Bollywood datasets
     - Combine celebrity folders into single celebrity_dataset/ directory
     - Verify no overlapping celebrities between datasets
     - Remove "pins_" prefix from celebrity folder names
     - _Requirements: 18.3_
 
-  - [~] 12.2 Generate FaceNet embeddings for all celebrity images
+  - [ ] 12.2 Generate FaceNet embeddings for all celebrity images
     - Iterate through all celebrity folders and images
     - Generate FaceNet embedding for each image using DeepFace
     - Handle detection failures gracefully (skip bad images)
     - Log progress and errors
     - _Requirements: 10.1, 18.1_
 
-  - [~] 12.3 Average embeddings per celebrity and save to pickle file
+  - [ ] 12.3 Average embeddings per celebrity and save to pickle file
     - Average multiple embeddings for same celebrity
     - Create dictionary: {celebrity_name: {embedding, dataset_source, thumbnail_path}}
     - Save to celebrity_embeddings.pkl using pickle
@@ -343,14 +343,14 @@ This task list implements FaceMatric - a facial geometry analysis application th
     - _Requirements: 18.1, 18.2, 18.3_
 
 - [ ] 13. Frontend JavaScript Integration
-  - [~] 13.1 Create api-client.js with API communication layer
+  - [ ] 13.1 Create api-client.js with API communication layer
     - Implement FaceMetricAPI class with analyzeFace method
     - Handle base64 image encoding/decoding
     - Implement APIError class for structured error handling
     - Configure API_BASE_URL (localhost for dev, production URL for deployment)
     - _Requirements: 14.1, 14.2, 15.1, 15.2, 15.3, 15.4, 15.5_
 
-  - [~] 13.2 Create upload-handler.js for upload screen
+  - [ ] 13.2 Create upload-handler.js for upload screen
     - Implement file upload button handler
     - Implement camera capture with MediaDevices API
     - Implement drag-and-drop zone with event listeners
@@ -359,7 +359,7 @@ This task list implements FaceMatric - a facial geometry analysis application th
     - Navigate to analyzing screen after upload
     - _Requirements: 16.1, 16.2, 16.3, 16.4, 16.5_
 
-  - [~] 13.3 Create analyzing-handler.js for analyzing screen
+  - [ ] 13.3 Create analyzing-handler.js for analyzing screen
     - Display uploaded image from sessionStorage
     - Update progress steps with icons and animations
     - Call API analyzeFace method
@@ -369,7 +369,7 @@ This task list implements FaceMatric - a facial geometry analysis application th
     - Navigate to results screen on success
     - _Requirements: 14.1, 14.2, 14.3, 14.4, 14.5, 14.6, 14.7, 14.8, 15.1, 15.2, 15.3, 15.4, 15.5_
 
-  - [~] 13.4 Create results-handler.js for results screen
+  - [ ] 13.4 Create results-handler.js for results screen
     - Load analysis results from sessionStorage
     - Update overall golden ratio score with circular progress
     - Update face symmetry type classification
@@ -381,7 +381,7 @@ This task list implements FaceMatric - a facial geometry analysis application th
     - Implement "NEW ANALYSIS" button to clear sessionStorage and restart
     - _Requirements: 14.3, 14.4, 14.5, 14.6, 14.7, 14.8, 11.2, 11.3_
 
-  - [~] 13.5 Add script tags to existing HTML files
+  - [ ] 13.5 Add script tags to existing HTML files
     - Add api-client.js and upload-handler.js to upload screen HTML
     - Add api-client.js and analyzing-handler.js to analyzing screen HTML
     - Add api-client.js and results-handler.js to results screen HTML
@@ -397,7 +397,7 @@ This task list implements FaceMatric - a facial geometry analysis application th
     - _Requirements: 14.1, 14.2, 14.3, 14.4, 14.5, 14.6, 14.7, 14.8, 15.1, 15.2, 15.3, 15.4, 15.5, 16.1, 16.2, 16.3, 16.4, 16.5, 11.2, 11.3_
 
 - [ ] 14. Deployment Configuration
-  - [~] 14.1 Configure backend deployment (Render/Railway)
+  - [ ] 14.1 Configure backend deployment (Render/Railway)
     - Create requirements.txt with all dependencies
     - Configure Dockerfile with Python base image and system dependencies
     - Set environment variables (ALLOWED_ORIGINS, PROCESSING_TIMEOUT, CELEBRITY_DB_PATH, etc.)
@@ -405,14 +405,14 @@ This task list implements FaceMatric - a facial geometry analysis application th
     - Configure uvicorn startup command
     - _Requirements: 12.1, 12.2, 13.1, 13.2, 13.3, 13.4, 18.1, 18.4_
 
-  - [~] 14.2 Configure frontend deployment (Vercel/Netlify)
+  - [ ] 14.2 Configure frontend deployment (Vercel/Netlify)
     - Create index.html redirect to upload screen
     - Create vercel.json with routes and CORS headers
     - Update API_BASE_URL in api-client.js to production backend URL
     - Deploy static HTML/CSS/JS files (no build step needed)
     - _Requirements: 14.1_
 
-  - [~] 14.3 Test production deployment end-to-end
+  - [ ] 14.3 Test production deployment end-to-end
     - Verify CORS configuration allows frontend domain
     - Test upload → analyze → results flow in production
     - Verify celebrity embeddings loading correctly
