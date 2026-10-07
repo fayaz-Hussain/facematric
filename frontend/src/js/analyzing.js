@@ -52,7 +52,6 @@ class AnalyzingManager {
             this.uploadedImage.src = imageData;
         } else {
             // If no image data, redirect back to home
-            console.warn('No image data found, redirecting to home');
             setTimeout(() => {
                 window.location.href = 'index.html';
             }, 1000);
@@ -123,7 +122,6 @@ class AnalyzingManager {
 
         // Wait a moment to show completion, then navigate to results
         setTimeout(() => {
-            console.log('Analysis complete! Navigating to results...');
             window.location.href = 'results.html';
         }, COMPLETION_DELAY);
     }

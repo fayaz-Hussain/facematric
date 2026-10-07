@@ -76,7 +76,6 @@ class UploadManager {
         }
 
         console.log('File selected:', file.name);
-        console.log('File size:', (file.size / 1024 / 1024).toFixed(2) + 'MB');
         
         // Convert file to data URL and store in sessionStorage
         const reader = new FileReader();

@@ -59,7 +59,6 @@ class ResultsManager {
             };
         } else {
             // If no image data, use placeholder
-            console.warn('No image data found, using placeholder');
             this.analyzedImage.src = 'https://via.placeholder.com/400x600/E8F7F2/40CCA2?text=Face+Image';
         }
     }
