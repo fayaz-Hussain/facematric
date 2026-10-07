@@ -3,6 +3,11 @@
  * Handles the analyzing page animation and progress
  */
 
+// Timing configuration (in milliseconds)
+const STEP_DURATION = 700; // Duration for each analysis step (0.7s)
+const PROGRESS_UPDATE_INTERVAL = 50; // How often to update progress bar
+const COMPLETION_DELAY = 500; // Delay before navigating to results
+
 class AnalyzingManager {
     constructor() {
         this.progressFill = null;
@@ -56,8 +61,9 @@ class AnalyzingManager {
 
     startAnalysis() {
         // Simulate analysis process
-        const stepDuration = 2500; // 2.5 seconds per step
         const totalSteps = this.steps.length;
+        const totalDuration = STEP_DURATION * totalSteps;
+        const progressIncrement = 100 / (totalDuration / PROGRESS_UPDATE_INTERVAL);
 
         // Activate first step immediately
         if (this.steps[0]) {
@@ -88,17 +94,18 @@ class AnalyzingManager {
                     this.completeAnalysis();
                 }
             }
-        }, stepDuration);
+        }, STEP_DURATION);
 
         // Update progress bar smoothly
         const progressInterval = setInterval(() => {
             if (this.progress < 100) {
-                this.progress += 0.5;
+                this.progress += progressIncrement;
+                if (this.progress > 100) this.progress = 100;
                 this.updateProgress(this.progress);
             } else {
                 clearInterval(progressInterval);
             }
-        }, 50);
+        }, PROGRESS_UPDATE_INTERVAL);
     }
 
     updateProgress(percent) {
@@ -118,7 +125,7 @@ class AnalyzingManager {
         setTimeout(() => {
             console.log('Analysis complete! Navigating to results...');
             window.location.href = 'results.html';
-        }, 1000);
+        }, COMPLETION_DELAY);
     }
 
     showCompletionMessage() {

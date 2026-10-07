@@ -5,7 +5,7 @@
 
 :root {
     /* Light Theme Colors */
-    --bg-primary: #E8F7F2;
+    --bg-primary: #f2fbf7;
     --bg-gradient-start: #E8F7F2;
     --bg-gradient-end: #D8F3EA;
     --surface-bg: rgba(255, 255, 255, 0.5);
@@ -25,11 +25,20 @@
     /* Logo Colors - Light Mode */
     --logo-face-text: #25272C;
     --logo-glow: none;
+    
+    /* Hero Spacing - Light Mode (tighter) */
+    --hero-padding-y: 1.2rem;
+    --hero-padding-y-mobile: 1rem;
+    --badge-margin-bottom: 1.2rem;
+    --badge-margin-bottom-mobile: 0.9rem;
+    --heading-margin-bottom: 0.8rem;
+    --description-margin-bottom: 1.4rem;
+    --description-margin-bottom-mobile: 1.2rem;
 }
 
 [data-theme="dark"] {
     /* Dark Theme Colors */
-    --bg-primary: #25272C;
+    --bg-primary: #111617;
     --bg-gradient-start: #25272C;
     --bg-gradient-end: #1F2125;
     --surface-bg: rgba(45, 48, 54, 0.6);
@@ -49,4 +58,13 @@
     /* Logo Colors - Dark Mode */
     --logo-face-text: #FFFFFF;
     --logo-glow: drop-shadow(0 0 6px rgba(64, 204, 162, 0.4)) drop-shadow(0 0 12px rgba(64, 204, 162, 0.2));
+    
+    /* Hero Spacing - Dark Mode (original) */
+    --hero-padding-y: 2rem;
+    --hero-padding-y-mobile: 1.5rem;
+    --badge-margin-bottom: 1.8rem;
+    --badge-margin-bottom-mobile: 1.2rem;
+    --heading-margin-bottom: 1.2rem;
+    --description-margin-bottom: 2.2rem;
+    --description-margin-bottom-mobile: 1.8rem;
 }
