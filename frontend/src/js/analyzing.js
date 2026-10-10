@@ -1,12 +1,9 @@
-/**
+﻿/**
  * analyzing.js
- * Handles the analyzing page animation and progress
+ * Handles the analyzing page - sends image to backend for analysis
  */
 
-// Timing configuration (in milliseconds)
-const STEP_DURATION = 700; // Duration for each analysis step (0.7s)
-const PROGRESS_UPDATE_INTERVAL = 50; // How often to update progress bar
-const COMPLETION_DELAY = 500; // Delay before navigating to results
+const API_BASE_URL = 'http://localhost:8000';
 
 class AnalyzingManager {
     constructor() {
@@ -16,11 +13,11 @@ class AnalyzingManager {
         this.steps = [];
         this.currentStep = 0;
         this.progress = 0;
+        this.analysisResult = null;
         this.init();
     }
 
     init() {
-        // Wait for DOM to be ready
         if (document.readyState === 'loading') {
             document.addEventListener('DOMContentLoaded', () => this.setupElements());
         } else {
@@ -39,10 +36,7 @@ class AnalyzingManager {
             document.getElementById('step4')
         ];
 
-        // Load the uploaded image from sessionStorage
         this.loadUploadedImage();
-
-        // Start the analysis animation
         this.startAnalysis();
     }
 
@@ -51,60 +45,90 @@ class AnalyzingManager {
         if (imageData && this.uploadedImage) {
             this.uploadedImage.src = imageData;
         } else {
-            // If no image data, redirect back to home
             setTimeout(() => {
                 window.location.href = 'index.html';
             }, 1000);
         }
     }
 
-    startAnalysis() {
-        // Simulate analysis process
-        const totalSteps = this.steps.length;
-        const totalDuration = STEP_DURATION * totalSteps;
-        const progressIncrement = 100 / (totalDuration / PROGRESS_UPDATE_INTERVAL);
+    async startAnalysis() {
+        try {
+            if (this.steps[0]) {
+                this.steps[0].classList.add('active');
+            }
+            this.updateProgress(10);
 
-        // Activate first step immediately
-        if (this.steps[0]) {
-            this.steps[0].classList.add('active');
+            const imageData = sessionStorage.getItem('uploadedImageData');
+            if (!imageData) {
+                throw new Error('No image data found');
+            }
+
+            this.updateProgress(20);
+            if (this.steps[0]) {
+                this.steps[0].classList.remove('active');
+                this.steps[0].classList.add('completed');
+            }
+            if (this.steps[1]) {
+                this.steps[1].classList.add('active');
+            }
+
+            const response = await fetch(imageData);
+            const blob = await response.blob();
+
+            const formData = new FormData();
+            formData.append('file', blob, 'image.jpg');
+
+            this.updateProgress(40);
+            if (this.steps[1]) {
+                this.steps[1].classList.remove('active');
+                this.steps[1].classList.add('completed');
+            }
+            if (this.steps[2]) {
+                this.steps[2].classList.add('active');
+            }
+
+            const analysisResponse = await fetch(API_BASE_URL + '/api/analyze', {
+                method: 'POST',
+                body: formData
+            });
+
+            if (!analysisResponse.ok) {
+                const errorData = await analysisResponse.json();
+                throw new Error(errorData.detail?.message || 'Backend error: ' + analysisResponse.status);
+            }
+
+            this.analysisResult = await analysisResponse.json();
+            
+            this.updateProgress(80);
+            if (this.steps[2]) {
+                this.steps[2].classList.remove('active');
+                this.steps[2].classList.add('completed');
+            }
+            if (this.steps[3]) {
+                this.steps[3].classList.add('active');
+            }
+
+            sessionStorage.setItem('analysisResults', JSON.stringify(this.analysisResult));
+
+            this.updateProgress(100);
+            
+            setTimeout(() => {
+                if (this.steps[3]) {
+                    this.steps[3].classList.remove('active');
+                    this.steps[3].classList.add('completed');
+                }
+                setTimeout(() => {
+                    window.location.href = 'results.html';
+                }, 500);
+            }, 1000);
+
+        } catch (error) {
+            console.error('Analysis error:', error);
+            alert('Analysis failed: ' + error.message + '\n\nMake sure backend is running at http://localhost:8000');
+            setTimeout(() => {
+                window.location.href = 'index.html';
+            }, 2000);
         }
-
-        // Progress through each step
-        const stepInterval = setInterval(() => {
-            if (this.currentStep < totalSteps) {
-                // Complete current step
-                if (this.steps[this.currentStep]) {
-                    this.steps[this.currentStep].classList.remove('active');
-                    this.steps[this.currentStep].classList.add('completed');
-                }
-
-                // Move to next step
-                this.currentStep++;
-                
-                if (this.currentStep < totalSteps) {
-                    // Activate next step
-                    if (this.steps[this.currentStep]) {
-                        this.steps[this.currentStep].classList.add('active');
-                    }
-                } else {
-                    // All steps complete
-                    clearInterval(stepInterval);
-                    clearInterval(progressInterval);
-                    this.completeAnalysis();
-                }
-            }
-        }, STEP_DURATION);
-
-        // Update progress bar smoothly
-        const progressInterval = setInterval(() => {
-            if (this.progress < 100) {
-                this.progress += progressIncrement;
-                if (this.progress > 100) this.progress = 100;
-                this.updateProgress(this.progress);
-            } else {
-                clearInterval(progressInterval);
-            }
-        }, PROGRESS_UPDATE_INTERVAL);
     }
 
     updateProgress(percent) {
@@ -115,40 +139,6 @@ class AnalyzingManager {
             this.progressText.textContent = Math.round(percent) + '%';
         }
     }
-
-    completeAnalysis() {
-        // Ensure progress is at 100%
-        this.updateProgress(100);
-
-        // Wait a moment to show completion, then navigate to results
-        setTimeout(() => {
-            window.location.href = 'results.html';
-        }, COMPLETION_DELAY);
-    }
-
-    showCompletionMessage() {
-        const statusHeader = document.querySelector('.status-header');
-        if (statusHeader) {
-            statusHeader.innerHTML = `
-                <h2>Analysis Complete! ✨</h2>
-                <p class="subtitle">Your facial analysis report is ready.</p>
-            `;
-        }
-
-        // Show a button to view results (placeholder for now)
-        const securityNote = document.querySelector('.security-note');
-        if (securityNote) {
-            securityNote.innerHTML = `
-                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                    <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
-                    <path d="M9 12L11 14L15 10" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
-                <span>Analysis completed successfully!</span>
-            `;
-            securityNote.style.background = 'rgba(64, 204, 162, 0.15)';
-        }
-    }
 }
 
-// Initialize analyzing manager
 const analyzingManager = new AnalyzingManager();
