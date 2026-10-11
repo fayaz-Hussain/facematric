@@ -587,13 +587,13 @@ class TestOverlayDataInternal:
         overlay = OverlayDataInternal(
             landmarks_2d=landmarks_2d,
             midline_x=320.0,
-            horizontal_thirds_y=[100.0, 250.0, 400.0],
+            horizontal_thirds_y=[100.0, 200.0, 300.0, 400.0],
             phi_spiral_center=(320.0, 240.0)
         )
         
         assert overlay.landmarks_2d.shape == (468, 2)
         assert overlay.midline_x == 320.0
-        assert overlay.horizontal_thirds_y == [100.0, 250.0, 400.0]
+        assert overlay.horizontal_thirds_y == [100.0, 200.0, 300.0, 400.0]
         assert overlay.phi_spiral_center == (320.0, 240.0)
     
     def test_validation_wrong_landmark_shape(self):
@@ -604,7 +604,7 @@ class TestOverlayDataInternal:
             OverlayDataInternal(
                 landmarks_2d=landmarks_2d,
                 midline_x=320.0,
-                horizontal_thirds_y=[100.0, 250.0, 400.0],
+                horizontal_thirds_y=[100.0, 200.0, 300.0, 400.0],
                 phi_spiral_center=(320.0, 240.0)
             )
     
@@ -612,7 +612,7 @@ class TestOverlayDataInternal:
         """Test validation fails for wrong number of horizontal thirds."""
         landmarks_2d = np.random.rand(468, 2).astype(np.float32)
         
-        with pytest.raises(ValueError, match="Must have exactly 3 horizontal thirds"):
+        with pytest.raises(ValueError, match="Must have exactly 4 horizontal thirds"):
             OverlayDataInternal(
                 landmarks_2d=landmarks_2d,
                 midline_x=320.0,
@@ -628,7 +628,7 @@ class TestOverlayDataInternal:
             OverlayDataInternal(
                 landmarks_2d=landmarks_2d,
                 midline_x=320.0,
-                horizontal_thirds_y=[400.0, 250.0, 100.0],  # Descending
+                horizontal_thirds_y=[400.0, 300.0, 200.0, 100.0],  # Descending
                 phi_spiral_center=(320.0, 240.0)
             )
 

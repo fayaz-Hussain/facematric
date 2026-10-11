@@ -34,8 +34,8 @@ class CelebrityMatcher:
             db_path: Path to celebrity embeddings pickle file
         """
         self.db_path = db_path or settings.celebrity_db_path
-        self.full_database: Optional[Dict[str, Dict[str, Any]]] = None
-        self.celebrity_embeddings: Optional[Dict[str, np.ndarray]] = None
+        self.full_database: Dict[str, Dict[str, Any]] = {}
+        self.celebrity_embeddings: Dict[str, Any] = {}
         self.facenet_model = None
         self.confidence_threshold = settings.celebrity_confidence_threshold
         self.is_available = False
@@ -336,14 +336,20 @@ class CelebrityMatcher:
                 f"(score: {best_score:.2f}, threshold: {threshold})"
             )
             
-            # Get celebrity data from full_database
-            celeb_data = self.full_database.get(best_celebrity_name, {})
+            # Get celebrity data from celebrity_embeddings or full_database
+            celeb_data = {}
+            if self.celebrity_embeddings and isinstance(self.celebrity_embeddings.get(best_celebrity_name), dict):
+                celeb_data = self.celebrity_embeddings.get(best_celebrity_name, {})
+            elif self.full_database:
+                celeb_data = self.full_database.get(best_celebrity_name, {})
+            
+            thumbnail_url = celeb_data.get("thumbnail_url") or celeb_data.get("thumbnail_path") or ""
             
             return {
                 "name": best_celebrity_name.replace("_", " "),  # Format name
                 "confidence_score": round(best_score, 2),
                 "dataset_source": celeb_data.get("dataset_source", "Unknown"),
-                "thumbnail_url": celeb_data.get("thumbnail_url", "")
+                "thumbnail_url": thumbnail_url
             }
         else:
             logger.info(

@@ -293,13 +293,14 @@ class OverlayDataInternal:
     Attributes:
         landmarks_2d: 468 2D landmark coordinates as (x, y) pairs
         midline_x: X-coordinate of vertical midline (face symmetry axis)
-        horizontal_thirds_y: List of 3 Y-coordinates for horizontal divisions
+        horizontal_thirds_y: List of 4 Y-coordinates for horizontal divisions
+                           Values: [face_top, third_1, third_2, face_bottom]
                            Based on golden ratio divisions of face height
         phi_spiral_center: (x, y) tuple for phi spiral center (near nose bridge)
     """
     landmarks_2d: np.ndarray  # Shape: (468, 2)
     midline_x: float
-    horizontal_thirds_y: List[float]  # Should have exactly 3 values
+    horizontal_thirds_y: List[float]  # Should have exactly 4 values
     phi_spiral_center: Tuple[float, float]  # (x, y)
     
     def __post_init__(self):
@@ -308,9 +309,9 @@ class OverlayDataInternal:
             raise ValueError(
                 f"2D landmarks must have shape (468, 2), got {self.landmarks_2d.shape}"
             )
-        if len(self.horizontal_thirds_y) != 3:
+        if len(self.horizontal_thirds_y) != 4:
             raise ValueError(
-                f"Must have exactly 3 horizontal thirds, got {len(self.horizontal_thirds_y)}"
+                f"Must have exactly 4 horizontal thirds, got {len(self.horizontal_thirds_y)}"
             )
         
         # Validate horizontal thirds are in ascending order

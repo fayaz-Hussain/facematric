@@ -72,8 +72,8 @@ class AnalyzingManager {
                 this.steps[1].classList.add('active');
             }
 
-            const response = await fetch(imageData);
-            const blob = await response.blob();
+            // Convert data URL to blob
+            const blob = await this.dataUrlToBlob(imageData);
 
             const formData = new FormData();
             formData.append('file', blob, 'image.jpg');
@@ -137,6 +137,30 @@ class AnalyzingManager {
         }
         if (this.progressText) {
             this.progressText.textContent = Math.round(percent) + '%';
+        }
+    }
+
+    async dataUrlToBlob(dataUrl) {
+        /**
+         * Convert data URL to blob for sending to API.
+         * Handles both base64 and regular data URLs.
+         */
+        try {
+            // Split the data URL to get mime type and data
+            const arr = dataUrl.split(',');
+            const mime = arr[0].match(/:(.*?);/)[1];
+            const bstr = atob(arr[1]);
+            const n = bstr.length;
+            const u8arr = new Uint8Array(n);
+            
+            for (let i = 0; i < n; i++) {
+                u8arr[i] = bstr.charCodeAt(i);
+            }
+            
+            return new Blob([u8arr], { type: mime });
+        } catch (error) {
+            console.error('Error converting data URL to blob:', error);
+            throw new Error('Failed to process image data');
         }
     }
 }

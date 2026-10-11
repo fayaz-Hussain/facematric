@@ -9,6 +9,10 @@ from typing import Optional, Dict, Any
 class ErrorCode(str, Enum):
     """Standardized error codes for API responses."""
     
+    # Request/Input validation errors (0xx)
+    INVALID_REQUEST = "INVALID_REQUEST"
+    FILE_TOO_LARGE = "FILE_TOO_LARGE"
+    
     # Image-related errors (1xx)
     INVALID_IMAGE = "INVALID_IMAGE"
     POOR_QUALITY = "POOR_QUALITY"
@@ -79,6 +83,8 @@ class ProcessingError(Exception):
 
 # User-friendly error messages
 ERROR_MESSAGES = {
+    ErrorCode.INVALID_REQUEST: "Invalid request format. Please provide either a file upload or base64 image string, not both.",
+    ErrorCode.FILE_TOO_LARGE: "File size exceeds 10MB limit. Please upload a smaller image.",
     ErrorCode.INVALID_IMAGE: "Corrupt or unsupported file format. Please upload a valid image (JPEG, PNG, HEIC, WebP, BMP, or GIF).",
     ErrorCode.POOR_QUALITY: "Image quality is too low for accurate analysis. Please ensure your photo is at least 300x300 pixels, well-lit, and facing the camera directly.",
     ErrorCode.NO_IMAGE: "No image provided. Please upload or capture a photo.",

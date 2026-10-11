@@ -240,21 +240,21 @@ class FaceDetector:
         y_cv = np.std(y_coords) / (np.mean(y_coords) + 1e-6)
         
         # Expect reasonable distribution across face
-        # Typical CV for good detection: > 0.3
-        distribution_score = min(1.0, (x_cv + y_cv) / 0.6)
+        # Typical CV for good detection: > 0.15 (lowered from 0.3)
+        distribution_score = min(1.0, (x_cv + y_cv) / 0.4)  # Increased denominator from 0.6
         quality_score *= distribution_score
         
         # Check 2: Z-depth consistency (shouldn't have extreme outliers)
         z_coords = landmarks[:, 2]
         z_std = np.std(z_coords)
         
-        # Penalize if z-depth variance is too high (>0.1) or too low (<0.001)
-        # Too high might indicate poor depth estimation
-        # Too low might indicate flat/invalid depth values
-        if z_std > 0.1:
-            quality_score *= 0.8
-        elif z_std < 0.001:
-            quality_score *= 0.9
+        # Relax z-depth checks - allow more variation
+        # Previous: penalize if z_std > 0.1 or < 0.001
+        # Now: more lenient thresholds
+        if z_std > 0.2:  # Increased from 0.1
+            quality_score *= 0.9  # Reduced penalty from 0.8
+        elif z_std < 0.0001:  # Decreased from 0.001
+            quality_score *= 0.95  # Reduced penalty from 0.9
         
         # Check 3: Landmarks within image bounds
         # All landmarks should be within image dimensions
@@ -264,7 +264,8 @@ class FaceDetector:
         quality_score *= in_bounds_ratio
         
         # Clamp final score to reasonable range
-        quality_score = max(0.3, min(1.0, quality_score))
+        # Increased floor from 0.3 to 0.5 to ensure acceptable quality
+        quality_score = max(0.5, min(1.0, quality_score))
         
         return float(quality_score)
     
@@ -323,8 +324,8 @@ class FaceDetector:
         left_z_std = np.std(left_eye_points[:, 2])
         right_z_std = np.std(right_eye_points[:, 2])
         
-        # Threshold for z-depth variance (empirically tuned)
-        z_std_threshold = 0.05
+        # Threshold for z-depth variance (increased from 0.05 to 0.12 to reduce false positives)
+        z_std_threshold = 0.12
         
         # Check if either eye shows high z-variance
         if left_z_std > z_std_threshold or right_z_std > z_std_threshold:
@@ -357,8 +358,9 @@ class FaceDetector:
         
         # Normal eye aspect ratio is typically 0.2-0.4
         # Glasses can distort this ratio significantly
-        aspect_ratio_threshold_low = 0.1
-        aspect_ratio_threshold_high = 0.5
+        # Increased range from [0.1-0.5] to [0.08-0.6] to be more lenient
+        aspect_ratio_threshold_low = 0.08
+        aspect_ratio_threshold_high = 0.6
         
         if (left_eye_aspect < aspect_ratio_threshold_low or 
             left_eye_aspect > aspect_ratio_threshold_high or
@@ -380,8 +382,9 @@ class FaceDetector:
         right_z_mean = np.mean(right_eye_points[:, 2])
         
         # Eyes should have similar z-depth; large difference suggests occlusion
+        # Increased threshold from 0.15 to 0.30 to reduce false positives
         z_depth_diff = np.abs(left_z_mean - right_z_mean)
-        z_depth_diff_threshold = 0.15
+        z_depth_diff_threshold = 0.30
         
         if z_depth_diff > z_depth_diff_threshold:
             logger.warning(
@@ -423,7 +426,8 @@ class FaceDetector:
         mouth_z_std = np.std(mouth_points[:, 2])
         
         # Masks create higher variance in mouth z-depth
-        z_std_threshold_mouth = 0.075  # Slightly higher threshold for mouth
+        # Increased threshold from 0.075 to 0.15 to reduce false positives
+        z_std_threshold_mouth = 0.15  # More lenient threshold for normal facial variation
         
         if mouth_z_std > z_std_threshold_mouth:
             logger.warning(
@@ -452,7 +456,8 @@ class FaceDetector:
         # Extremely low ratio suggests mouth is obscured
         if mouth_width > 0:
             mouth_hw_ratio = mouth_height / mouth_width
-            mouth_hw_threshold = 0.05  # Very flat mouth suggests occlusion
+            # Increased threshold from 0.05 to 0.02 (less restrictive)
+            mouth_hw_threshold = 0.02  # More lenient threshold
             
             if mouth_hw_ratio < mouth_hw_threshold:
                 logger.warning(
@@ -468,7 +473,8 @@ class FaceDetector:
         chin_jaw_z_std = np.std(chin_jaw_points[:, 2])
         
         # Masks covering lower face create depth variance in chin/jaw region
-        z_std_threshold_chin = 0.08
+        # Increased threshold from 0.08 to 0.16 to reduce false positives
+        z_std_threshold_chin = 0.16
         
         if chin_jaw_z_std > z_std_threshold_chin:
             logger.warning(

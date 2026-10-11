@@ -151,27 +151,34 @@ class OverlayGenerator:
         Calculate horizontal division lines based on golden ratio.
         
         Divides face into thirds approximately following φ proportions.
+        Returns 4 values: [face_top, third_1, third_2, face_bottom]
         
         Args:
             landmarks_2d: 468 2D landmarks
         
         Returns:
-            List of 3 y-coordinates for horizontal divisions
+            List of 4 y-coordinates for horizontal divisions
         """
-        # Top and bottom of face
-        face_top_y = landmarks_2d[10][1]      # Forehead top
-        face_bottom_y = landmarks_2d[152][1]  # Chin bottom
+        # Top and bottom of face (ensure top < bottom for ascending order)
+        raw_top_y = landmarks_2d[10][1]      # Forehead top
+        raw_bottom_y = landmarks_2d[152][1]  # Chin bottom
+        
+        face_top_y = min(raw_top_y, raw_bottom_y)
+        face_bottom_y = max(raw_top_y, raw_bottom_y)
         
         face_height = face_bottom_y - face_top_y
+        if face_height <= 0:
+            face_height = 1.0
+            face_bottom_y = face_top_y + 1.0
         
         # Divide into thirds (approximate golden ratio divisions)
         # Upper third at ~38.2% (1/φ ≈ 0.618, inverse ≈ 0.382)
         # Middle third at ~61.8%
         third_1_y = face_top_y + (face_height * 0.382)
         third_2_y = face_top_y + (face_height * 0.618)
-        third_3_y = face_bottom_y
         
-        return [float(third_1_y), float(third_2_y), float(third_3_y)]
+        # Return 4 values: top, third_1, third_2, bottom
+        return [float(face_top_y), float(third_1_y), float(third_2_y), float(face_bottom_y)]
     
     def _calculate_phi_spiral_center(
         self,
