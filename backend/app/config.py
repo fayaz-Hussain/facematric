@@ -13,7 +13,7 @@ class Settings(BaseSettings):
     # API Configuration
     app_name: str = "FaceMatric API"
     app_version: str = "1.0.0"
-    allowed_origins: str = "http://localhost:5173,http://localhost:3000"
+    allowed_origins: str = "http://localhost:5173,http://127.0.0.1:5173,http://localhost:3000,http://127.0.0.1:3000"
     processing_timeout: int = 30
     
     # Server Configuration
@@ -41,7 +41,7 @@ class Settings(BaseSettings):
     phi: float = 1.618
     
     # Celebrity Matching
-    celebrity_confidence_threshold: float = 0.55
+    celebrity_confidence_threshold: float = 0.35
     
     # MediaPipe Configuration
     mediapipe_max_faces: int = 1

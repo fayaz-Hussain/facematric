@@ -7,6 +7,7 @@ Implements privacy-preserving in-memory image processing with no persistent stor
 
 from fastapi import FastAPI, UploadFile, File, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 from fastapi.responses import JSONResponse
 import asyncio
 import time
@@ -24,6 +25,7 @@ from app.models.responses import (
     OverlayData,
     GoldenRatioGuides,
     CelebrityMatch,
+    CelebrityMatchItem,
     ErrorResponse,
     HealthCheckResponse,
     SymmetryTypeEnum
@@ -62,6 +64,12 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Mount static files for celebrity thumbnails
+import os
+celebrity_dataset_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "celebrity_dataset"))
+if os.path.exists(celebrity_dataset_dir):
+    app.mount("/celebrities", StaticFiles(directory=celebrity_dataset_dir), name="celebrities")
 
 
 @app.on_event("startup")
@@ -161,6 +169,19 @@ async def analyze_face(
         # If file upload, validate file properties
         if file:
             file_bytes = await _validate_and_read_file(request_id, file)
+            # When submitted via multipart/form-data, extract include_celebrity_match from form if provided
+            content_type = request.headers.get("content-type", "")
+            if "multipart/form-data" in content_type:
+                try:
+                    form = await request.form()
+                    if "include_celebrity_match" in form:
+                        val = form["include_celebrity_match"]
+                        if isinstance(val, str):
+                            include_celebrity_match = val.strip().lower() in ("true", "1", "yes")
+                        else:
+                            include_celebrity_match = bool(val)
+                except Exception as e:
+                    logger.debug(f"[{request_id}] Failed to read form data for include_celebrity_match: {e}")
         
         try:
             # Enforce timeout
@@ -542,12 +563,40 @@ async def _process_analysis(
         # Convert celebrity match
         celebrity_match = None
         if celebrity_match_internal:
+            def normalize_thumb_url(raw_path):
+                if not raw_path:
+                    return None
+                norm_path = raw_path.replace('\\', '/')
+                if 'celebrity_dataset/' in norm_path:
+                    rel_part = norm_path.split('celebrity_dataset/')[-1]
+                    return f"/celebrities/{rel_part}"
+                elif not norm_path.startswith('http') and not norm_path.startswith('/'):
+                    return f"/celebrities/{norm_path}"
+                return norm_path
+
+            thumb_url = normalize_thumb_url(celebrity_match_internal.thumbnail_path)
+            
+            top_matches = []
+            if celebrity_match_internal.top_matches:
+                for item in celebrity_match_internal.top_matches:
+                    item_thumb = normalize_thumb_url(item.get("thumbnail_path"))
+                    top_matches.append(
+                        CelebrityMatchItem(
+                            rank=item["rank"],
+                            name=item["name"],
+                            confidence=item["confidence"],
+                            dataset_source=item.get("dataset_source"),
+                            thumbnail_url=item_thumb
+                        )
+                    )
+            
             celebrity_match = CelebrityMatch(
                 name=celebrity_match_internal.name,
                 confidence=celebrity_match_internal.confidence,
                 dataset_source=celebrity_match_internal.dataset_source,
-                thumbnail_url=celebrity_match_internal.thumbnail_path,
-                message=celebrity_match_internal.message
+                thumbnail_url=thumb_url,
+                message=celebrity_match_internal.message,
+                top_matches=top_matches
             )
         
         # === 7. Log Metadata Only (Requirement 13.4) ===

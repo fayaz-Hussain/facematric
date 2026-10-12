@@ -116,6 +116,11 @@ class FaceDetector:
             for lm in face_landmarks
         ], dtype=np.float32)
         
+        # Standard MediaPipe Face Mesh uses 468 facial mesh landmarks
+        # If model includes iris landmarks (478 points), take the standard 468 landmarks
+        if len(landmarks_array) > 468:
+            landmarks_array = landmarks_array[:468]
+        
         # Calculate average landmark confidence
         # MediaPipe Face Landmarker provides visibility and presence scores per landmark
         # Compute confidence as the average of these quality metrics
@@ -234,14 +239,16 @@ class FaceDetector:
         x_coords = landmarks[:, 0]
         y_coords = landmarks[:, 1]
         
-        # Calculate coefficient of variation for x and y coordinates
-        # Low variation indicates clustering, which suggests poor detection
-        x_cv = np.std(x_coords) / (np.mean(x_coords) + 1e-6)
-        y_cv = np.std(y_coords) / (np.mean(y_coords) + 1e-6)
+        # Calculate face bounding box dimensions relative to image size
+        face_width = np.max(x_coords) - np.min(x_coords)
+        face_height = np.max(y_coords) - np.min(y_coords)
         
-        # Expect reasonable distribution across face
-        # Typical CV for good detection: > 0.15 (lowered from 0.3)
-        distribution_score = min(1.0, (x_cv + y_cv) / 0.4)  # Increased denominator from 0.6
+        rel_face_w = face_width / (image_data.width + 1e-6)
+        rel_face_h = face_height / (image_data.height + 1e-6)
+        face_span = np.sqrt(max(0.0, rel_face_w * rel_face_h))
+        
+        # Expect face to occupy a reasonable area (> 12% scale)
+        distribution_score = min(1.0, face_span / 0.15)
         quality_score *= distribution_score
         
         # Check 2: Z-depth consistency (shouldn't have extreme outliers)
@@ -249,12 +256,10 @@ class FaceDetector:
         z_std = np.std(z_coords)
         
         # Relax z-depth checks - allow more variation
-        # Previous: penalize if z_std > 0.1 or < 0.001
-        # Now: more lenient thresholds
-        if z_std > 0.2:  # Increased from 0.1
-            quality_score *= 0.9  # Reduced penalty from 0.8
-        elif z_std < 0.0001:  # Decreased from 0.001
-            quality_score *= 0.95  # Reduced penalty from 0.9
+        if z_std > 0.25:
+            quality_score *= 0.95
+        elif z_std < 0.0001:
+            quality_score *= 0.95
         
         # Check 3: Landmarks within image bounds
         # All landmarks should be within image dimensions
@@ -264,8 +269,8 @@ class FaceDetector:
         quality_score *= in_bounds_ratio
         
         # Clamp final score to reasonable range
-        # Increased floor from 0.3 to 0.5 to ensure acceptable quality
-        quality_score = max(0.5, min(1.0, quality_score))
+        # Ensure floor of 0.65 for valid detections to prevent false-positive quality rejections
+        quality_score = max(0.65, min(1.0, quality_score))
         
         return float(quality_score)
     
@@ -439,25 +444,23 @@ class FaceDetector:
                 "Please upload a photo without face coverings for accurate analysis."
             )
         
-        # Strategy 2: Check mouth opening visibility
-        # Calculate vertical distance between upper and lower lip
-        # Upper lip center: landmark 0 (or 13)
-        # Lower lip center: landmark 17 (or 14)
-        upper_lip_y = landmarks[13][1]
-        lower_lip_y = landmarks[14][1]
+        # Strategy 2: Check mouth visibility and outer lip bounds
+        # Upper outer lip center: landmark 0
+        # Lower outer lip center: landmark 17
+        upper_lip_y = landmarks[0][1]
+        lower_lip_y = landmarks[17][1]
         mouth_height = np.abs(upper_lip_y - lower_lip_y)
         
-        # Calculate mouth width for context
+        # Calculate mouth width for context (corners 61 to 291)
         left_corner = landmarks[61][0]
         right_corner = landmarks[291][0]
         mouth_width = np.abs(right_corner - left_corner)
         
-        # Mouth height-to-width ratio should be reasonable
-        # Extremely low ratio suggests mouth is obscured
+        # Outer mouth height-to-width ratio should be reasonable
+        # Extremely low ratio (< 0.05) indicates the mouth region is obscured or flattened
         if mouth_width > 0:
             mouth_hw_ratio = mouth_height / mouth_width
-            # Increased threshold from 0.05 to 0.02 (less restrictive)
-            mouth_hw_threshold = 0.02  # More lenient threshold
+            mouth_hw_threshold = 0.04
             
             if mouth_hw_ratio < mouth_hw_threshold:
                 logger.warning(

@@ -1,217 +1,196 @@
 """
-Celebrity Database Preprocessing Script
+Celebrity Database Preprocessing Script (Tasks 12.1, 12.2, 12.3)
 
-Generates FaceNet embeddings for all celebrity images and saves them to a pickle file.
-This is a one-time preprocessing step before deployment.
+Merges Pins Face Recognition (105 Western) and Bollywood datasets (100 Bollywood),
+generates 512-dimensional FaceNet embeddings using batching and Facenet512,
+computes normalized averaged embeddings per celebrity,
+and writes to backend/data/celebrity_embeddings.pkl matching CelebrityMatcher schema:
+{
+    celebrity_name: {
+        "embedding": np.ndarray (512,),
+        "dataset_source": "Western" | "Bollywood",
+        "thumbnail_url": str,
+        "thumbnail_path": str,
+        "image_count": int
+    }
+}
 """
 
 import os
 import sys
 from pathlib import Path
 import pickle
+import cv2
 import numpy as np
-from PIL import Image
 from tqdm import tqdm
 import gc
 
-# Add parent directory to path
-sys.path.append(str(Path(__file__).parent.parent))
+os.environ["TF_USE_LEGACY_KERAS"] = "1"
+os.environ["TF_CPP_MIN_LOG_LEVEL"] = "2"
 
-from deepface import DeepFace
+# Add backend directory to path
+backend_dir = Path(__file__).resolve().parent.parent
+sys.path.append(str(backend_dir))
+
+from deepface.basemodels import Facenet512
 
 
-def load_celebrity_images(dataset_path: str) -> dict:
+def clean_celebrity_name(folder_name: str) -> str:
+    """Standardize celebrity folder name by stripping pins_ prefix and formatting."""
+    name = folder_name
+    if name.startswith("pins_"):
+        name = name[5:]
+    name = name.strip().replace(" ", "_")
+    return name
+
+
+def collect_celebrity_dataset(dataset_path: Path):
     """
-    Load all celebrity images from dataset.
-    
-    Args:
-        dataset_path: Path to celebrity_dataset directory
+    Select exactly 205 celebrities (105 Western + 100 Bollywood).
     
     Returns:
-        Dictionary mapping celebrity names to list of image paths
+        List of tuples: (celebrity_name, dataset_source, list_of_image_paths)
     """
-    dataset_dir = Path(dataset_path)
+    if not dataset_path.exists():
+        raise FileNotFoundError(f"Dataset path does not exist: {dataset_path}")
     
-    if not dataset_dir.exists():
-        raise FileNotFoundError(f"Dataset directory not found: {dataset_path}")
+    western_folders = sorted([f for f in dataset_path.iterdir() if f.is_dir() and f.name.startswith("pins_")])
+    bollywood_folders = sorted([f for f in dataset_path.iterdir() if f.is_dir() and not f.name.startswith("pins_")])
     
-    celebrities = {}
+    print(f"Found {len(western_folders)} Western folders, {len(bollywood_folders)} Bollywood folders.")
     
-    # Iterate through celebrity folders
-    for celeb_folder in sorted(dataset_dir.iterdir()):
-        if not celeb_folder.is_dir():
-            continue
-        
-        celeb_name = celeb_folder.name
-        image_files = []
-        
-        # Collect all image files
-        for ext in ['*.jpg', '*.jpeg', '*.png']:
-            image_files.extend(celeb_folder.glob(ext))
-        
-        if image_files:
-            celebrities[celeb_name] = [str(img) for img in sorted(image_files)]
+    # Task 12.3: Exactly 205 celebrities (105 Western + 100 Bollywood)
+    selected_western = western_folders[:105]
+    selected_bollywood = bollywood_folders[:100]
     
+    celebrities = []
+    
+    for folder in selected_western:
+        celeb_name = clean_celebrity_name(folder.name)
+        images = sorted(list(folder.glob("*.jpg")) + list(folder.glob("*.png")) + list(folder.glob("*.jpeg")))
+        if images:
+            celebrities.append((celeb_name, "Western", images))
+            
+    for folder in selected_bollywood:
+        celeb_name = clean_celebrity_name(folder.name)
+        images = sorted(list(folder.glob("*.jpg")) + list(folder.glob("*.png")) + list(folder.glob("*.jpeg")))
+        if images:
+            celebrities.append((celeb_name, "Bollywood", images))
+            
+    print(f"Total selected celebrities: {len(celebrities)} (Western: {len(selected_western)}, Bollywood: {len(selected_bollywood)})")
     return celebrities
 
 
-def generate_embedding(image_path: str) -> np.ndarray:
+def extract_face_batch(image_paths, max_images=10):
     """
-    Generate FaceNet embedding for a single image.
-    
-    Args:
-        image_path: Path to image file
-    
-    Returns:
-        128-dimensional embedding vector
-    
-    Raises:
-        Exception if face detection or embedding generation fails
+    Load and preprocess up to max_images images for a celebrity.
+    Resizes to (160, 160) and normalizes to [-1, 1].
     """
-    try:
-        # Load image
-        img = Image.open(image_path)
-        img_array = np.array(img)
-        
-        # Generate embedding using DeepFace
-        embedding_obj = DeepFace.represent(
-            img_path=img_array,
-            model_name="Facenet",
-            enforce_detection=True,
-            detector_backend="opencv"
-        )
-        
-        # Extract embedding
-        if isinstance(embedding_obj, list):
-            embedding = np.array(embedding_obj[0]["embedding"])
-        else:
-            embedding = np.array(embedding_obj["embedding"])
-        
-        return embedding
+    selected_paths = image_paths[:max_images]
+    batch = []
+    valid_paths = []
     
-    except Exception as e:
-        raise Exception(f"Failed to process {image_path}: {str(e)}")
-
-
-def process_celebrity(celeb_name: str, image_paths: list) -> dict:
-    """
-    Process all images for a single celebrity and average embeddings.
-    
-    Args:
-        celeb_name: Celebrity name
-        image_paths: List of image file paths
-    
-    Returns:
-        Dictionary with averaged embedding and metadata
-    """
-    embeddings = []
-    successful_images = []
-    
-    print(f"\nProcessing {celeb_name} ({len(image_paths)} images)...")
-    
-    for img_path in image_paths:
+    for p in selected_paths:
         try:
-            embedding = generate_embedding(img_path)
-            embeddings.append(embedding)
-            successful_images.append(img_path)
+            img = cv2.imread(str(p))
+            if img is None:
+                continue
+            img_rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+            img_resized = cv2.resize(img_rgb, (160, 160))
+            norm_img = (img_resized.astype(np.float32) / 127.5) - 1.0
+            batch.append(norm_img)
+            valid_paths.append(str(p))
+        except Exception:
+            continue
+            
+    if not batch:
+        return None, []
+    return np.array(batch, dtype=np.float32), valid_paths
+
+
+def process_all_celebrities(celebrities, model):
+    """Generate averaged embeddings for all celebrities."""
+    database = {}
+    failed = []
+    
+    for celeb_name, source, img_paths in tqdm(celebrities, desc="Generating embeddings"):
+        try:
+            batch, valid_paths = extract_face_batch(img_paths, max_images=10)
+            if batch is None or len(valid_paths) == 0:
+                print(f"Warning: No valid images for {celeb_name}")
+                failed.append(celeb_name)
+                continue
+                
+            # Batch inference
+            raw_embeddings = model.predict(batch, batch_size=len(batch), verbose=0)
+            
+            # Normalize each embedding
+            norms = np.linalg.norm(raw_embeddings, axis=1, keepdims=True)
+            norms = np.maximum(norms, 1e-10)
+            norm_embeddings = raw_embeddings / norms
+            
+            # Average embeddings
+            avg_embedding = np.mean(norm_embeddings, axis=0)
+            avg_norm = np.linalg.norm(avg_embedding)
+            if avg_norm > 1e-10:
+                avg_embedding = avg_embedding / avg_norm
+                
+            thumbnail_path = valid_paths[0]
+            # Create a relative thumbnail url path
+            rel_thumbnail = thumbnail_path.replace("\\", "/")
+            
+            database[celeb_name] = {
+                "embedding": avg_embedding.astype(np.float32),
+                "dataset_source": source,
+                "thumbnail_url": rel_thumbnail,
+                "thumbnail_path": rel_thumbnail,
+                "image_count": len(valid_paths)
+            }
         except Exception as e:
-            print(f"  ⚠️  Skipped {Path(img_path).name}: {str(e)}")
-    
-    if not embeddings:
-        raise Exception(f"No valid embeddings generated for {celeb_name}")
-    
-    # Average embeddings
-    avg_embedding = np.mean(embeddings, axis=0)
-    
-    # Determine dataset source
-    dataset_source = "Bollywood" if any(x in celeb_name for x in [
-        "Khan", "Kapoor", "Kumar", "Chopra", "Roshan", "Devgan", "Bachchan"
-    ]) else "Western"
-    
-    print(f"  ✓ Generated embedding from {len(embeddings)}/{len(image_paths)} images")
-    
-    return {
-        "embedding": avg_embedding,
-        "dataset_source": dataset_source,
-        "thumbnail_path": successful_images[0] if successful_images else None,
-        "image_count": len(embeddings)
-    }
+            print(f"Error processing {celeb_name}: {e}")
+            failed.append(celeb_name)
+            
+        if len(database) % 25 == 0:
+            gc.collect()
+            
+    return database, failed
 
 
 def main():
-    """Main preprocessing function."""
     print("=" * 60)
-    print("Celebrity Database Preprocessing")
+    print("Celebrity Database Preprocessing (Tasks 12.1 - 12.3)")
     print("=" * 60)
     
-    # Paths
-    script_dir = Path(__file__).parent
+    script_dir = Path(__file__).resolve().parent
     project_root = script_dir.parent.parent
     dataset_path = project_root / "celebrity_dataset"
     output_path = script_dir.parent / "data" / "celebrity_embeddings.pkl"
     
-    print(f"\nDataset path: {dataset_path}")
-    print(f"Output path: {output_path}")
+    celebrities = collect_celebrity_dataset(dataset_path)
     
-    # Load celebrity images
-    print("\n📂 Loading celebrity dataset...")
-    celebrities = load_celebrity_images(str(dataset_path))
-    print(f"Found {len(celebrities)} celebrities")
+    print("\nLoading Facenet512 model...")
+    model = Facenet512.loadModel()
+    print("Facenet512 loaded successfully.")
     
-    # Process each celebrity
-    print("\n🔄 Generating embeddings...")
-    celebrity_embeddings = {}
-    failed_celebrities = []
+    print("\nGenerating embeddings...")
+    database, failed = process_all_celebrities(celebrities, model)
     
-    for celeb_name, image_paths in tqdm(celebrities.items(), desc="Processing celebrities"):
-        try:
-            celeb_data = process_celebrity(celeb_name, image_paths)
-            celebrity_embeddings[celeb_name] = celeb_data
-            
-            # Force garbage collection to free memory
-            gc.collect()
-            
-        except Exception as e:
-            print(f"\n❌ Failed to process {celeb_name}: {str(e)}")
-            failed_celebrities.append(celeb_name)
+    print(f"\nProcessing summary:")
+    print(f"Successfully processed: {len(database)}")
+    print(f"Failed: {len(failed)}")
     
-    # Summary
-    print("\n" + "=" * 60)
-    print("Processing Complete")
-    print("=" * 60)
-    print(f"✓ Successfully processed: {len(celebrity_embeddings)} celebrities")
+    western_count = sum(1 for v in database.values() if v["dataset_source"] == "Western")
+    bollywood_count = sum(1 for v in database.values() if v["dataset_source"] == "Bollywood")
+    print(f"Western count: {western_count}")
+    print(f"Bollywood count: {bollywood_count}")
     
-    if failed_celebrities:
-        print(f"✗ Failed: {len(failed_celebrities)} celebrities")
-        for name in failed_celebrities:
-            print(f"  - {name}")
-    
-    # Count by dataset source
-    western_count = sum(1 for data in celebrity_embeddings.values() 
-                       if data["dataset_source"] == "Western")
-    bollywood_count = sum(1 for data in celebrity_embeddings.values() 
-                         if data["dataset_source"] == "Bollywood")
-    
-    print(f"\nDataset breakdown:")
-    print(f"  Western: {western_count}")
-    print(f"  Bollywood: {bollywood_count}")
-    
-    # Save to pickle
-    print(f"\n💾 Saving embeddings to {output_path}...")
     output_path.parent.mkdir(parents=True, exist_ok=True)
-    
-    with open(output_path, 'wb') as f:
-        pickle.dump(celebrity_embeddings, f, protocol=pickle.HIGHEST_PROTOCOL)
-    
-    # Verify file size
+    with open(output_path, "wb") as f:
+        pickle.dump(database, f, protocol=pickle.HIGHEST_PROTOCOL)
+        
     file_size_mb = output_path.stat().st_size / (1024 * 1024)
-    print(f"✓ Saved successfully ({file_size_mb:.2f} MB)")
-    
-    print("\n🎉 Done! Celebrity database is ready for use.")
-    print(f"\nNext steps:")
-    print(f"1. The embeddings file is at: {output_path}")
-    print(f"2. Make sure backend/.env has: CELEBRITY_DB_PATH=./data/celebrity_embeddings.pkl")
-    print(f"3. Start the backend server: uvicorn app.main:app --reload")
+    print(f"Saved celebrity embeddings to {output_path} ({file_size_mb:.2f} MB)")
+    print("Done!")
 
 
 if __name__ == "__main__":

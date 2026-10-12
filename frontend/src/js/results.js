@@ -1,4 +1,4 @@
-﻿/**
+/**
  * results.js
  * Displays real analysis results from backend
  */
@@ -75,51 +75,81 @@ class ResultsManager {
         const scoreValue = this.analysisData.golden_ratio_score;
         this.animateScoreCircle(scoreValue);
 
+        const goldenRatioElement = document.getElementById('goldenRatioValue');
+        if (goldenRatioElement) {
+            this.animateNumber(goldenRatioElement, 0, Math.round(scoreValue), 1500);
+        }
+
         const percentileValue = this.analysisData.percentile_rank;
         const percentileElement = document.getElementById('percentileValue');
         if (percentileElement) {
             this.animateNumber(percentileElement, 0, percentileValue, 1500);
         }
 
+        const percentileStatus = document.getElementById('percentileStatus');
+        if (percentileStatus && percentileValue !== undefined) {
+            percentileStatus.textContent = `Higher than ${percentileValue}% of people`;
+        }
+
         const symmetryType = this.analysisData.face_symmetry_type;
         const symmetryElement = document.getElementById('symmetryType');
-        if (symmetryElement) {
-            symmetryElement.textContent = symmetryType.toUpperCase();
+        if (symmetryElement && symmetryType) {
+            symmetryElement.textContent = symmetryType.charAt(0).toUpperCase() + symmetryType.slice(1);
+        }
+
+        const symmetryDesc = document.getElementById('symmetryDesc');
+        if (symmetryDesc && symmetryType) {
+            const descriptions = {
+                oval: 'Balanced & Proportioned',
+                rectangle: 'Strong & Defined Structure',
+                round: 'Soft & Harmonious Curves',
+                square: 'Bold & Symmetrical Jawline',
+                heart: 'Graceful & Sculpted Contour',
+                diamond: 'Dramatic & Angular Cheekbones'
+            };
+            symmetryDesc.textContent = descriptions[symmetryType.toLowerCase()] || 'Harmonious Proportions';
         }
 
         this.displayFeatureBreakdown();
-
-        if (this.analysisData.celebrity_match) {
-            this.displayCelebrityMatch();
-        }
+        this.displayCelebrityMatch();
     }
 
     displayFeatureBreakdown() {
         const features = this.analysisData.feature_breakdown;
-        const breakdownContainer = document.querySelector('.feature-breakdown') || 
-                                   document.querySelector('.features-grid') ||
-                                   document.getElementById('featuresContainer');
+        const breakdownContainer = document.getElementById('proportionsContainer') ||
+                                   document.querySelector('.proportions-list') ||
+                                   document.querySelector('.feature-breakdown') || 
+                                   document.querySelector('.features-grid');
 
         if (!breakdownContainer || !features) return;
 
         breakdownContainer.innerHTML = '';
 
-        features.forEach(feature => {
-            const featureDiv = document.createElement('div');
-            featureDiv.className = 'feature-item';
-            featureDiv.innerHTML = `
-                <div class="feature-header">
-                    <h4>${feature.feature}</h4>
-                    <span class="feature-score">${feature.score.toFixed(1)}/100</span>
+        features.forEach((feature, idx) => {
+            const rowDiv = document.createElement('div');
+            rowDiv.className = 'proportion-row';
+            const scorePct = Math.min(100, Math.max(0, Math.round(feature.score)));
+            
+            rowDiv.innerHTML = `
+                <div class="proportion-header-row">
+                    <div class="proportion-icon-wrapper">
+                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <circle cx="12" cy="12" r="8" stroke="currentColor" stroke-width="2"/>
+                            <path d="M12 8V16M8 12H16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                        </svg>
+                    </div>
+                    <span class="proportion-label">${feature.feature}</span>
                 </div>
-                <div class="feature-bar">
-                    <div class="feature-fill" style="width: ${feature.score}%"></div>
-                </div>
-                <div class="feature-details">
-                    <small>Measured: ${feature.measured_ratio.toFixed(2)} | Ideal: ${feature.ideal_ratio.toFixed(2)}</small>
+                <div class="proportion-comparison">
+                    <div class="proportion-bar-wrapper">
+                        <div class="proportion-bar">
+                            <div class="proportion-fill feature-fill" style="width: ${scorePct}%"></div>
+                        </div>
+                    </div>
+                    <span class="proportion-percentage">${scorePct}%</span>
                 </div>
             `;
-            breakdownContainer.appendChild(featureDiv);
+            breakdownContainer.appendChild(rowDiv);
         });
 
         setTimeout(() => this.animateProportionBars(), 300);
@@ -127,21 +157,74 @@ class ResultsManager {
 
     displayCelebrityMatch() {
         const celebrity = this.analysisData.celebrity_match;
-        const celebrityContainer = document.querySelector('.celebrity-match') ||
-                                   document.getElementById('celebrityMatch');
+        const nameEl = document.getElementById('celebrityName');
+        const badgeEl = document.getElementById('celebrityConfidence');
+        const subtitleEl = document.getElementById('celebritySubtitle');
+        const imageEl = document.getElementById('celebrityImage');
+        const backendBase = window.API_BASE_URL || (window.ENV && window.ENV.API_BASE_URL) || 'http://localhost:8000';
 
-        if (!celebrityContainer) return;
+        if (celebrity && celebrity.name) {
+            if (nameEl) nameEl.textContent = celebrity.name.replace(/_/g, ' ');
+            if (badgeEl && celebrity.confidence !== null && celebrity.confidence !== undefined) {
+                badgeEl.style.display = 'block';
+                badgeEl.textContent = `${Math.round(celebrity.confidence * 100)}%`;
+            }
+            if (subtitleEl) {
+                subtitleEl.textContent = `${celebrity.dataset_source || 'Celebrity'} Match`;
+            }
+            if (imageEl && celebrity.thumbnail_url) {
+                let imgUrl = celebrity.thumbnail_url;
+                if (imgUrl.startsWith('/')) {
+                    imgUrl = backendBase + imgUrl;
+                }
+                imageEl.src = encodeURI(imgUrl);
+                imageEl.alt = celebrity.name.replace(/_/g, ' ');
+            }
 
-        const matchDiv = document.createElement('div');
-        matchDiv.className = 'celebrity-match-result';
-        matchDiv.innerHTML = `
-            <h3>Celebrity Match</h3>
-            <h4>${celebrity.name}</h4>
-            <div class="confidence-badge">${(celebrity.confidence * 100).toFixed(1)}%</div>
-            <p>${celebrity.message || 'Similar facial proportions detected'}</p>
-        `;
-        celebrityContainer.innerHTML = '';
-        celebrityContainer.appendChild(matchDiv);
+            // Populate #2 to #5 matches
+            const othersContainer = document.getElementById('lookalikeOthers');
+            if (othersContainer) {
+                othersContainer.innerHTML = '';
+                const otherMatches = (celebrity.top_matches && celebrity.top_matches.length > 1)
+                    ? celebrity.top_matches.slice(1, 5)
+                    : [];
+
+                otherMatches.forEach(match => {
+                    let matchImg = match.thumbnail_url || '';
+                    if (matchImg && matchImg.startsWith('/')) {
+                        matchImg = backendBase + matchImg;
+                    }
+                    const safeImgSrc = matchImg ? encodeURI(matchImg) : 'https://via.placeholder.com/40';
+                    const itemDiv = document.createElement('div');
+                    itemDiv.className = 'lookalike-item';
+                    itemDiv.innerHTML = `
+                        <span class="lookalike-item-rank">${match.rank}</span>
+                        <div class="lookalike-item-image-wrapper">
+                            <img src="${safeImgSrc}" 
+                                 alt="${match.name}" 
+                                 class="lookalike-item-image"
+                                 onerror="this.onerror=null;this.src='https://via.placeholder.com/40';"/>
+                        </div>
+                        <div class="lookalike-item-info">
+                            <span class="lookalike-item-name">${match.name}</span>
+                            <span class="lookalike-item-match">${Math.round(match.confidence * 100)}%</span>
+                        </div>
+                    `;
+                    othersContainer.appendChild(itemDiv);
+                });
+            }
+        } else if (celebrity && celebrity.message) {
+            if (nameEl) nameEl.textContent = 'No Match Found';
+            if (badgeEl) badgeEl.style.display = 'none';
+            if (subtitleEl) subtitleEl.textContent = celebrity.message;
+            if (imageEl) {
+                imageEl.src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="150" height="150" viewBox="0 0 24 24" fill="none" stroke="%2340CCA2" stroke-width="1.5"><circle cx="12" cy="8" r="4"/><path d="M6 20v-2a6 6 0 0 1 12 0v2"/></svg>';
+            }
+            const othersContainer = document.getElementById('lookalikeOthers');
+            if (othersContainer) {
+                othersContainer.innerHTML = '';
+            }
+        }
     }
 
     animateScoreCircle(score) {
@@ -186,63 +269,91 @@ class ResultsManager {
             bar.style.width = '0%';
             setTimeout(() => {
                 bar.style.width = originalWidth;
-            }, index * 100);
+            }, index * 80);
         });
     }
 
     drawOverlay() {
-        if (!this.ctx || !this.analysisData || !this.analysisData.overlay_data) return;
+        if (!this.ctx || !this.analysisData || !this.analysisData.overlay_data || !this.analyzedImage) return;
 
         const canvas = this.overlayCanvas;
+        const img = this.analyzedImage;
+        
+        // Ensure canvas dimensions match rendered image dimensions
+        const rect = img.getBoundingClientRect();
+        const displayWidth = img.clientWidth || canvas.parentElement.offsetWidth;
+        const displayHeight = img.clientHeight || canvas.parentElement.offsetHeight;
+
+        canvas.width = displayWidth;
+        canvas.height = displayHeight;
         this.ctx.clearRect(0, 0, canvas.width, canvas.height);
 
         const overlayData = this.analysisData.overlay_data;
         const landmarks = overlayData.landmarks;
         const guides = overlayData.golden_ratio_guides;
 
+        // Landmarks coordinates are in pre-processed image dimensions (max 640px)
+        const naturalWidth = img.naturalWidth || displayWidth;
+        const naturalHeight = img.naturalHeight || displayHeight;
+        const scaleX = displayWidth / naturalWidth;
+        const scaleY = displayHeight / naturalHeight;
+
         if (landmarks && landmarks.length > 0) {
-            this.drawLandmarks(landmarks);
+            this.drawLandmarks(landmarks, scaleX, scaleY);
         }
 
         if (guides) {
-            this.drawGoldenRatioGuides(guides);
+            this.drawGoldenRatioGuides(guides, scaleX, scaleY);
         }
     }
 
-    drawLandmarks(landmarks) {
+    drawLandmarks(landmarks, scaleX = 1, scaleY = 1) {
         if (!this.ctx) return;
 
         this.ctx.fillStyle = 'rgba(64, 204, 162, 0.9)';
-        this.ctx.lineWidth = 2;
+        this.ctx.lineWidth = 1.5;
 
         landmarks.forEach(([x, y]) => {
             this.ctx.beginPath();
-            this.ctx.arc(x, y, 3, 0, 2 * Math.PI);
+            this.ctx.arc(x * scaleX, y * scaleY, 2.5, 0, 2 * Math.PI);
             this.ctx.fill();
         });
     }
 
-    drawGoldenRatioGuides(guides) {
+    drawGoldenRatioGuides(guides, scaleX = 1, scaleY = 1) {
         if (!this.ctx) return;
 
-        this.ctx.strokeStyle = 'rgba(64, 204, 162, 0.5)';
-        this.ctx.lineWidth = 1;
-        this.ctx.setLineDash([8, 8]);
+        this.ctx.strokeStyle = 'rgba(64, 204, 162, 0.6)';
+        this.ctx.lineWidth = 1.5;
+        this.ctx.setLineDash([6, 6]);
 
-        if (guides.midline) {
+        const midline = guides.vertical_midline !== undefined ? guides.vertical_midline : guides.midline;
+        if (midline !== undefined && midline !== null) {
+            const mx = midline * scaleX;
             this.ctx.beginPath();
-            this.ctx.moveTo(guides.midline, 0);
-            this.ctx.lineTo(guides.midline, this.overlayCanvas.height);
+            this.ctx.moveTo(mx, 0);
+            this.ctx.lineTo(mx, this.overlayCanvas.height);
             this.ctx.stroke();
         }
 
-        if (guides.horizontal_thirds && guides.horizontal_thirds.length > 0) {
-            guides.horizontal_thirds.forEach(y => {
+        const thirds = guides.horizontal_thirds;
+        if (thirds && thirds.length > 0) {
+            thirds.forEach(y => {
+                const my = y * scaleY;
                 this.ctx.beginPath();
-                this.ctx.moveTo(0, y);
-                this.ctx.lineTo(this.overlayCanvas.width, y);
+                this.ctx.moveTo(0, my);
+                this.ctx.lineTo(this.overlayCanvas.width, my);
                 this.ctx.stroke();
             });
+        }
+
+        if (guides.phi_spiral_center && guides.phi_spiral_center.length >= 2) {
+            const [cx, cy] = guides.phi_spiral_center;
+            this.ctx.setLineDash([]);
+            this.ctx.strokeStyle = 'rgba(255, 215, 0, 0.8)';
+            this.ctx.beginPath();
+            this.ctx.arc(cx * scaleX, cy * scaleY, 6, 0, 2 * Math.PI);
+            this.ctx.stroke();
         }
 
         this.ctx.setLineDash([]);

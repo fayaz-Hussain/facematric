@@ -177,8 +177,10 @@ class CelebrityMatcher:
                     continue
                 
                 # All validations passed - add to results
-                validated_embeddings[celebrity_name] = embedding
-                self.full_database[celebrity_name] = celeb_data
+                celeb_entry = dict(celeb_data)
+                celeb_entry["embedding"] = embedding
+                validated_embeddings[celebrity_name] = celeb_entry
+                self.full_database[celebrity_name] = celeb_entry
                 
             except Exception as e:
                 logger.warning(
@@ -224,11 +226,11 @@ class CelebrityMatcher:
             return True
         
         try:
-            from deepface import DeepFace
-            # Test model loading
-            DeepFace.build_model("Facenet")
-            self.facenet_model = DeepFace
-            logger.info("FaceNet model initialized successfully")
+            import os
+            os.environ["TF_USE_LEGACY_KERAS"] = "1"
+            from deepface.basemodels import Facenet512
+            self.facenet_model = Facenet512.loadModel()
+            logger.info("FaceNet512 model initialized successfully")
             return True
         except Exception as e:
             logger.error(f"Failed to initialize FaceNet: {str(e)}")
@@ -379,18 +381,31 @@ class CelebrityMatcher:
         # Our ImageData already has this format
         
         try:
-            # Use DeepFace to generate embedding
-            embedding_obj = self.facenet_model.represent(
-                img_path=image_data.array,
-                model_name="Facenet",
-                enforce_detection=False  # We already detected face
-            )
+            import cv2
+            # Resize image to (160, 160) and normalize to [-1, 1]
+            rgb_img = image_data.array
+            resized = cv2.resize(rgb_img, (160, 160))
+            normalized = (resized.astype(np.float32) / 127.5) - 1.0
+            batch = np.expand_dims(normalized, axis=0)
             
-            # Extract embedding vector
-            if isinstance(embedding_obj, list) and len(embedding_obj) > 0:
-                embedding = np.array(embedding_obj[0]["embedding"])
+            # Predict 512-D embedding
+            if hasattr(self.facenet_model, "predict"):
+                pred = self.facenet_model.predict(batch, verbose=0)
+                embedding = np.array(pred[0], dtype=np.float32)
             else:
-                embedding = np.array(embedding_obj["embedding"])
+                embedding_obj = self.facenet_model.represent(
+                    img_path=image_data.array,
+                    model_name="Facenet",
+                    enforce_detection=False
+                )
+                if isinstance(embedding_obj, list) and len(embedding_obj) > 0:
+                    embedding = np.array(embedding_obj[0]["embedding"])
+                else:
+                    embedding = np.array(embedding_obj["embedding"])
+            
+            norm = np.linalg.norm(embedding)
+            if norm > 1e-10:
+                embedding = embedding / norm
             
             logger.debug(f"Generated embedding with shape: {embedding.shape}")
             
@@ -481,37 +496,49 @@ class CelebrityMatcher:
                 message="No close match found in our dataset"
             )
         
-        # Get best match (first in sorted list)
-        best_celebrity, best_similarity = rankings[0]
-        best_data = self.celebrity_embeddings[best_celebrity]
+        # Extract top 5 matches
+        top_5_rankings = rankings[:5]
+        top_matches_list = []
         
-        # Apply confidence threshold
-        if best_similarity >= self.confidence_threshold:
-            logger.info(
-                f"Celebrity match found: {best_celebrity} "
-                f"(confidence: {best_similarity:.2f})"
-            )
+        # Calculate human-intuitive similarity percentage:
+        # In 512-D FaceNet embeddings, cosine similarities between different faces range ~0.0 to ~0.50.
+        # We scale cosine similarity to an intuitive 70-95% look-alike match rating.
+        best_celebrity, best_similarity = top_5_rankings[0]
+        c1 = max(0.60, min(0.96, 0.50 + float(best_similarity)))
+        last_conf = c1
+        
+        for rank_idx, (celeb_name, sim) in enumerate(top_5_rankings, start=1):
+            celeb_data = self.celebrity_embeddings.get(celeb_name, {})
+            if rank_idx == 1:
+                conf = round(c1, 2)
+            else:
+                raw_scaled = 0.50 + float(sim)
+                max_allowed = last_conf - 0.02
+                conf = round(max(0.55, min(max_allowed, raw_scaled)), 2)
+            last_conf = conf
             
-            return CelebrityMatchInternal(
-                name=best_celebrity.replace("_", " "),  # Format name
-                confidence=round(best_similarity, 2),
-                dataset_source=best_data.get("dataset_source", "Unknown"),
-                thumbnail_path=best_data.get("thumbnail_path", ""),
-                message=None
-            )
-        else:
-            logger.info(
-                f"No confident match found. Best: {best_celebrity} "
-                f"({best_similarity:.2f}, threshold: {self.confidence_threshold})"
-            )
-            
-            return CelebrityMatchInternal(
-                name=None,
-                confidence=None,
-                dataset_source=None,
-                thumbnail_path=None,
-                message="No close match found in our dataset"
-            )
+            top_matches_list.append({
+                "rank": rank_idx,
+                "name": celeb_name.replace("_", " "),
+                "confidence": conf,
+                "dataset_source": celeb_data.get("dataset_source", "Unknown"),
+                "thumbnail_path": celeb_data.get("thumbnail_path", "")
+            })
+        
+        logger.info(
+            f"Celebrity top match: {best_celebrity} "
+            f"(cosine: {best_similarity:.2f}, calibrated: {c1*100:.1f}%), "
+            f"top 5 matches generated: {len(top_matches_list)}"
+        )
+        
+        return CelebrityMatchInternal(
+            name=top_matches_list[0]["name"],
+            confidence=top_matches_list[0]["confidence"],
+            dataset_source=top_matches_list[0]["dataset_source"],
+            thumbnail_path=top_matches_list[0]["thumbnail_path"],
+            message=None,
+            top_matches=top_matches_list
+        )
     
     
 # Global instance (lazy-loaded)

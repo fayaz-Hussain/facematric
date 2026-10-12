@@ -264,6 +264,7 @@ class CelebrityMatchInternal:
     dataset_source: Optional[str] = None
     thumbnail_path: Optional[str] = None
     message: Optional[str] = None
+    top_matches: Optional[List[dict]] = None
     
     def __post_init__(self):
         """Validate celebrity match data."""

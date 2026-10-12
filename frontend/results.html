@@ -231,8 +231,8 @@
                             <ellipse cx="50" cy="70" rx="32" ry="48" stroke="var(--accent-teal)" stroke-width="2.5" fill="var(--accent-teal-soft)"/>
                         </svg>
                     </div>
-                    <div class="face-shape-name">Oval</div>
-                    <div class="face-shape-desc">Balanced & Proportioned</div>
+                    <div class="face-shape-name" id="symmetryType">Oval</div>
+                    <div class="face-shape-desc" id="symmetryDesc">Balanced & Proportioned</div>
                 </div>
 
                 <!-- Golden Ratio Score Card -->
@@ -245,7 +245,7 @@
                         </svg>
                     </div>
                     <div class="golden-ratio-value-container">
-                        <span class="golden-ratio-value">84</span>
+                        <span class="golden-ratio-value" id="goldenRatioValue">84</span>
                         <span class="golden-ratio-max">/100</span>
                     </div>
                     <div class="golden-ratio-wave">
@@ -253,7 +253,7 @@
                             <path d="M0 20 Q 25 10, 50 20 T 100 20 T 150 20 T 200 20" stroke="var(--accent-teal)" stroke-width="2" fill="none" opacity="0.5"/>
                         </svg>
                     </div>
-                    <div class="golden-ratio-status">Well Proportioned</div>
+                    <div class="golden-ratio-status" id="percentileStatus">Top 15% Symmetry</div>
                 </div>
 
                 <!-- Quality Checks Card -->
@@ -350,7 +350,7 @@
                             <span>Golden Ratio (φ=1.618)</span>
                         </div>
                     </div>
-                    <div class="proportions-list">
+                    <div class="proportions-list" id="proportionsContainer">
                         <div class="proportion-row">
                             <div class="proportion-header-row">
                                 <div class="proportion-icon-wrapper">
@@ -475,53 +475,14 @@
                     <div class="lookalike-top-match">
                         <div class="lookalike-rank-badge">#1</div>
                         <div class="lookalike-image-container">
-                            <img src="https://via.placeholder.com/150" alt="Top Match" class="lookalike-image"/>
-                            <div class="lookalike-badge">92%</div>
+                            <img id="celebrityImage" src="https://via.placeholder.com/150" alt="Top Match" class="lookalike-image" onerror="this.onerror=null;this.src='https://via.placeholder.com/150';"/>
+                            <div class="lookalike-badge" id="celebrityConfidence">92%</div>
                         </div>
-                        <div class="lookalike-name">Tom Holland</div>
-                        <div class="lookalike-subtitle">Match Confidence</div>
+                        <div class="lookalike-name" id="celebrityName">Tom Holland</div>
+                        <div class="lookalike-subtitle" id="celebritySubtitle">Match Confidence</div>
                     </div>
-                    <div class="lookalike-others">
-                        <div class="lookalike-item">
-                            <span class="lookalike-item-rank">2</span>
-                            <div class="lookalike-item-image-wrapper">
-                                <img src="https://via.placeholder.com/40" alt="Second Match" class="lookalike-item-image"/>
-                            </div>
-                            <div class="lookalike-item-info">
-                                <span class="lookalike-item-name">Timothée Chalamet</span>
-                                <span class="lookalike-item-match">88%</span>
-                            </div>
-                        </div>
-                        <div class="lookalike-item">
-                            <span class="lookalike-item-rank">3</span>
-                            <div class="lookalike-item-image-wrapper">
-                                <img src="https://via.placeholder.com/40" alt="Third Match" class="lookalike-item-image"/>
-                            </div>
-                            <div class="lookalike-item-info">
-                                <span class="lookalike-item-name">Shawn Mendes</span>
-                                <span class="lookalike-item-match">85%</span>
-                            </div>
-                        </div>
-                        <div class="lookalike-item">
-                            <span class="lookalike-item-rank">4</span>
-                            <div class="lookalike-item-image-wrapper">
-                                <img src="https://via.placeholder.com/40" alt="Fourth Match" class="lookalike-item-image"/>
-                            </div>
-                            <div class="lookalike-item-info">
-                                <span class="lookalike-item-name">Andrew Garfield</span>
-                                <span class="lookalike-item-match">82%</span>
-                            </div>
-                        </div>
-                        <div class="lookalike-item">
-                            <span class="lookalike-item-rank">5</span>
-                            <div class="lookalike-item-image-wrapper">
-                                <img src="https://via.placeholder.com/40" alt="Fifth Match" class="lookalike-item-image"/>
-                            </div>
-                            <div class="lookalike-item-info">
-                                <span class="lookalike-item-name">Tom Hardy</span>
-                                <span class="lookalike-item-match">80%</span>
-                            </div>
-                        </div>
+                    <div class="lookalike-others" id="lookalikeOthers">
+                        <!-- Populated dynamically with ranks #2 to #5 -->
                     </div>
                 </div>
             </div>

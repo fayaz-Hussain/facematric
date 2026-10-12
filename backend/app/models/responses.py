@@ -111,6 +111,15 @@ class OverlayData(BaseModel):
     )
 
 
+class CelebrityMatchItem(BaseModel):
+    """Individual celebrity match in ranked look-alike results."""
+    rank: int = Field(..., description="Rank position (1 to 5)", example=1)
+    name: str = Field(..., description="Celebrity name", example="Shah Rukh Khan")
+    confidence: float = Field(..., description="Match confidence score (0.0-1.0)", example=0.92)
+    dataset_source: Optional[str] = Field(None, description="Dataset source", example="Bollywood")
+    thumbnail_url: Optional[str] = Field(None, description="URL to thumbnail image")
+
+
 class CelebrityMatch(BaseModel):
     """Celebrity look-alike match result."""
     
@@ -144,6 +153,11 @@ class CelebrityMatch(BaseModel):
         None,
         description="Message when no match found or feature unavailable",
         example="No close match found in our dataset"
+    )
+
+    top_matches: Optional[List[CelebrityMatchItem]] = Field(
+        default_factory=list,
+        description="Top 5 ranked celebrity matches"
     )
     
     class Config:
@@ -200,9 +214,9 @@ class AnalysisResultModel(BaseModel):
     
     feature_breakdown: List[FeatureBreakdownItem] = Field(
         ...,
-        description="Detailed scores for each of the 8 facial ratios",
+        description="Detailed scores for each of the facial ratios (including bilateral splits for asymmetry)",
         min_length=8,
-        max_length=8
+        max_length=16
     )
     
     overlay_data: OverlayData = Field(
