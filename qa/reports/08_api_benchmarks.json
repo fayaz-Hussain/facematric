@@ -1,0 +1,23 @@
+{
+  "n_runs": 15,
+  "scoring_path_ms": {
+    "p50": 282.2,
+    "p95": 371.4,
+    "mean": 293.7,
+    "min": 255.9,
+    "max": 391.9,
+    "prd_target_ms": 3000,
+    "target_met": true
+  },
+  "full_path_ms": {
+    "p50": 515.9,
+    "p95": 3512.8,
+    "mean": 1174.3,
+    "min": 444.6,
+    "max": 10239.6
+  },
+  "celebrity_overhead_ms": {
+    "p50": 233.6,
+    "p95": 3141.4
+  }
+}

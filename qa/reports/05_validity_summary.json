@@ -1,0 +1,129 @@
+{
+  "repeatability": {
+    "n_identities": 15,
+    "total_photos": 72,
+    "pooled_within_sd": 3.136,
+    "mean_person_sd": 2.97,
+    "median_person_sd": 2.72,
+    "max_person_sd": 4.92,
+    "pct_meeting_target_sd_le_3": 60.0,
+    "per_ratio_sd": {
+      "Face Length \u00f7 Face Width": 2.86,
+      "Cheekbone to Jaw Width": 1.81,
+      "Eye Spacing \u00f7 Eye Width": 4.22,
+      "Nose Width \u00f7 Mouth Width": 2.93,
+      "Mouth Width \u00f7 Face Width": 3.24,
+      "Vertical Thirds": 9.32,
+      "Eye-Eyebrow Distance \u00f7 Eye Height": 19.97,
+      "Chin Width \u00f7 Nose Width": 9.24
+    }
+  },
+  "variance_decomposition": {
+    "K_identities": 15,
+    "N_photos": 72,
+    "k0": 4.8,
+    "MSB": 24.919,
+    "MSW": 10.084,
+    "F_statistic": 2.471,
+    "p_value": 0.008365743549016202,
+    "sigma2_between": 3.093,
+    "sigma2_within": 10.084,
+    "pct_var_between": 23.5,
+    "pct_var_within": 76.5,
+    "ICC1": 0.2347
+  },
+  "percentile_calibration": {
+    "engine_distribution": "Normal(mu=70.0, sigma=10.0)",
+    "empirical_distribution": "Normal(mu=52.41, sigma=4.62)",
+    "comparisons": [
+      {
+        "score": 55,
+        "engine_percentile": 7,
+        "empirical_percentile": 71,
+        "discrepancy": -64,
+        "note": "Engine labels below-average (7th pct); actually above average (71st pct)!"
+      },
+      {
+        "score": 60,
+        "engine_percentile": 16,
+        "empirical_percentile": 95,
+        "discrepancy": -79,
+        "note": "Engine labels low-tier (16th pct); actually top 5% of population (95th pct)!"
+      },
+      {
+        "score": 65,
+        "engine_percentile": 31,
+        "empirical_percentile": 100,
+        "discrepancy": -69,
+        "note": "Engine labels bottom third (31st pct); actually top 0.3% (99.7th pct)!"
+      },
+      {
+        "score": 70,
+        "engine_percentile": 50,
+        "empirical_percentile": 100,
+        "discrepancy": -50,
+        "note": "Engine median (50th pct); practically impossible in real faces (>99.99th pct)!"
+      },
+      {
+        "score": 75,
+        "engine_percentile": 69,
+        "empirical_percentile": 100,
+        "discrepancy": -31,
+        "note": "Biologically unreachable; engine ranks 69\u201384%, reality is 100.0%!"
+      },
+      {
+        "score": 80,
+        "engine_percentile": 84,
+        "empirical_percentile": 100,
+        "discrepancy": -16,
+        "note": "Biologically unreachable; engine ranks 69\u201384%, reality is 100.0%!"
+      }
+    ],
+    "engine_slope_at_median": 3.99,
+    "empirical_slope_at_median": 8.64
+  },
+  "face_shape_rules": [
+    {
+      "shape": "HEART",
+      "priority": 1,
+      "condition": "forehead_width > jaw_width * 1.20",
+      "threshold": "forehead / jaw > 1.20"
+    },
+    {
+      "shape": "DIAMOND",
+      "priority": 2,
+      "condition": "cheekbone_width > max(forehead_width, jaw_width) * 1.10",
+      "threshold": "cheekbone / max(forehead, jaw) > 1.10"
+    },
+    {
+      "shape": "OVAL",
+      "priority": 3,
+      "condition": "1.40 <= length_width_ratio <= 1.60 and jawline_angle > 140.0\u00b0",
+      "threshold": "ratio in [1.40, 1.60], angle > 140.0\u00b0"
+    },
+    {
+      "shape": "RECTANGLE",
+      "priority": 4,
+      "condition": "length_width_ratio > 1.60 and jawline_angle < 130.0\u00b0",
+      "threshold": "ratio > 1.60, angle < 130.0\u00b0"
+    },
+    {
+      "shape": "ROUND",
+      "priority": 5,
+      "condition": "0.90 <= length_width_ratio <= 1.10 and jawline_angle > 140.0\u00b0",
+      "threshold": "ratio in [0.90, 1.10], angle > 140.0\u00b0"
+    },
+    {
+      "shape": "SQUARE",
+      "priority": 6,
+      "condition": "0.90 <= length_width_ratio <= 1.10 and jawline_angle < 130.0\u00b0",
+      "threshold": "ratio in [0.90, 1.10], angle < 130.0\u00b0"
+    },
+    {
+      "shape": "OVAL (Default fallback)",
+      "priority": 7,
+      "condition": "None of the above match (borderline/unclassified)",
+      "threshold": "Fallback catch-all"
+    }
+  ]
+}

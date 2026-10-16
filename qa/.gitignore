@@ -1,0 +1,8 @@
+.venv/
+__pycache__/
+*.pyc
+*.pkl
+*.npy
+*.npz
+*.h5
+data/

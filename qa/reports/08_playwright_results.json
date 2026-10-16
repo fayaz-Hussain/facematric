@@ -1,0 +1,724 @@
+{
+  "config": {
+    "argv": [
+      "C:\\Program Files\\nodejs\\node.exe",
+      "C:\\Users\\FayazHussain\\Desktop\\FaceMatric\\qa\\e2e\\node_modules\\@playwright\\test\\cli.js",
+      "test"
+    ],
+    "configFile": "C:\\Users\\FayazHussain\\Desktop\\FaceMatric\\qa\\e2e\\playwright.config.js",
+    "rootDir": "C:/Users/FayazHussain/Desktop/FaceMatric/qa/e2e/tests",
+    "failOnFlakyTests": false,
+    "forbidOnly": false,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 2
+    },
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "C:/Users/FayazHussain/Desktop/FaceMatric/qa/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 2
+        },
+        "id": "desktop-chrome",
+        "name": "desktop-chrome",
+        "testDir": "C:/Users/FayazHussain/Desktop/FaceMatric/qa/e2e/tests",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 30000
+      },
+      {
+        "outputDir": "C:/Users/FayazHussain/Desktop/FaceMatric/qa/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 2
+        },
+        "id": "mobile-chrome",
+        "name": "mobile-chrome",
+        "testDir": "C:/Users/FayazHussain/Desktop/FaceMatric/qa/e2e/tests",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 30000
+      }
+    ],
+    "filteredProjects": [
+      {
+        "grep": {},
+        "grepInvert": null,
+        "outputDir": "C:\\Users\\FayazHussain\\Desktop\\FaceMatric\\qa\\e2e\\test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 2
+        },
+        "name": "desktop-chrome",
+        "testDir": "C:\\Users\\FayazHussain\\Desktop\\FaceMatric\\qa\\e2e\\tests",
+        "snapshotDir": "C:\\Users\\FayazHussain\\Desktop\\FaceMatric\\qa\\e2e\\tests",
+        "testIgnore": [],
+        "testMatch": "**/*.@(spec|test).?(c|m)[jt]s?(x)",
+        "timeout": 30000,
+        "use": {
+          "baseURL": "http://localhost:3000",
+          "trace": "on-first-retry",
+          "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/156.0.8078.4 Safari/537.36",
+          "viewport": {
+            "width": 1280,
+            "height": 800
+          },
+          "screen": {
+            "width": 1920,
+            "height": 1080
+          },
+          "deviceScaleFactor": 1,
+          "isMobile": false,
+          "hasTouch": false,
+          "defaultBrowserType": "chromium"
+        },
+        "dependencies": [],
+        "ignoreSnapshots": false,
+        "__projectId": "desktop-chrome"
+      },
+      {
+        "grep": {},
+        "grepInvert": null,
+        "outputDir": "C:\\Users\\FayazHussain\\Desktop\\FaceMatric\\qa\\e2e\\test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 2
+        },
+        "name": "mobile-chrome",
+        "testDir": "C:\\Users\\FayazHussain\\Desktop\\FaceMatric\\qa\\e2e\\tests",
+        "snapshotDir": "C:\\Users\\FayazHussain\\Desktop\\FaceMatric\\qa\\e2e\\tests",
+        "testIgnore": [],
+        "testMatch": "**/*.@(spec|test).?(c|m)[jt]s?(x)",
+        "timeout": 30000,
+        "use": {
+          "baseURL": "http://localhost:3000",
+          "trace": "on-first-retry",
+          "userAgent": "Mozilla/5.0 (Linux; Android 11; Pixel 5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/156.0.8078.4 Mobile Safari/537.36",
+          "viewport": {
+            "width": 375,
+            "height": 667
+          },
+          "screen": {
+            "width": 393,
+            "height": 851
+          },
+          "deviceScaleFactor": 2.75,
+          "isMobile": true,
+          "hasTouch": true,
+          "defaultBrowserType": "chromium"
+        },
+        "dependencies": [],
+        "ignoreSnapshots": false,
+        "__projectId": "mobile-chrome"
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      [
+        "list",
+        null
+      ],
+      [
+        "json",
+        {
+          "outputFile": "../reports/08_playwright_results.json"
+        }
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "default",
+    "updateSourceMethod": "patch",
+    "version": "1.64.1",
+    "workers": 4,
+    "webServer": null
+  },
+  "suites": [
+    {
+      "title": "frontend.spec.js",
+      "file": "frontend.spec.js",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "Frontend E2E Integration Suite",
+          "file": "frontend.spec.js",
+          "line": 66,
+          "column": 6,
+          "specs": [
+            {
+              "title": "Displayed values on Results screen equal API response",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "desktop-chrome",
+                  "projectName": "desktop-chrome",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 2550,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-14T22:44:22.511Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "b8927c7c7abd922a0b01-5d2440252f5dea4e8b5f",
+              "file": "frontend.spec.js",
+              "line": 68,
+              "column": 3
+            },
+            {
+              "title": "Overlay alignment within 2 px of image boundary at two viewport sizes",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "desktop-chrome",
+                  "projectName": "desktop-chrome",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 590,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-14T22:44:25.258Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "b8927c7c7abd922a0b01-8bea7044cb1c0a42e720",
+              "file": "frontend.spec.js",
+              "line": 108,
+              "column": 3
+            },
+            {
+              "title": "Error screen displays message and working Try Again on analysis failure",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "desktop-chrome",
+                  "projectName": "desktop-chrome",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 827,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-14T22:44:25.891Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "b8927c7c7abd922a0b01-358d2a484625168a1186",
+              "file": "frontend.spec.js",
+              "line": 139,
+              "column": 3
+            },
+            {
+              "title": "PRD disclaimer is present on every screen (Expected failure: FM-BUG-012)",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [
+                    {
+                      "type": "fail",
+                      "description": "FM-BUG-012: The PRD Section 15 disclaimer is missing from analyzing.html and diverges in index/results.",
+                      "location": {
+                        "file": "C:\\Users\\FayazHussain\\Desktop\\FaceMatric\\qa\\e2e\\tests\\frontend.spec.js",
+                        "line": 173,
+                        "column": 10
+                      }
+                    }
+                  ],
+                  "expectedStatus": "failed",
+                  "projectId": "desktop-chrome",
+                  "projectName": "desktop-chrome",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "failed",
+                      "duration": 320,
+                      "error": {
+                        "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoContain\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // indexOf\u001b[22m\n\nExpected substring: \u001b[32m\"This tool analyzes geometric facial proportions for educational purposes. Scores do not reflect beauty, worth, or health. Results are influenced by photo angle and quality.\"\u001b[39m\nReceived string:    \u001b[31m\"······················································································································································································································································································································································································································································································································\u001b[39m\n\u001b[31m                FaceMetric\u001b[39m\n\u001b[31m                Facial Symmetry & Golden Ratio Analysis·······························\u001b[39m\n\u001b[31m            About Project·············\u001b[39m\n\u001b[31m                ☀️·················\u001b[39m\n\u001b[31m                🌙·····································································\u001b[39m\n\u001b[31m                SCIENCE. SYMMETRY. YOU.···························\u001b[39m\n\u001b[31m                Discover Your\u001b[39m\n\u001b[31m                Facial Geometry···························\u001b[39m\n\u001b[31m                Upload an image to receive a comprehensive, scientific analysis of your facial proportions, symmetry, and alignment with the Golden Ratio using advanced AI diagnostics.······································································································································································\u001b[39m\n\u001b[31m                Upload a Photo or Take a Picture\u001b[39m\n\u001b[31m                JPG, PNG, WEBP • Maximum 10MB······················································································································\u001b[39m\n\u001b[31m                        Upload Image······················································································································································\u001b[39m\n\u001b[31m                        Use Camera···························································································································\u001b[39m\n\u001b[31m                    Your image is processed securely and is not stored.··························································································································································\u001b[39m\n\u001b[31m                This analysis is based on facial geometry and proportions, not skin color, ethnicity, or beauty standards.························································\u001b[39m\n\u001b[31m\"\u001b[39m",
+                        "stack": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoContain\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // indexOf\u001b[22m\n\nExpected substring: \u001b[32m\"This tool analyzes geometric facial proportions for educational purposes. Scores do not reflect beauty, worth, or health. Results are influenced by photo angle and quality.\"\u001b[39m\nReceived string:    \u001b[31m\"······················································································································································································································································································································································································································································································································\u001b[39m\n\u001b[31m                FaceMetric\u001b[39m\n\u001b[31m                Facial Symmetry & Golden Ratio Analysis·······························\u001b[39m\n\u001b[31m            About Project·············\u001b[39m\n\u001b[31m                ☀️·················\u001b[39m\n\u001b[31m                🌙·····································································\u001b[39m\n\u001b[31m                SCIENCE. SYMMETRY. YOU.···························\u001b[39m\n\u001b[31m                Discover Your\u001b[39m\n\u001b[31m                Facial Geometry···························\u001b[39m\n\u001b[31m                Upload an image to receive a comprehensive, scientific analysis of your facial proportions, symmetry, and alignment with the Golden Ratio using advanced AI diagnostics.······································································································································································\u001b[39m\n\u001b[31m                Upload a Photo or Take a Picture\u001b[39m\n\u001b[31m                JPG, PNG, WEBP • Maximum 10MB······················································································································\u001b[39m\n\u001b[31m                        Upload Image······················································································································································\u001b[39m\n\u001b[31m                        Use Camera···························································································································\u001b[39m\n\u001b[31m                    Your image is processed securely and is not stored.··························································································································································\u001b[39m\n\u001b[31m                This analysis is based on facial geometry and proportions, not skin color, ethnicity, or beauty standards.························································\u001b[39m\n\u001b[31m\"\u001b[39m\n    at C:\\Users\\FayazHussain\\Desktop\\FaceMatric\\qa\\e2e\\tests\\frontend.spec.js:180:23",
+                        "location": {
+                          "file": "C:\\Users\\FayazHussain\\Desktop\\FaceMatric\\qa\\e2e\\tests\\frontend.spec.js",
+                          "column": 23,
+                          "line": 180
+                        },
+                        "snippet": "\u001b[0m \u001b[90m 178 |\u001b[39m     \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mgoto(\u001b[32m`${FRONTEND_URL}/index.html`\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m 179 |\u001b[39m     \u001b[36mconst\u001b[39m indexBody \u001b[33m=\u001b[39m \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mtextContent(\u001b[32m'body'\u001b[39m)\u001b[33m;\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 180 |\u001b[39m     expect(indexBody)\u001b[33m.\u001b[39mtoContain(\u001b[33mPRD_DISCLAIMER_SNIPPET\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m     |\u001b[39m                       \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 181 |\u001b[39m\n \u001b[90m 182 |\u001b[39m     \u001b[90m// 2. Analyzing screen\u001b[39m\n \u001b[90m 183 |\u001b[39m     \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mgoto(\u001b[32m`${FRONTEND_URL}/analyzing.html`\u001b[39m)\u001b[33m;\u001b[39m\u001b[0m"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "C:\\Users\\FayazHussain\\Desktop\\FaceMatric\\qa\\e2e\\tests\\frontend.spec.js",
+                            "column": 23,
+                            "line": 180
+                          },
+                          "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoContain\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // indexOf\u001b[22m\n\nExpected substring: \u001b[32m\"This tool analyzes geometric facial proportions for educational purposes. Scores do not reflect beauty, worth, or health. Results are influenced by photo angle and quality.\"\u001b[39m\nReceived string:    \u001b[31m\"······················································································································································································································································································································································································································································································································\u001b[39m\n\u001b[31m                FaceMetric\u001b[39m\n\u001b[31m                Facial Symmetry & Golden Ratio Analysis·······························\u001b[39m\n\u001b[31m            About Project·············\u001b[39m\n\u001b[31m                ☀️·················\u001b[39m\n\u001b[31m                🌙·····································································\u001b[39m\n\u001b[31m                SCIENCE. SYMMETRY. YOU.···························\u001b[39m\n\u001b[31m                Discover Your\u001b[39m\n\u001b[31m                Facial Geometry···························\u001b[39m\n\u001b[31m                Upload an image to receive a comprehensive, scientific analysis of your facial proportions, symmetry, and alignment with the Golden Ratio using advanced AI diagnostics.······································································································································································\u001b[39m\n\u001b[31m                Upload a Photo or Take a Picture\u001b[39m\n\u001b[31m                JPG, PNG, WEBP • Maximum 10MB······················································································································\u001b[39m\n\u001b[31m                        Upload Image······················································································································································\u001b[39m\n\u001b[31m                        Use Camera···························································································································\u001b[39m\n\u001b[31m                    Your image is processed securely and is not stored.··························································································································································\u001b[39m\n\u001b[31m                This analysis is based on facial geometry and proportions, not skin color, ethnicity, or beauty standards.························································\u001b[39m\n\u001b[31m\"\u001b[39m\n\n  178 |     await page.goto(`${FRONTEND_URL}/index.html`);\n  179 |     const indexBody = await page.textContent('body');\n> 180 |     expect(indexBody).toContain(PRD_DISCLAIMER_SNIPPET);\n      |                       ^\n  181 |\n  182 |     // 2. Analyzing screen\n  183 |     await page.goto(`${FRONTEND_URL}/analyzing.html`);\n    at C:\\Users\\FayazHussain\\Desktop\\FaceMatric\\qa\\e2e\\tests\\frontend.spec.js:180:23"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-14T22:44:26.748Z",
+                      "annotations": [
+                        {
+                          "type": "fail",
+                          "description": "FM-BUG-012: The PRD Section 15 disclaimer is missing from analyzing.html and diverges in index/results.",
+                          "location": {
+                            "file": "C:\\Users\\FayazHussain\\Desktop\\FaceMatric\\qa\\e2e\\tests\\frontend.spec.js",
+                            "line": 173,
+                            "column": 10
+                          }
+                        }
+                      ],
+                      "attachments": [
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "C:\\Users\\FayazHussain\\Desktop\\FaceMatric\\qa\\e2e\\test-results\\frontend-Frontend-E2E-Inte-345f4-xpected-failure-FM-BUG-012--desktop-chrome\\error-context.md"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "C:\\Users\\FayazHussain\\Desktop\\FaceMatric\\qa\\e2e\\tests\\frontend.spec.js",
+                        "column": 23,
+                        "line": 180
+                      }
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "b8927c7c7abd922a0b01-911be60fec62b5872823",
+              "file": "frontend.spec.js",
+              "line": 172,
+              "column": 3
+            },
+            {
+              "title": "When celebrity_match is null, page must NOT show Tom Holland placeholder (Expected failure: FM-BUG-010)",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [
+                    {
+                      "type": "fail",
+                      "description": "FM-BUG-010: When celebrity_match is null, results.html fails to update the card and leaves Tom Holland (92%) visible.",
+                      "location": {
+                        "file": "C:\\Users\\FayazHussain\\Desktop\\FaceMatric\\qa\\e2e\\tests\\frontend.spec.js",
+                        "line": 194,
+                        "column": 10
+                      }
+                    }
+                  ],
+                  "expectedStatus": "failed",
+                  "projectId": "desktop-chrome",
+                  "projectName": "desktop-chrome",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "failed",
+                      "duration": 382,
+                      "error": {
+                        "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mnot\u001b[2m.\u001b[22mtoBe\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // Object.is equality\u001b[22m\n\nExpected: not \u001b[32m\"Tom Holland\"\u001b[39m",
+                        "stack": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mnot\u001b[2m.\u001b[22mtoBe\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // Object.is equality\u001b[22m\n\nExpected: not \u001b[32m\"Tom Holland\"\u001b[39m\n    at C:\\Users\\FayazHussain\\Desktop\\FaceMatric\\qa\\e2e\\tests\\frontend.spec.js:211:34",
+                        "location": {
+                          "file": "C:\\Users\\FayazHussain\\Desktop\\FaceMatric\\qa\\e2e\\tests\\frontend.spec.js",
+                          "column": 34,
+                          "line": 211
+                        },
+                        "snippet": "\u001b[0m \u001b[90m 209 |\u001b[39m     \u001b[90m// In buggy production code, nameText is still \"Tom Holland\"\u001b[39m\n \u001b[90m 210 |\u001b[39m     \u001b[90m// Expectation: If celebrity_match is null, Tom Holland must NOT be displayed\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 211 |\u001b[39m     expect(nameText\u001b[33m?\u001b[39m\u001b[33m.\u001b[39mtrim())\u001b[33m.\u001b[39mnot\u001b[33m.\u001b[39mtoBe(\u001b[32m'Tom Holland'\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m     |\u001b[39m                                  \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 212 |\u001b[39m   })\u001b[33m;\u001b[39m\n \u001b[90m 213 |\u001b[39m\n \u001b[90m 214 |\u001b[39m })\u001b[33m;\u001b[39m\u001b[0m"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "C:\\Users\\FayazHussain\\Desktop\\FaceMatric\\qa\\e2e\\tests\\frontend.spec.js",
+                            "column": 34,
+                            "line": 211
+                          },
+                          "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mnot\u001b[2m.\u001b[22mtoBe\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // Object.is equality\u001b[22m\n\nExpected: not \u001b[32m\"Tom Holland\"\u001b[39m\n\n  209 |     // In buggy production code, nameText is still \"Tom Holland\"\n  210 |     // Expectation: If celebrity_match is null, Tom Holland must NOT be displayed\n> 211 |     expect(nameText?.trim()).not.toBe('Tom Holland');\n      |                                  ^\n  212 |   });\n  213 |\n  214 | });\n    at C:\\Users\\FayazHussain\\Desktop\\FaceMatric\\qa\\e2e\\tests\\frontend.spec.js:211:34"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-14T22:44:27.097Z",
+                      "annotations": [
+                        {
+                          "type": "fail",
+                          "description": "FM-BUG-010: When celebrity_match is null, results.html fails to update the card and leaves Tom Holland (92%) visible.",
+                          "location": {
+                            "file": "C:\\Users\\FayazHussain\\Desktop\\FaceMatric\\qa\\e2e\\tests\\frontend.spec.js",
+                            "line": 194,
+                            "column": 10
+                          }
+                        }
+                      ],
+                      "attachments": [
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "C:\\Users\\FayazHussain\\Desktop\\FaceMatric\\qa\\e2e\\test-results\\frontend-Frontend-E2E-Inte-7a402-xpected-failure-FM-BUG-010--desktop-chrome\\error-context.md"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "C:\\Users\\FayazHussain\\Desktop\\FaceMatric\\qa\\e2e\\tests\\frontend.spec.js",
+                        "column": 34,
+                        "line": 211
+                      }
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "b8927c7c7abd922a0b01-5f975c724d5c3f7f55c4",
+              "file": "frontend.spec.js",
+              "line": 193,
+              "column": 3
+            },
+            {
+              "title": "Displayed values on Results screen equal API response",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "mobile-chrome",
+                  "projectName": "mobile-chrome",
+                  "results": [
+                    {
+                      "workerIndex": 1,
+                      "parallelIndex": 1,
+                      "status": "passed",
+                      "duration": 2035,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-14T22:44:22.507Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "b8927c7c7abd922a0b01-47c42424b82bb13e1499",
+              "file": "frontend.spec.js",
+              "line": 68,
+              "column": 3
+            },
+            {
+              "title": "Overlay alignment within 2 px of image boundary at two viewport sizes",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "mobile-chrome",
+                  "projectName": "mobile-chrome",
+                  "results": [
+                    {
+                      "workerIndex": 1,
+                      "parallelIndex": 1,
+                      "status": "passed",
+                      "duration": 427,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-14T22:44:24.701Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "b8927c7c7abd922a0b01-6f604353095695b4660f",
+              "file": "frontend.spec.js",
+              "line": 108,
+              "column": 3
+            },
+            {
+              "title": "Error screen displays message and working Try Again on analysis failure",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "mobile-chrome",
+                  "projectName": "mobile-chrome",
+                  "results": [
+                    {
+                      "workerIndex": 1,
+                      "parallelIndex": 1,
+                      "status": "passed",
+                      "duration": 609,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-14T22:44:25.153Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "b8927c7c7abd922a0b01-b4b7f3f15b96471a4167",
+              "file": "frontend.spec.js",
+              "line": 139,
+              "column": 3
+            },
+            {
+              "title": "PRD disclaimer is present on every screen (Expected failure: FM-BUG-012)",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [
+                    {
+                      "type": "fail",
+                      "description": "FM-BUG-012: The PRD Section 15 disclaimer is missing from analyzing.html and diverges in index/results.",
+                      "location": {
+                        "file": "C:\\Users\\FayazHussain\\Desktop\\FaceMatric\\qa\\e2e\\tests\\frontend.spec.js",
+                        "line": 173,
+                        "column": 10
+                      }
+                    }
+                  ],
+                  "expectedStatus": "failed",
+                  "projectId": "mobile-chrome",
+                  "projectName": "mobile-chrome",
+                  "results": [
+                    {
+                      "workerIndex": 1,
+                      "parallelIndex": 1,
+                      "status": "failed",
+                      "duration": 376,
+                      "error": {
+                        "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoContain\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // indexOf\u001b[22m\n\nExpected substring: \u001b[32m\"This tool analyzes geometric facial proportions for educational purposes. Scores do not reflect beauty, worth, or health. Results are influenced by photo angle and quality.\"\u001b[39m\nReceived string:    \u001b[31m\"······················································································································································································································································································································································································································································································································\u001b[39m\n\u001b[31m                FaceMetric\u001b[39m\n\u001b[31m                Facial Symmetry & Golden Ratio Analysis·······························\u001b[39m\n\u001b[31m            About Project·············\u001b[39m\n\u001b[31m                ☀️·················\u001b[39m\n\u001b[31m                🌙·····································································\u001b[39m\n\u001b[31m                SCIENCE. SYMMETRY. YOU.···························\u001b[39m\n\u001b[31m                Discover Your\u001b[39m\n\u001b[31m                Facial Geometry···························\u001b[39m\n\u001b[31m                Upload an image to receive a comprehensive, scientific analysis of your facial proportions, symmetry, and alignment with the Golden Ratio using advanced AI diagnostics.······································································································································································\u001b[39m\n\u001b[31m                Upload a Photo or Take a Picture\u001b[39m\n\u001b[31m                JPG, PNG, WEBP • Maximum 10MB······················································································································\u001b[39m\n\u001b[31m                        Upload Image······················································································································································\u001b[39m\n\u001b[31m                        Use Camera···························································································································\u001b[39m\n\u001b[31m                    Your image is processed securely and is not stored.··························································································································································\u001b[39m\n\u001b[31m                This analysis is based on facial geometry and proportions, not skin color, ethnicity, or beauty standards.························································\u001b[39m\n\u001b[31m\"\u001b[39m",
+                        "stack": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoContain\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // indexOf\u001b[22m\n\nExpected substring: \u001b[32m\"This tool analyzes geometric facial proportions for educational purposes. Scores do not reflect beauty, worth, or health. Results are influenced by photo angle and quality.\"\u001b[39m\nReceived string:    \u001b[31m\"······················································································································································································································································································································································································································································································································\u001b[39m\n\u001b[31m                FaceMetric\u001b[39m\n\u001b[31m                Facial Symmetry & Golden Ratio Analysis·······························\u001b[39m\n\u001b[31m            About Project·············\u001b[39m\n\u001b[31m                ☀️·················\u001b[39m\n\u001b[31m                🌙·····································································\u001b[39m\n\u001b[31m                SCIENCE. SYMMETRY. YOU.···························\u001b[39m\n\u001b[31m                Discover Your\u001b[39m\n\u001b[31m                Facial Geometry···························\u001b[39m\n\u001b[31m                Upload an image to receive a comprehensive, scientific analysis of your facial proportions, symmetry, and alignment with the Golden Ratio using advanced AI diagnostics.······································································································································································\u001b[39m\n\u001b[31m                Upload a Photo or Take a Picture\u001b[39m\n\u001b[31m                JPG, PNG, WEBP • Maximum 10MB······················································································································\u001b[39m\n\u001b[31m                        Upload Image······················································································································································\u001b[39m\n\u001b[31m                        Use Camera···························································································································\u001b[39m\n\u001b[31m                    Your image is processed securely and is not stored.··························································································································································\u001b[39m\n\u001b[31m                This analysis is based on facial geometry and proportions, not skin color, ethnicity, or beauty standards.························································\u001b[39m\n\u001b[31m\"\u001b[39m\n    at C:\\Users\\FayazHussain\\Desktop\\FaceMatric\\qa\\e2e\\tests\\frontend.spec.js:180:23",
+                        "location": {
+                          "file": "C:\\Users\\FayazHussain\\Desktop\\FaceMatric\\qa\\e2e\\tests\\frontend.spec.js",
+                          "column": 23,
+                          "line": 180
+                        },
+                        "snippet": "\u001b[0m \u001b[90m 178 |\u001b[39m     \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mgoto(\u001b[32m`${FRONTEND_URL}/index.html`\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m 179 |\u001b[39m     \u001b[36mconst\u001b[39m indexBody \u001b[33m=\u001b[39m \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mtextContent(\u001b[32m'body'\u001b[39m)\u001b[33m;\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 180 |\u001b[39m     expect(indexBody)\u001b[33m.\u001b[39mtoContain(\u001b[33mPRD_DISCLAIMER_SNIPPET\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m     |\u001b[39m                       \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 181 |\u001b[39m\n \u001b[90m 182 |\u001b[39m     \u001b[90m// 2. Analyzing screen\u001b[39m\n \u001b[90m 183 |\u001b[39m     \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mgoto(\u001b[32m`${FRONTEND_URL}/analyzing.html`\u001b[39m)\u001b[33m;\u001b[39m\u001b[0m"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "C:\\Users\\FayazHussain\\Desktop\\FaceMatric\\qa\\e2e\\tests\\frontend.spec.js",
+                            "column": 23,
+                            "line": 180
+                          },
+                          "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoContain\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // indexOf\u001b[22m\n\nExpected substring: \u001b[32m\"This tool analyzes geometric facial proportions for educational purposes. Scores do not reflect beauty, worth, or health. Results are influenced by photo angle and quality.\"\u001b[39m\nReceived string:    \u001b[31m\"······················································································································································································································································································································································································································································································································\u001b[39m\n\u001b[31m                FaceMetric\u001b[39m\n\u001b[31m                Facial Symmetry & Golden Ratio Analysis·······························\u001b[39m\n\u001b[31m            About Project·············\u001b[39m\n\u001b[31m                ☀️·················\u001b[39m\n\u001b[31m                🌙·····································································\u001b[39m\n\u001b[31m                SCIENCE. SYMMETRY. YOU.···························\u001b[39m\n\u001b[31m                Discover Your\u001b[39m\n\u001b[31m                Facial Geometry···························\u001b[39m\n\u001b[31m                Upload an image to receive a comprehensive, scientific analysis of your facial proportions, symmetry, and alignment with the Golden Ratio using advanced AI diagnostics.······································································································································································\u001b[39m\n\u001b[31m                Upload a Photo or Take a Picture\u001b[39m\n\u001b[31m                JPG, PNG, WEBP • Maximum 10MB······················································································································\u001b[39m\n\u001b[31m                        Upload Image······················································································································································\u001b[39m\n\u001b[31m                        Use Camera···························································································································\u001b[39m\n\u001b[31m                    Your image is processed securely and is not stored.··························································································································································\u001b[39m\n\u001b[31m                This analysis is based on facial geometry and proportions, not skin color, ethnicity, or beauty standards.························································\u001b[39m\n\u001b[31m\"\u001b[39m\n\n  178 |     await page.goto(`${FRONTEND_URL}/index.html`);\n  179 |     const indexBody = await page.textContent('body');\n> 180 |     expect(indexBody).toContain(PRD_DISCLAIMER_SNIPPET);\n      |                       ^\n  181 |\n  182 |     // 2. Analyzing screen\n  183 |     await page.goto(`${FRONTEND_URL}/analyzing.html`);\n    at C:\\Users\\FayazHussain\\Desktop\\FaceMatric\\qa\\e2e\\tests\\frontend.spec.js:180:23"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-14T22:44:25.799Z",
+                      "annotations": [
+                        {
+                          "type": "fail",
+                          "description": "FM-BUG-012: The PRD Section 15 disclaimer is missing from analyzing.html and diverges in index/results.",
+                          "location": {
+                            "file": "C:\\Users\\FayazHussain\\Desktop\\FaceMatric\\qa\\e2e\\tests\\frontend.spec.js",
+                            "line": 173,
+                            "column": 10
+                          }
+                        }
+                      ],
+                      "attachments": [
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "C:\\Users\\FayazHussain\\Desktop\\FaceMatric\\qa\\e2e\\test-results\\frontend-Frontend-E2E-Inte-345f4-xpected-failure-FM-BUG-012--mobile-chrome\\error-context.md"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "C:\\Users\\FayazHussain\\Desktop\\FaceMatric\\qa\\e2e\\tests\\frontend.spec.js",
+                        "column": 23,
+                        "line": 180
+                      }
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "b8927c7c7abd922a0b01-2103fa8e2b27cb33f8b1",
+              "file": "frontend.spec.js",
+              "line": 172,
+              "column": 3
+            },
+            {
+              "title": "When celebrity_match is null, page must NOT show Tom Holland placeholder (Expected failure: FM-BUG-010)",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [
+                    {
+                      "type": "fail",
+                      "description": "FM-BUG-010: When celebrity_match is null, results.html fails to update the card and leaves Tom Holland (92%) visible.",
+                      "location": {
+                        "file": "C:\\Users\\FayazHussain\\Desktop\\FaceMatric\\qa\\e2e\\tests\\frontend.spec.js",
+                        "line": 194,
+                        "column": 10
+                      }
+                    }
+                  ],
+                  "expectedStatus": "failed",
+                  "projectId": "mobile-chrome",
+                  "projectName": "mobile-chrome",
+                  "results": [
+                    {
+                      "workerIndex": 1,
+                      "parallelIndex": 1,
+                      "status": "failed",
+                      "duration": 578,
+                      "error": {
+                        "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mnot\u001b[2m.\u001b[22mtoBe\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // Object.is equality\u001b[22m\n\nExpected: not \u001b[32m\"Tom Holland\"\u001b[39m",
+                        "stack": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mnot\u001b[2m.\u001b[22mtoBe\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // Object.is equality\u001b[22m\n\nExpected: not \u001b[32m\"Tom Holland\"\u001b[39m\n    at C:\\Users\\FayazHussain\\Desktop\\FaceMatric\\qa\\e2e\\tests\\frontend.spec.js:211:34",
+                        "location": {
+                          "file": "C:\\Users\\FayazHussain\\Desktop\\FaceMatric\\qa\\e2e\\tests\\frontend.spec.js",
+                          "column": 34,
+                          "line": 211
+                        },
+                        "snippet": "\u001b[0m \u001b[90m 209 |\u001b[39m     \u001b[90m// In buggy production code, nameText is still \"Tom Holland\"\u001b[39m\n \u001b[90m 210 |\u001b[39m     \u001b[90m// Expectation: If celebrity_match is null, Tom Holland must NOT be displayed\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 211 |\u001b[39m     expect(nameText\u001b[33m?\u001b[39m\u001b[33m.\u001b[39mtrim())\u001b[33m.\u001b[39mnot\u001b[33m.\u001b[39mtoBe(\u001b[32m'Tom Holland'\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m     |\u001b[39m                                  \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 212 |\u001b[39m   })\u001b[33m;\u001b[39m\n \u001b[90m 213 |\u001b[39m\n \u001b[90m 214 |\u001b[39m })\u001b[33m;\u001b[39m\u001b[0m"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "C:\\Users\\FayazHussain\\Desktop\\FaceMatric\\qa\\e2e\\tests\\frontend.spec.js",
+                            "column": 34,
+                            "line": 211
+                          },
+                          "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mnot\u001b[2m.\u001b[22mtoBe\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // Object.is equality\u001b[22m\n\nExpected: not \u001b[32m\"Tom Holland\"\u001b[39m\n\n  209 |     // In buggy production code, nameText is still \"Tom Holland\"\n  210 |     // Expectation: If celebrity_match is null, Tom Holland must NOT be displayed\n> 211 |     expect(nameText?.trim()).not.toBe('Tom Holland');\n      |                                  ^\n  212 |   });\n  213 |\n  214 | });\n    at C:\\Users\\FayazHussain\\Desktop\\FaceMatric\\qa\\e2e\\tests\\frontend.spec.js:211:34"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-14T22:44:26.224Z",
+                      "annotations": [
+                        {
+                          "type": "fail",
+                          "description": "FM-BUG-010: When celebrity_match is null, results.html fails to update the card and leaves Tom Holland (92%) visible.",
+                          "location": {
+                            "file": "C:\\Users\\FayazHussain\\Desktop\\FaceMatric\\qa\\e2e\\tests\\frontend.spec.js",
+                            "line": 194,
+                            "column": 10
+                          }
+                        }
+                      ],
+                      "attachments": [
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "C:\\Users\\FayazHussain\\Desktop\\FaceMatric\\qa\\e2e\\test-results\\frontend-Frontend-E2E-Inte-7a402-xpected-failure-FM-BUG-010--mobile-chrome\\error-context.md"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "C:\\Users\\FayazHussain\\Desktop\\FaceMatric\\qa\\e2e\\tests\\frontend.spec.js",
+                        "column": 34,
+                        "line": 211
+                      }
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "b8927c7c7abd922a0b01-6e498ab8cc1b8815c224",
+              "file": "frontend.spec.js",
+              "line": 193,
+              "column": 3
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-10-14T22:44:21.934Z",
+    "duration": 5671.989,
+    "expected": 10,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  }
+}

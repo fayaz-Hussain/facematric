@@ -70,3 +70,11 @@ temp/
 
 # Dataset (large image dataset - excluded from git)
 celebrity_dataset/
+
+# QA test suite and artifacts
+qa/data/
+qa/.venv/
+qa/reports/overlays/
+qa/e2e/node_modules/
+*.pyc
+

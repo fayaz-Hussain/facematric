@@ -1,0 +1,290 @@
+{
+  "clean_photos": {
+    "total": 30,
+    "accepted": 30,
+    "rejected": 0,
+    "rejections": []
+  },
+  "occlusion_folders": {
+    "sunglasses": "BLOCKED (Empty directory: no curated dataset)",
+    "glasses": "BLOCKED (Empty directory: no curated dataset)",
+    "mask": "BLOCKED (Empty directory: no curated dataset)",
+    "hand": "BLOCKED (Empty directory: no curated dataset)",
+    "hair": "BLOCKED (Empty directory: no curated dataset)"
+  },
+  "occlusion_spot_checks": [
+    {
+      "case": "Clear glasses (Bill Gates)",
+      "status_code": 200,
+      "outcome": "Accepted as valid (HTTP 200)",
+      "note": "Allowed by relaxed z-depth threshold in OCCLUSION_FIX_SUMMARY (false accept if glasses strictly forbidden)"
+    },
+    {
+      "case": "Synthetic sunglasses (black eye box)",
+      "status_code": 200,
+      "error_code": null,
+      "outcome": "False Accept (HTTP 200)",
+      "note": "MediaPipe predicted smooth z-depth through sunglasses; _detect_glasses failed to trigger (FM-BUG-017)"
+    },
+    {
+      "case": "Synthetic surgical mask (lower face cover)",
+      "status_code": 200,
+      "error_code": null,
+      "outcome": "False Accept (HTTP 200)",
+      "note": "MediaPipe predicted smooth z-depth through mask; _detect_mask failed to trigger (FM-BUG-017)"
+    }
+  ],
+  "input_handling": {
+    "corrupt_file": {
+      "url": "/api/analyze",
+      "status_code": 400,
+      "expected_status": 400,
+      "status_match": true,
+      "error_code": "INVALID_IMAGE",
+      "expected_error": "INVALID_IMAGE",
+      "error_match": true,
+      "is_nested_under_detail": true,
+      "contract_valid": false,
+      "contract_errors": [
+        "Schema breach (FM-BUG-027): Error fields are nested under 'detail' instead of at the root level"
+      ],
+      "message": "Corrupt or unsupported file format. Please upload a valid image.",
+      "retry": true
+    },
+    "empty_body": {
+      "url": "/api/analyze",
+      "status_code": 400,
+      "expected_status": 400,
+      "status_match": true,
+      "error_code": "INVALID_IMAGE",
+      "expected_error": "INVALID_IMAGE",
+      "error_match": true,
+      "is_nested_under_detail": false,
+      "contract_valid": true,
+      "contract_errors": [],
+      "message": "Uploaded file is empty",
+      "retry": true
+    },
+    "data_uri_prefix_in_query": {
+      "url": "/api/analyze?image_base64=data:image/jpeg;base64,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",
+      "status_code": 400,
+      "expected_status": 400,
+      "status_match": true,
+      "error_code": "INVALID_IMAGE",
+      "expected_error": "INVALID_IMAGE",
+      "error_match": true,
+      "is_nested_under_detail": true,
+      "contract_valid": false,
+      "contract_errors": [
+        "Schema breach (FM-BUG-027): Error fields are nested under 'detail' instead of at the root level"
+      ],
+      "message": "Corrupt or unsupported file format. Please upload a valid image.",
+      "retry": true
+    },
+    "raw_base64_in_query": {
+      "url": "/api/analyze?image_base64=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",
+      "status_code": 400,
+      "expected_status": 200,
+      "status_match": false,
+      "error_code": "INVALID_IMAGE",
+      "expected_error": null,
+      "error_match": true,
+      "is_nested_under_detail": true,
+      "contract_valid": false,
+      "contract_errors": [
+        "Schema breach (FM-BUG-027): Error fields are nested under 'detail' instead of at the root level"
+      ],
+      "message": "Corrupt or unsupported file format. Please upload a valid image.",
+      "retry": true
+    },
+    "raw_base64_in_post_body": {
+      "url": "/api/analyze",
+      "status_code": 400,
+      "expected_status": 400,
+      "status_match": true,
+      "error_code": "NO_IMAGE",
+      "expected_error": "NO_IMAGE",
+      "error_match": true,
+      "is_nested_under_detail": false,
+      "contract_valid": true,
+      "contract_errors": [],
+      "message": "No image provided. Please upload a file or provide a base64-encoded image.",
+      "retry": true
+    },
+    "rgba_png": {
+      "url": "/api/analyze",
+      "status_code": 200,
+      "expected_status": 200,
+      "status_match": true,
+      "error_code": null,
+      "expected_error": null,
+      "error_match": true,
+      "is_nested_under_detail": false,
+      "contract_valid": true,
+      "contract_errors": [],
+      "message": null,
+      "retry": null
+    },
+    "grayscale": {
+      "url": "/api/analyze",
+      "status_code": 200,
+      "expected_status": 200,
+      "status_match": true,
+      "error_code": null,
+      "expected_error": null,
+      "error_match": true,
+      "is_nested_under_detail": false,
+      "contract_valid": true,
+      "contract_errors": [],
+      "message": null,
+      "retry": null
+    },
+    "animated_gif": {
+      "url": "/api/analyze",
+      "status_code": 200,
+      "expected_status": 200,
+      "status_match": true,
+      "error_code": null,
+      "expected_error": null,
+      "error_match": true,
+      "is_nested_under_detail": false,
+      "contract_valid": true,
+      "contract_errors": [],
+      "message": null,
+      "retry": null
+    },
+    "webp": {
+      "url": "/api/analyze",
+      "status_code": 200,
+      "expected_status": 200,
+      "status_match": true,
+      "error_code": null,
+      "expected_error": null,
+      "error_match": true,
+      "is_nested_under_detail": false,
+      "contract_valid": true,
+      "contract_errors": [],
+      "message": null,
+      "retry": null
+    },
+    "bmp": {
+      "url": "/api/analyze",
+      "status_code": 200,
+      "expected_status": 200,
+      "status_match": true,
+      "error_code": null,
+      "expected_error": null,
+      "error_match": true,
+      "is_nested_under_detail": false,
+      "contract_valid": true,
+      "contract_errors": [],
+      "message": null,
+      "retry": null
+    },
+    "exif_rotated": {
+      "url": "/api/analyze",
+      "status_code": 200,
+      "expected_status": 200,
+      "status_match": true,
+      "error_code": null,
+      "expected_error": null,
+      "error_match": true,
+      "is_nested_under_detail": false,
+      "contract_valid": true,
+      "contract_errors": [],
+      "message": null,
+      "retry": null
+    },
+    "heic_file": {
+      "url": "/api/analyze",
+      "status_code": 400,
+      "expected_status": 400,
+      "status_match": true,
+      "error_code": "INVALID_IMAGE",
+      "expected_error": "INVALID_IMAGE",
+      "error_match": true,
+      "is_nested_under_detail": true,
+      "contract_valid": false,
+      "contract_errors": [
+        "Schema breach (FM-BUG-027): Error fields are nested under 'detail' instead of at the root level"
+      ],
+      "message": "Corrupt or unsupported file format. Please upload a valid image.",
+      "retry": true
+    },
+    "file_too_large_20mb": {
+      "url": "/api/analyze",
+      "status_code": 400,
+      "expected_status": 400,
+      "status_match": true,
+      "error_code": "FILE_TOO_LARGE",
+      "expected_error": "FILE_TOO_LARGE",
+      "error_match": true,
+      "is_nested_under_detail": false,
+      "contract_valid": true,
+      "contract_errors": [],
+      "message": "File size exceeds 10MB limit. Your file: 10.0MB",
+      "retry": true
+    },
+    "under_300x300": {
+      "url": "/api/analyze",
+      "status_code": 400,
+      "expected_status": 400,
+      "status_match": true,
+      "error_code": "POOR_QUALITY",
+      "expected_error": "POOR_QUALITY",
+      "error_match": true,
+      "is_nested_under_detail": true,
+      "contract_valid": false,
+      "contract_errors": [
+        "Schema breach (FM-BUG-027): Error fields are nested under 'detail' instead of at the root level"
+      ],
+      "message": "Image resolution too low for accurate analysis. Minimum size: 300x300 pixels. Your image: 250x250 pixels.",
+      "retry": true
+    },
+    "wider_than_3_1": {
+      "url": "/api/analyze",
+      "status_code": 400,
+      "expected_status": 400,
+      "status_match": true,
+      "error_code": "POOR_QUALITY",
+      "expected_error": "POOR_QUALITY",
+      "error_match": true,
+      "is_nested_under_detail": true,
+      "contract_valid": false,
+      "contract_errors": [
+        "Schema breach (FM-BUG-027): Error fields are nested under 'detail' instead of at the root level"
+      ],
+      "message": "Image aspect ratio too extreme for accurate face detection. Maximum ratio: 3.0:1. Your image ratio: 4.00:1.",
+      "retry": true
+    },
+    "both_file_and_base64": {
+      "url": "/api/analyze?image_base64=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",
+      "status_code": 400,
+      "expected_status": 400,
+      "status_match": true,
+      "error_code": "INVALID_REQUEST",
+      "expected_error": "INVALID_REQUEST",
+      "error_match": true,
+      "is_nested_under_detail": false,
+      "contract_valid": true,
+      "contract_errors": [],
+      "message": "Provide either a file upload or base64 image string, not both",
+      "retry": true
+    },
+    "neither_file_nor_base64": {
+      "url": "/api/analyze",
+      "status_code": 400,
+      "expected_status": 400,
+      "status_match": true,
+      "error_code": "NO_IMAGE",
+      "expected_error": "NO_IMAGE",
+      "error_match": true,
+      "is_nested_under_detail": false,
+      "contract_valid": true,
+      "contract_errors": [],
+      "message": "No image provided. Please upload a file or provide a base64-encoded image.",
+      "retry": true
+    }
+  },
+  "contract_verification": {}
+}
