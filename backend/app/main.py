@@ -6,6 +6,7 @@ Implements privacy-preserving in-memory image processing with no persistent stor
 """
 
 from fastapi import FastAPI, UploadFile, File, HTTPException, Request
+from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import JSONResponse
@@ -162,26 +163,61 @@ async def analyze_face(
     logger.info(f"[{request_id}] Analysis request received")
     
     file_bytes = None
-    try:
-        # Validate request format: must provide exactly one input method
-        await _validate_request_format(request_id, file, image_base64)
-        
-        # If file upload, validate file properties
-        if file:
-            file_bytes = await _validate_and_read_file(request_id, file)
-            # When submitted via multipart/form-data, extract include_celebrity_match from form if provided
-            content_type = request.headers.get("content-type", "")
-            if "multipart/form-data" in content_type:
+    extracted_file = file
+    extracted_base64 = image_base64
+    
+    # Extract image_base64 and include_celebrity_match from body (JSON or Form) if not in query/file
+    content_type = request.headers.get("content-type", "")
+    if "application/json" in content_type:
+        try:
+            body = await request.json()
+            if isinstance(body, dict):
+                extracted_base64 = extracted_base64 or body.get("image_base64") or body.get("image")
+                if "include_celebrity_match" in body:
+                    val = body["include_celebrity_match"]
+                    include_celebrity_match = val if isinstance(val, bool) else str(val).strip().lower() in ("true", "1", "yes")
+        except Exception as e:
+            logger.debug(f"[{request_id}] Failed to read JSON body: {e}")
+    elif "form" in content_type:
+        try:
+            form = await request.form()
+            extracted_base64 = extracted_base64 or form.get("image_base64") or form.get("image")
+            if not extracted_file and "image" in form and hasattr(form["image"], "filename"):
+                extracted_file = form["image"]
+            if "include_celebrity_match" in form:
+                val = form["include_celebrity_match"]
+                include_celebrity_match = val if isinstance(val, bool) else str(val).strip().lower() in ("true", "1", "yes")
+        except Exception as e:
+            logger.debug(f"[{request_id}] Failed to read form data: {e}")
+    else:
+        # Fallback for omitted/generic content-type
+        if not extracted_base64:
+            try:
+                body = await request.json()
+                if isinstance(body, dict):
+                    extracted_base64 = body.get("image_base64") or body.get("image")
+                    if "include_celebrity_match" in body:
+                        val = body["include_celebrity_match"]
+                        include_celebrity_match = val if isinstance(val, bool) else str(val).strip().lower() in ("true", "1", "yes")
+            except Exception:
                 try:
                     form = await request.form()
+                    extracted_base64 = form.get("image_base64") or form.get("image")
+                    if not extracted_file and "image" in form and hasattr(form["image"], "filename"):
+                        extracted_file = form["image"]
                     if "include_celebrity_match" in form:
                         val = form["include_celebrity_match"]
-                        if isinstance(val, str):
-                            include_celebrity_match = val.strip().lower() in ("true", "1", "yes")
-                        else:
-                            include_celebrity_match = bool(val)
-                except Exception as e:
-                    logger.debug(f"[{request_id}] Failed to read form data for include_celebrity_match: {e}")
+                        include_celebrity_match = val if isinstance(val, bool) else str(val).strip().lower() in ("true", "1", "yes")
+                except Exception:
+                    pass
+
+    try:
+        # Validate request format: must provide exactly one input method
+        await _validate_request_format(request_id, extracted_file, extracted_base64)
+        
+        # If file upload, validate file properties
+        if extracted_file:
+            file_bytes = await _validate_and_read_file(request_id, extracted_file)
         
         try:
             # Enforce timeout
@@ -190,7 +226,7 @@ async def analyze_face(
                 _process_analysis(
                     request_id=request_id,
                     file_bytes=file_bytes,
-                    image_base64=image_base64,
+                    image_base64=extracted_base64,
                     include_celebrity=include_celebrity_match
                 ),
                 timeout=settings.processing_timeout
@@ -218,35 +254,46 @@ async def analyze_face(
                 f"[{request_id}] Processing timeout exceeded: "
                 f"{settings.processing_timeout}s timeout after {elapsed_ms}ms"
             )
-            raise HTTPException(
+            return JSONResponse(
                 status_code=408,
-                detail={
+                content={
                     "status": "error",
                     "error_code": ErrorCode.PROCESSING_TIMEOUT.value,
                     "message": get_error_message(ErrorCode.PROCESSING_TIMEOUT),
-                    "retry": True
+                    "retry": True,
+                    "detail": {
+                        "status": "error",
+                        "error_code": ErrorCode.PROCESSING_TIMEOUT.value,
+                        "message": get_error_message(ErrorCode.PROCESSING_TIMEOUT),
+                        "retry": True
+                    }
                 }
             )
         
         except ValidationError as e:
             logger.warning(f"[{request_id}] Validation error: {e.error_code.value}")
-            raise HTTPException(
+            return JSONResponse(
                 status_code=400,
-                detail=e.to_dict()
+                content=e.to_dict()
             )
         
         except Exception as e:
             logger.error(f"[{request_id}] Unexpected error: {str(e)}", exc_info=True)
-            raise HTTPException(
+            return JSONResponse(
                 status_code=500,
-                detail={
+                content={
                     "status": "error",
                     "error_code": ErrorCode.INTERNAL_ERROR.value,
                     "message": get_error_message(ErrorCode.INTERNAL_ERROR),
                     "retry": True
                 }
             )
-    
+    except ValidationError as e:
+        logger.warning(f"[{request_id}] Validation error: {e.error_code.value}")
+        return JSONResponse(
+            status_code=400,
+            content=e.to_dict()
+        )
     finally:
         # === PRIVACY-PRESERVING CLEANUP ===
         # Requirement 13.1, 13.2: Clean up image data after processing (success or error)
@@ -259,6 +306,9 @@ async def analyze_face(
         if image_base64 is not None:
             del image_base64
             logger.debug(f"[{request_id}] Base64 image data deleted")
+        
+        if extracted_base64 is not None:
+            del extracted_base64
         
         # Force garbage collection to ensure memory is freed
         # This is recommended for long-running processes (Requirement 13.3)
@@ -669,6 +719,59 @@ async def validation_exception_handler(request: Request, exc: ValidationError):
     return JSONResponse(
         status_code=400,
         content=exc.to_dict()
+    )
+
+
+@app.exception_handler(HTTPException)
+async def http_exception_handler(request: Request, exc: HTTPException):
+    detail = exc.detail
+    if isinstance(detail, dict):
+        if "error_code" in detail:
+            content = {
+                "status": detail.get("status", "error"),
+                "error_code": detail["error_code"],
+                "message": detail.get("message", str(detail)),
+                "retry": detail.get("retry", True)
+            }
+        elif "detail" in detail and isinstance(detail["detail"], dict) and "error_code" in detail["detail"]:
+            d = detail["detail"]
+            content = {
+                "status": d.get("status", "error"),
+                "error_code": d["error_code"],
+                "message": d.get("message", str(d)),
+                "retry": d.get("retry", True)
+            }
+        else:
+            error_code = "INVALID_REQUEST" if exc.status_code == 400 else "INTERNAL_ERROR"
+            content = {
+                "status": "error",
+                "error_code": error_code,
+                "message": str(detail),
+                "retry": True
+            }
+    else:
+        error_code = "INVALID_REQUEST" if exc.status_code == 400 else "INTERNAL_ERROR"
+        content = {
+            "status": "error",
+            "error_code": error_code,
+            "message": str(detail),
+            "retry": True
+        }
+    return JSONResponse(status_code=exc.status_code, content=content)
+
+
+@app.exception_handler(RequestValidationError)
+async def request_validation_exception_handler(request: Request, exc: RequestValidationError):
+    request_id = getattr(request.state, 'request_id', 'unknown')
+    logger.warning(f"[{request_id}] Request validation error: {exc}")
+    return JSONResponse(
+        status_code=400,
+        content={
+            "status": "error",
+            "error_code": ErrorCode.INVALID_REQUEST.value,
+            "message": f"Invalid request parameters: {str(exc)}",
+            "retry": True
+        }
     )
 
 

@@ -253,7 +253,7 @@
                             <path d="M0 20 Q 25 10, 50 20 T 100 20 T 150 20 T 200 20" stroke="var(--accent-teal)" stroke-width="2" fill="none" opacity="0.5"/>
                         </svg>
                     </div>
-                    <div class="golden-ratio-status" id="percentileStatus">Top 15% Symmetry</div>
+                    <div class="golden-ratio-status" id="percentileStatus" style="display: none;"></div>
                 </div>
 
                 <!-- Quality Checks Card -->
@@ -473,13 +473,13 @@
                         </svg>
                     </div>
                     <div class="lookalike-top-match">
-                        <div class="lookalike-rank-badge">#1</div>
-                        <div class="lookalike-image-container">
-                            <img id="celebrityImage" src="https://via.placeholder.com/150" alt="Top Match" class="lookalike-image" onerror="this.onerror=null;this.src='https://via.placeholder.com/150';"/>
-                            <div class="lookalike-badge" id="celebrityConfidence">92%</div>
+                        <div class="lookalike-rank-badge" id="celebrityRankBadge" style="display: none;">#1</div>
+                        <div class="lookalike-image-container" id="celebrityImageContainer" style="display: none;">
+                            <img id="celebrityImage" src="" alt="Top Match" class="lookalike-image" style="display: none;"/>
+                            <div class="lookalike-badge" id="celebrityConfidence" style="display: none;"></div>
                         </div>
-                        <div class="lookalike-name" id="celebrityName">Tom Holland</div>
-                        <div class="lookalike-subtitle" id="celebritySubtitle">Match Confidence</div>
+                        <div class="lookalike-name" id="celebrityName">No look-alike match found</div>
+                        <div class="lookalike-subtitle" id="celebritySubtitle" style="display: none;"></div>
                     </div>
                     <div class="lookalike-others" id="lookalikeOthers">
                         <!-- Populated dynamically with ranks #2 to #5 -->
@@ -493,7 +493,7 @@
                     <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
                     <path d="M12 8V12M12 16H12.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
                 </svg>
-                <p>This analysis is based on facial geometry and proportions, not skin color, ethnicity, or beauty standards.</p>
+                <p>This tool analyzes geometric facial proportions for educational purposes. Scores do not reflect beauty, worth, or health. Results are influenced by photo angle and quality.</p>
             </div>
         </div>
     </main>

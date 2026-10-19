@@ -90,10 +90,6 @@ class TestApiAnalyzeContract:
         guides = overlay.get("golden_ratio_guides")
         assert guides is not None
 
-    @pytest.mark.xfail(
-        strict=True,
-        reason="FM-BUG-028: Base64 in POST body fails because image_base64 parameter in main.py is typed as Query, not Body/Form."
-    )
     def test_base64_in_post_body_contract(self, client):
         with open(TEST_IMAGE_PATH, "rb") as f:
             b64_str = base64.b64encode(f.read()).decode("utf-8")

@@ -11,6 +11,12 @@ import numpy as np
 import base64
 from typing import Optional
 
+try:
+    import pillow_heif
+    pillow_heif.register_heif_opener()
+except ImportError:
+    pass
+
 from app.models.internal import ImageData
 from app.utils.errors import ValidationError, ErrorCode
 from app.utils.logger import get_logger
@@ -32,7 +38,7 @@ class ImageProcessor:
     - Validation (resolution, aspect ratio, format)
     """
     
-    SUPPORTED_FORMATS = {'JPEG', 'PNG', 'HEIC', 'WEBP', 'BMP', 'GIF'}
+    SUPPORTED_FORMATS = {'JPEG', 'PNG', 'HEIC', 'HEIF', 'WEBP', 'BMP', 'GIF'}
     
     def __init__(self):
         """Initialize ImageProcessor with configuration from settings."""

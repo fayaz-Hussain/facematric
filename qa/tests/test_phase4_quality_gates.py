@@ -125,7 +125,6 @@ class TestImageFormatHandling:
         assert resp.status_code == 200
         assert resp.json()["status"] == "success"
 
-    @pytest.mark.xfail(strict=True, reason="FM-BUG-006: pillow-heif is not registered in production backend; HEIC returns INVALID_IMAGE")
     def test_heic_acceptance(self, client, sample_face_bytes):
         im = Image.open(io.BytesIO(sample_face_bytes))
         heif_file = pillow_heif.from_pillow(im)
@@ -192,9 +191,8 @@ class TestValidationAndQualityGates:
 
 
 class TestBugRegressions:
-    """Strict xfail regressions for Phase 4 logged defects."""
+    """Regressions for Phase 4 logged defects."""
 
-    @pytest.mark.xfail(strict=True, reason="FM-BUG-027: Errors from _process_analysis are nested under 'detail' key instead of top-level ErrorResponse schema")
     def test_contract_top_level_error_schema_on_corrupt_file(self, client):
         resp = client.post("/api/analyze", files={"file": ("corrupt.jpg", b"corrupt", "image/jpeg")})
         assert resp.status_code == 400
@@ -205,7 +203,6 @@ class TestBugRegressions:
         assert "error_code" in body
         assert body["error_code"] == "INVALID_IMAGE"
 
-    @pytest.mark.xfail(strict=True, reason="FM-BUG-028: Base64 in POST body is ignored because route parameter is not declared as Form/Body")
     def test_base64_in_post_body_accepted(self, client, sample_face_bytes):
         im = Image.open(io.BytesIO(sample_face_bytes)).resize((300, 360))
         buf = io.BytesIO()

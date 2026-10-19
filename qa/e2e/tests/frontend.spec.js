@@ -170,8 +170,6 @@ test.describe('Frontend E2E Integration Suite', () => {
   });
 
   test('PRD disclaimer is present on every screen (Expected failure: FM-BUG-012)', async ({ page }) => {
-    test.fail(true, 'FM-BUG-012: The PRD Section 15 disclaimer is missing from analyzing.html and diverges in index/results.');
-
     const PRD_DISCLAIMER_SNIPPET = "This tool analyzes geometric facial proportions for educational purposes. Scores do not reflect beauty, worth, or health. Results are influenced by photo angle and quality.";
 
     // 1. Landing screen
@@ -191,8 +189,6 @@ test.describe('Frontend E2E Integration Suite', () => {
   });
 
   test('When celebrity_match is null, page must NOT show Tom Holland placeholder (Expected failure: FM-BUG-010)', async ({ page }) => {
-    test.fail(true, 'FM-BUG-010: When celebrity_match is null, results.html fails to update the card and leaves Tom Holland (92%) visible.');
-
     // Inject null celebrity result (as produced by Server 2 on port 8001)
     await page.goto(`${FRONTEND_URL}/index.html`);
     await page.evaluate(({ res, img }) => {

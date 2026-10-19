@@ -87,8 +87,8 @@ class ResultsManager {
         }
 
         const percentileStatus = document.getElementById('percentileStatus');
-        if (percentileStatus && percentileValue !== undefined) {
-            percentileStatus.textContent = `Higher than ${percentileValue}% of people`;
+        if (percentileStatus) {
+            percentileStatus.style.display = 'none';
         }
 
         const symmetryType = this.analysisData.face_symmetry_type;
@@ -156,33 +156,50 @@ class ResultsManager {
     }
 
     displayCelebrityMatch() {
-        const celebrity = this.analysisData.celebrity_match;
+        const celebrity = this.analysisData ? this.analysisData.celebrity_match : null;
         const nameEl = document.getElementById('celebrityName');
         const badgeEl = document.getElementById('celebrityConfidence');
         const subtitleEl = document.getElementById('celebritySubtitle');
         const imageEl = document.getElementById('celebrityImage');
+        const imageContainer = document.getElementById('celebrityImageContainer') || (imageEl ? imageEl.parentElement : null);
+        const rankBadge = document.getElementById('celebrityRankBadge') || document.querySelector('.lookalike-rank-badge');
+        const othersContainer = document.getElementById('lookalikeOthers');
         const backendBase = window.API_BASE_URL || (window.ENV && window.ENV.API_BASE_URL) || 'http://localhost:8000';
 
         if (celebrity && celebrity.name) {
-            if (nameEl) nameEl.textContent = celebrity.name.replace(/_/g, ' ');
+            if (rankBadge) rankBadge.style.display = 'inline-flex';
+            if (imageContainer) imageContainer.style.display = 'block';
+            if (nameEl) {
+                nameEl.textContent = celebrity.name.replace(/_/g, ' ');
+                nameEl.style.display = 'block';
+            }
             if (badgeEl && celebrity.confidence !== null && celebrity.confidence !== undefined) {
                 badgeEl.style.display = 'block';
                 badgeEl.textContent = `${Math.round(celebrity.confidence * 100)}%`;
+            } else if (badgeEl) {
+                badgeEl.style.display = 'none';
+                badgeEl.textContent = '';
             }
             if (subtitleEl) {
                 subtitleEl.textContent = `${celebrity.dataset_source || 'Celebrity'} Match`;
+                subtitleEl.style.display = 'block';
             }
-            if (imageEl && celebrity.thumbnail_url) {
-                let imgUrl = celebrity.thumbnail_url;
-                if (imgUrl.startsWith('/')) {
-                    imgUrl = backendBase + imgUrl;
+            if (imageEl) {
+                if (celebrity.thumbnail_url) {
+                    let imgUrl = celebrity.thumbnail_url;
+                    if (imgUrl.startsWith('/')) {
+                        imgUrl = backendBase + imgUrl;
+                    }
+                    imageEl.src = encodeURI(imgUrl);
+                    imageEl.alt = celebrity.name.replace(/_/g, ' ');
+                    imageEl.style.display = 'block';
+                } else {
+                    imageEl.style.display = 'none';
+                    imageEl.src = '';
                 }
-                imageEl.src = encodeURI(imgUrl);
-                imageEl.alt = celebrity.name.replace(/_/g, ' ');
             }
 
             // Populate #2 to #5 matches
-            const othersContainer = document.getElementById('lookalikeOthers');
             if (othersContainer) {
                 othersContainer.innerHTML = '';
                 const otherMatches = (celebrity.top_matches && celebrity.top_matches.length > 1)
@@ -194,16 +211,13 @@ class ResultsManager {
                     if (matchImg && matchImg.startsWith('/')) {
                         matchImg = backendBase + matchImg;
                     }
-                    const safeImgSrc = matchImg ? encodeURI(matchImg) : 'https://via.placeholder.com/40';
+                    const safeImgSrc = matchImg ? encodeURI(matchImg) : '';
                     const itemDiv = document.createElement('div');
                     itemDiv.className = 'lookalike-item';
                     itemDiv.innerHTML = `
                         <span class="lookalike-item-rank">${match.rank}</span>
                         <div class="lookalike-item-image-wrapper">
-                            <img src="${safeImgSrc}" 
-                                 alt="${match.name}" 
-                                 class="lookalike-item-image"
-                                 onerror="this.onerror=null;this.src='https://via.placeholder.com/40';"/>
+                            ${safeImgSrc ? `<img src="${safeImgSrc}" alt="${match.name}" class="lookalike-item-image" onerror="this.onerror=null;this.parentElement.style.display='none';"/>` : ''}
                         </div>
                         <div class="lookalike-item-info">
                             <span class="lookalike-item-name">${match.name}</span>
@@ -213,14 +227,31 @@ class ResultsManager {
                     othersContainer.appendChild(itemDiv);
                 });
             }
-        } else if (celebrity && celebrity.message) {
-            if (nameEl) nameEl.textContent = 'No Match Found';
-            if (badgeEl) badgeEl.style.display = 'none';
-            if (subtitleEl) subtitleEl.textContent = celebrity.message;
+        } else {
+            // When celebrity_match is null, has no name, or no match found
+            if (rankBadge) rankBadge.style.display = 'none';
+            if (imageContainer) imageContainer.style.display = 'none';
             if (imageEl) {
-                imageEl.src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="150" height="150" viewBox="0 0 24 24" fill="none" stroke="%2340CCA2" stroke-width="1.5"><circle cx="12" cy="8" r="4"/><path d="M6 20v-2a6 6 0 0 1 12 0v2"/></svg>';
+                imageEl.src = '';
+                imageEl.style.display = 'none';
             }
-            const othersContainer = document.getElementById('lookalikeOthers');
+            if (badgeEl) {
+                badgeEl.style.display = 'none';
+                badgeEl.textContent = '';
+            }
+            if (nameEl) {
+                nameEl.textContent = 'No look-alike match found';
+                nameEl.style.display = 'block';
+            }
+            if (subtitleEl) {
+                if (celebrity && celebrity.message) {
+                    subtitleEl.textContent = celebrity.message;
+                    subtitleEl.style.display = 'block';
+                } else {
+                    subtitleEl.textContent = '';
+                    subtitleEl.style.display = 'none';
+                }
+            }
             if (othersContainer) {
                 othersContainer.innerHTML = '';
             }
@@ -360,12 +391,25 @@ class ResultsManager {
     }
 
     showError(message) {
+        const disclaimerEl = document.querySelector('.results-disclaimer');
+        const disclaimerHtml = disclaimerEl ? disclaimerEl.outerHTML : `
+            <div class="results-disclaimer">
+                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
+                    <path d="M12 8V12M12 16H12.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+                <p>This tool analyzes geometric facial proportions for educational purposes. Scores do not reflect beauty, worth, or health. Results are influenced by photo angle and quality.</p>
+            </div>
+        `;
         const container = document.querySelector('main') || document.body;
         container.innerHTML = `
-            <div style="text-align: center; padding: 2rem; color: red;">
-                <h2>Error</h2>
-                <p>${message}</p>
-                <a href="index.html" style="color: var(--accent-teal);">Back to Home</a>
+            <div class="results-container">
+                <div style="text-align: center; padding: 2rem; color: red;">
+                    <h2>Error</h2>
+                    <p>${message}</p>
+                    <a href="index.html" style="color: var(--accent-teal);">Back to Home</a>
+                </div>
+                ${disclaimerHtml}
             </div>
         `;
     }

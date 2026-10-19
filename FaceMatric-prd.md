@@ -1,4 +1,4 @@
-﻿# PRD: FaceMatric
+# PRD: FaceMatric
 **Facial Symmetry Type & Golden Ratio Scoring App**
 
 Author: Fayaz Hussain
@@ -188,7 +188,7 @@ Backend returns structured response (see API Contract below) containing:
   "status": "success",
   "processing_time_ms": 1847,
   "results": {
-    "golden_ratio_score": 78.4,
+    "golden_ratio_score": 94.4,
     "percentile_rank": 73,
     "face_symmetry_type": "oval",
     "feature_breakdown": [
@@ -196,14 +196,14 @@ Backend returns structured response (see API Contract below) containing:
         "feature": "Face Length ÷ Face Width",
         "measured_ratio": 1.52,
         "ideal_ratio": 1.618,
-        "score": 82.3,
+        "score": 93.9,
         "deviation": -0.098
       },
       {
         "feature": "Eye Spacing ÷ Eye Width",
         "measured_ratio": 1.70,
         "ideal_ratio": 1.618,
-        "score": 74.1,
+        "score": 94.9,
         "deviation": 0.082
       }
       // ... 6 more features
