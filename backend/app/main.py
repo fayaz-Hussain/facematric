@@ -622,7 +622,10 @@ async def _process_analysis(
                 measured_ratio=fs.measured_ratio,
                 ideal_ratio=fs.ideal_ratio,
                 score=fs.score,
-                deviation=fs.deviation
+                deviation=fs.deviation,
+                ratio_left=float(fs.ratio_left) if isinstance(getattr(fs, "ratio_left", None), (int, float)) else None,
+                ratio_right=float(fs.ratio_right) if isinstance(getattr(fs, "ratio_right", None), (int, float)) else None,
+                asymmetry_pct=float(fs.asymmetry_pct) if isinstance(getattr(fs, "asymmetry_pct", None), (int, float)) else None,
             )
             for fs in golden_ratio_result.features
         ]

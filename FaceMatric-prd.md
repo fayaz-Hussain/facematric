@@ -115,7 +115,8 @@ All scoring is based purely on **golden ratio (φ = 1.618) comparisons** of faci
 3. Eye spacing ÷ eye width
 4. Nose width ÷ mouth width
 5. Mouth width ÷ face width
-6. Nose bridge to chin ÷ hairline to nose bridge
+6. Nose bridge to chin ÷ forehead top to nose bridge (vertical thirds, approx. hairline)
+   - *Limitation (FM-BUG-016):* MediaPipe Face Mesh does not detect actual hairline boundaries; landmark 10 (top center of the forehead mesh) is used as an anatomical proxy for the trichion. On individuals with high foreheads, receding hairlines, or balding, landmark 10 sits lower than the true biological hairline, causing forehead height to be approximate.
 7. Eye-to-eyebrow distance ÷ eye height
 8. Chin width ÷ nose width
 
@@ -124,17 +125,17 @@ All scoring is based purely on **golden ratio (φ = 1.618) comparisons** of faci
 - This gives a 0–100 score for each individual feature
 - Features closer to φ score higher
 
-**Handling outliers (asymmetric features):**
-- Calculate individual scores for symmetrical feature pairs (e.g., left eye vs. right eye spacing)
-- If one feature is asymmetric (scores low), it pulls down only its component score
-- Overall score is weighted average of all 8 feature scores
-- Display per-feature breakdown so users see which features scored high/low
+**Handling asymmetric features (bilateral handling, FM-BUG-009):**
+- For bilateral features (R2 Cheekbone-to-Jaw, R3 Eye Spacing, R7 Eye-to-Brow), left and right variants are measured independently.
+- The mean of the left and right measurements is used as the feature's single score in the overall average.
+- Left ratio, right ratio, and asymmetry percentage (`|left - right| / mean * 100`) are reported as informational metadata without creating additional weighted entries.
+- The breakdown always contains exactly 8 scored features.
 
 **Overall golden ratio score:**
-- Weighted average of all 8 feature scores
-- Weights are equal by default (can be tuned based on research)
-- Formula: `Overall Score = (Σ score_i) / 8`
-- **No synthetic "perfect" reference:** A score of 100 is theoretically perfect φ alignment but unattainable by any human face
+- Equal-weighted arithmetic mean of all 8 feature scores:
+  `Overall Score = (Σ score_i) / 8`
+- Rounded to one decimal place, bounded [0, 100].
+- **No synthetic "perfect" reference:** A score of 100 is theoretically perfect φ alignment but unattainable by any human face.
 
 **Percentile ranking:**
 - Maintain a reference distribution of scores from a calibration dataset (or bootstrap from initial users)

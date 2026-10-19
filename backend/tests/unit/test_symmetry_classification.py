@@ -54,10 +54,10 @@ def create_landmarks(overrides: dict = None) -> Landmarks:
     landmarks_array[152] = [320, 450, 0]   # FACE_BOTTOM (300px length)
     landmarks_array[234] = [200, 300, 0]   # FACE_LEFT
     landmarks_array[454] = [440, 300, 0]   # FACE_RIGHT (240px width)
-    landmarks_array[172] = [180, 380, 0]   # JAW_LEFT
-    landmarks_array[397] = [460, 380, 0]   # JAW_RIGHT
-    landmarks_array[427] = [180, 380, 0]   # JAW_LEFT_ALT
-    landmarks_array[200] = [460, 380, 0]   # JAW_RIGHT_ALT
+    landmarks_array[172] = [180, 420, 0]   # JAW_LEFT (rounded jawline, angle > 140°)
+    landmarks_array[397] = [460, 420, 0]   # JAW_RIGHT
+    landmarks_array[427] = [180, 420, 0]   # JAW_LEFT_ALT
+    landmarks_array[200] = [460, 420, 0]   # JAW_RIGHT_ALT
     landmarks_array[21] = [220, 200, 0]    # FOREHEAD_LEFT
     landmarks_array[251] = [420, 200, 0]   # FOREHEAD_RIGHT
     

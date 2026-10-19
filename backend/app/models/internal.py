@@ -168,12 +168,18 @@ class FeatureScoreInternal:
         ideal_ratio: Target golden ratio (φ = 1.618)
         score: Computed score in range [0, 100]
         deviation: Difference from ideal (measured_ratio - ideal_ratio)
+        ratio_left: Optional left-side ratio for bilateral features
+        ratio_right: Optional right-side ratio for bilateral features
+        asymmetry_pct: Optional asymmetry percentage (|left - right| / mean * 100)
     """
     feature: str
     measured_ratio: float
     ideal_ratio: float  # Always 1.618 for golden ratio
     score: float
     deviation: float
+    ratio_left: Optional[float] = None
+    ratio_right: Optional[float] = None
+    asymmetry_pct: Optional[float] = None
     
     def __post_init__(self):
         """Validate feature score data."""
@@ -207,9 +213,7 @@ class GoldenRatioResult:
     
     Attributes:
         overall_score: Mean of all feature scores, range [0, 100], rounded to 1 decimal
-        features: List of feature individual feature scores. Typically 8 for symmetric features,
-                  but may be >8 if bilateral features are detected as asymmetric (>10% difference).
-                  See Requirement 19.4 for asymmetric feature handling.
+        features: List of exactly 8 feature scores (FM-BUG-009).
     """
     overall_score: float
     features: List[FeatureScoreInternal]
@@ -219,14 +223,13 @@ class GoldenRatioResult:
         if not 0.0 <= self.overall_score <= 100.0:
             raise ValueError(f"Overall score must be in [0, 100], got {self.overall_score}")
         
-        # Requirement 5.1-5.8: Must have at least 8 features (may be >8 with asymmetric features)
-        # Requirement 19.4: Asymmetric features produce >8 entries if they differ by >10%
-        if len(self.features) < 8:
-            raise ValueError(f"Must have at least 8 features, got {len(self.features)}")
+        # Requirement 5.1-5.8 and FM-BUG-009: Must have exactly 8 features
+        if len(self.features) != 8:
+            raise ValueError(f"Must have at least 8 features (exactly 8 required), got {len(self.features)}")
         
         # Verify overall score is arithmetic mean (within rounding tolerance)
         feature_scores = [f.score for f in self.features]
-        expected_mean = sum(feature_scores) / len(feature_scores)
+        expected_mean = sum(feature_scores) / 8.0
         if abs(self.overall_score - expected_mean) > 0.15:  # Allow 0.15 tolerance for rounding
             raise ValueError(
                 f"Overall score {self.overall_score} is not arithmetic mean "

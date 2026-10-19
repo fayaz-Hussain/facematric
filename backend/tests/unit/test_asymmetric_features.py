@@ -218,13 +218,11 @@ class TestAsymmetryDetection:
         golden_ratio_scorer
     ):
         """
-        Test that an asymmetric face triggers asymmetry detection.
+        Test that an asymmetric face records bilateral details without splitting.
         
-        When left and right ratios differ by >10%, they should be scored
-        separately and returned as 2 entries.
-        
-        Requirement 19.2: Score each side independently if asymmetric (>10%)
-        Requirement 19.4: Display as separate entries if differ by >10%
+        FM-BUG-009: For bilateral ratios compute left and right, use their mean as the
+        feature's single value in the overall average, and report left, right and asymmetry %
+        as extra information that does not add entries to the breakdown list.
         """
         # Create a clear asymmetry: >10% difference
         left_ratio = 1.5
@@ -238,14 +236,13 @@ class TestAsymmetryDetection:
             avg_ratio
         )
         
-        # Should return 2 separate entries
-        assert len(scores) == 2, "Asymmetric feature should produce 2 score entries"
-        assert "(Left)" in scores[0].feature, "First score should be labeled (Left)"
-        assert "(Right)" in scores[1].feature, "Second score should be labeled (Right)"
-        
-        # Each should have the correct measured_ratio
-        assert scores[0].measured_ratio == round(left_ratio, 3)
-        assert scores[1].measured_ratio == round(right_ratio, 3)
+        # Should return exactly 1 entry (not split)
+        assert len(scores) == 1, "Asymmetric feature should produce 1 score entry"
+        assert scores[0].feature == "Asymmetric Test"
+        assert scores[0].ratio_left == pytest.approx(left_ratio, rel=1e-3)
+        assert scores[0].ratio_right == pytest.approx(right_ratio, rel=1e-3)
+        assert scores[0].asymmetry_pct is not None
+        assert scores[0].asymmetry_pct > 10.0
     
     def test_asymmetry_threshold_at_exactly_10_percent(
         self,
@@ -253,9 +250,6 @@ class TestAsymmetryDetection:
     ):
         """
         Test boundary condition: exactly 10% asymmetry.
-        
-        At exactly the 10% threshold, should not trigger split
-        (threshold is >10%, not >=10%).
         """
         left_ratio = 1.5
         right_ratio = left_ratio * (1.0 + ASYMMETRY_THRESHOLD)  # Exactly at threshold
@@ -268,8 +262,9 @@ class TestAsymmetryDetection:
             avg_ratio
         )
         
-        # Exactly at threshold should not split
-        assert len(scores) == 1, "At 10% threshold, should not split"
+        assert len(scores) == 1
+        assert scores[0].asymmetry_pct is not None
+        assert scores[0].asymmetry_pct == pytest.approx(10.0, abs=0.5)
     
     def test_asymmetry_threshold_just_over_10_percent(
         self,
@@ -278,7 +273,7 @@ class TestAsymmetryDetection:
         """
         Test boundary condition: just over 10% asymmetry.
         
-        Just above 10% should trigger split.
+        FM-BUG-009: Still returns 1 entry and records asymmetry_pct.
         """
         left_ratio = 1.5
         right_ratio = left_ratio * (1.0 + ASYMMETRY_THRESHOLD + 0.01)  # Slightly over threshold
@@ -291,8 +286,9 @@ class TestAsymmetryDetection:
             avg_ratio
         )
         
-        # Just over threshold should split
-        assert len(scores) == 2, "Just over 10% threshold, should split"
+        assert len(scores) == 1
+        assert scores[0].asymmetry_pct is not None
+        assert scores[0].asymmetry_pct > 10.0
 
 
 class TestOverallScoreWithAsymmetry:
@@ -504,11 +500,9 @@ class TestAsymmetryThresholdBehavior:
         )
         
         # Use small epsilon for floating point comparison
+        # FM-BUG-009: Breakdown always returns exactly 1 entry and records asymmetry_pct
         actual_asymmetry = abs(base_ratio - other_ratio) / avg_ratio
-        if actual_asymmetry > ASYMMETRY_THRESHOLD + 1e-6:
-            assert len(scores) == 2, \
-                f"Asymmetry {asymmetry_pct*100:.1f}% (actual: {actual_asymmetry*100:.2f}%) should split (>10%)"
-        else:
-            assert len(scores) == 1, \
-                f"Asymmetry {asymmetry_pct*100:.1f}% (actual: {actual_asymmetry*100:.2f}%) should not split (<=10%)"
+        assert len(scores) == 1
+        assert scores[0].asymmetry_pct is not None
+        assert scores[0].asymmetry_pct == pytest.approx(actual_asymmetry * 100.0, rel=1e-2)
 

@@ -64,6 +64,24 @@ class FeatureBreakdownItem(BaseModel):
         description="Deviation from ideal ratio (positive = above ideal, negative = below)",
         example=0.007
     )
+    
+    ratio_left: Optional[float] = Field(
+        None,
+        description="Left-side ratio measurement for bilateral features",
+        example=1.610
+    )
+    
+    ratio_right: Optional[float] = Field(
+        None,
+        description="Right-side ratio measurement for bilateral features",
+        example=1.626
+    )
+    
+    asymmetry_pct: Optional[float] = Field(
+        None,
+        description="Bilateral asymmetry percentage between left and right measurements",
+        example=1.0
+    )
 
 
 # Alias for backward compatibility

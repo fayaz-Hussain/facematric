@@ -14,8 +14,11 @@ import math
 import pytest
 import numpy as np
 
-# Ensure backend and qa roots are importable
-backend_path = os.path.abspath("backend")
+# Ensure repo root and backend are importable regardless of CWD
+repo_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
+if repo_root not in sys.path:
+    sys.path.insert(0, repo_root)
+backend_path = os.path.join(repo_root, "backend")
 if backend_path not in sys.path:
     sys.path.insert(0, backend_path)
 
@@ -141,12 +144,11 @@ class TestKnownBugs:
     These tests MUST fail until the user explicitly approves and implements fixes.
     """
 
-    @pytest.mark.xfail(strict=True, reason="FM-BUG-009: overall score divides by len(feature_scores), overweighting asymmetric features")
     def test_overall_score_equals_equal_weighted_mean_of_8_features(self, scorer, synthetic_landmarks):
         """
         PRD Step 3b and Requirement 7.1 mandate that the overall score is the equal-weighted
         arithmetic mean of the 8 features (12.5% each).
-        When bilateral features split (>10%), production divides by 9 or 10, biasing the overall score.
+        FM-BUG-009: Breakdown always contains exactly 8 entries; bilateral features are averaged.
         """
         # Create asymmetric eyes (asymmetry > 10% on Ratio 3)
         pts = synthetic_landmarks.points.copy()
@@ -158,8 +160,8 @@ class TestKnownBugs:
         lm = Landmarks(points=pts, confidence=1.0, image_width=640, image_height=480)
         res = scorer.score_all(lm)
         
-        # Breakdown has 9 entries
-        assert len(res.features) == 9, "Expected 9 entries due to bilateral split"
+        # Breakdown has exactly 8 entries
+        assert len(res.features) == 8, "Expected exactly 8 entries in feature breakdown (FM-BUG-009)"
         
         # Calculate true 8-feature equal-weighted mean (merging left/right into single 1/8 weight)
         feature_scores_map = {}
@@ -173,13 +175,12 @@ class TestKnownBugs:
         category_scores = [sum(scores)/len(scores) for scores in feature_scores_map.values()]
         expected_overall_score = round(sum(category_scores) / 8.0, 1)
         
-        # Production overall_score divides by 9, violating equal weighting
+        # Production overall_score divides by 8
         assert res.overall_score == expected_overall_score, (
             f"Overall score biased by asymmetric split: got {res.overall_score}, "
             f"expected equal-weighted 8-feature mean {expected_overall_score}"
         )
 
-    @pytest.mark.xfail(strict=True, reason="FM-BUG-007: ratio 7 right side hardcoded to ratio_left (ratio_right = ratio_left)")
     def test_ratio_7_measures_right_side_independently(self, scorer, synthetic_landmarks):
         """
         Ratio 7 claims bilateral measurement and asymmetry detection.

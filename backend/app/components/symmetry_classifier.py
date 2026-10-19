@@ -126,42 +126,46 @@ class SymmetryClassifier:
         cheekbone_width: float
     ) -> SymmetryType:
         """
-        Apply decision tree to classify face shape.
+        Exhaustive contiguous decision tree to classify face shape (FM-BUG-029).
         
-        Decision tree based on empirical thresholds:
-        - Oval: 1.4 <= ratio <= 1.6, rounded jaw (angle > 140°)
-        - Rectangle: ratio > 1.6, angular jaw (angle < 130°)
-        - Round: 0.9 <= ratio <= 1.1, rounded jaw (angle > 140°)
-        - Square: 0.9 <= ratio <= 1.1, angular jaw (angle < 130°)
-        - Heart: forehead significantly wider than jaw
-        - Diamond: cheekbones wider than forehead and jaw
+        No fall-through default.
+        1. Heart: Forehead significantly wider than jaw (forehead_width > jaw_width * 1.2)
+        2. Diamond: Cheekbones widest feature (cheekbone_width > max(forehead_width, jaw_width) * 1.1)
+        3. Contiguous bands on length/width ratio and jawline angle:
+           - ratio < 1.15:
+             - angle < 135.0° (angular)  -> SQUARE
+             - angle >= 135.0° (rounded) -> ROUND
+           - 1.15 <= ratio <= 1.45:
+             - angle < 135.0° (angular)  -> RECTANGLE
+             - angle >= 135.0° (rounded) -> OVAL
+           - ratio > 1.45:
+             - angle < 135.0° (angular)  -> RECTANGLE
+             - angle >= 135.0° (rounded) -> OVAL
         """
-        # Heart shape: Forehead notably wider than jaw
+        # Priority 1: Heart shape
         if forehead_width > jaw_width * 1.2:
             return SymmetryType.HEART
         
-        # Diamond shape: Cheekbones widest feature
+        # Priority 2: Diamond shape
         if cheekbone_width > max(forehead_width, jaw_width) * 1.1:
             return SymmetryType.DIAMOND
         
-        # Oval shape: Moderate ratio, rounded jawline
-        if 1.4 <= length_width_ratio <= 1.6 and jawline_angle > 140:
-            return SymmetryType.OVAL
-        
-        # Rectangle shape: Long face, angular jawline
-        if length_width_ratio > 1.6 and jawline_angle < 130:
-            return SymmetryType.RECTANGLE
-        
-        # Round shape: Similar length/width, rounded jawline
-        if 0.9 <= length_width_ratio <= 1.1 and jawline_angle > 140:
-            return SymmetryType.ROUND
-        
-        # Square shape: Similar length/width, angular jawline
-        if 0.9 <= length_width_ratio <= 1.1 and jawline_angle < 130:
-            return SymmetryType.SQUARE
-        
-        # Default to oval if borderline
-        return SymmetryType.OVAL
+        # Priority 3: Contiguous partitioning by ratio and jawline angle
+        if length_width_ratio < 1.15:
+            if jawline_angle < 135.0:
+                return SymmetryType.SQUARE
+            else:
+                return SymmetryType.ROUND
+        elif length_width_ratio <= 1.45:
+            if jawline_angle < 135.0:
+                return SymmetryType.RECTANGLE
+            else:
+                return SymmetryType.OVAL
+        else:
+            if jawline_angle < 135.0:
+                return SymmetryType.RECTANGLE
+            else:
+                return SymmetryType.OVAL
     
     def _euclidean_distance(self, p1: np.ndarray, p2: np.ndarray) -> float:
         """

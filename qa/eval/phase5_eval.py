@@ -23,6 +23,8 @@ from qa.eval.phase2_measurements import estimate_head_pose_yaw
 
 LANDMARK_TASK = os.path.join(PROJECT_ROOT, "backend", "data", "face_landmarker.task")
 DATASET_DIR = os.path.join(PROJECT_ROOT, "celebrity_dataset")
+if not os.path.exists(DATASET_DIR):
+    DATASET_DIR = r"C:\Users\FayazHussain\Desktop\FaceMatric\celebrity_dataset"
 REPORTS_DIR = os.path.join(PROJECT_ROOT, "qa", "reports")
 DATA_DIR = os.path.join(PROJECT_ROOT, "qa", "data")
 

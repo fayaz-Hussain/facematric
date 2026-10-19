@@ -63,6 +63,17 @@ def golden_face_landmarks():
     points[61] = [280, 200, 0]     # MOUTH_LEFT
     points[291] = [360, 200, 0]    # MOUTH_RIGHT
     
+    # Midline & Additional Facial Landmarks (Batches 2 & 3)
+    points[168] = [320, 100, 0]    # MIDLINE_GLABELLA
+    points[129] = [300, 160, 0]    # NOSE_LEFT (alare)
+    points[358] = [340, 160, 0]    # NOSE_RIGHT (alare)
+    points[386] = [420, 120, 0]    # RIGHT_EYE_TOP
+    points[374] = [420, 140, 0]    # RIGHT_EYE_BOTTOM
+    points[300] = [420, 110, 0]    # RIGHT_EYEBROW_BOTTOM
+    points[17] = [320, 220, 0]     # LOWER_LIP
+    points[148] = [280, 235, 0]    # chin contour left
+    points[377] = [360, 235, 0]    # chin contour right
+    
     landmarks = Landmarks(
         points=points,
         confidence=0.8,
@@ -107,6 +118,17 @@ def symmetrical_face_landmarks():
     # Mouth
     points[61] = [280, 300, 0]     # MOUTH_LEFT (mouth_width = 80)
     points[291] = [360, 300, 0]    # MOUTH_RIGHT
+
+    # Midline & Additional Facial Landmarks (Batches 2 & 3)
+    points[168] = [320, 150, 0]    # MIDLINE_GLABELLA
+    points[129] = [300, 240, 0]    # NOSE_LEFT (alare)
+    points[358] = [340, 240, 0]    # NOSE_RIGHT (alare)
+    points[386] = [415, 190, 0]    # RIGHT_EYE_TOP
+    points[374] = [415, 210, 0]    # RIGHT_EYE_BOTTOM
+    points[300] = [415, 175, 0]    # RIGHT_EYEBROW_BOTTOM
+    points[17] = [320, 340, 0]     # LOWER_LIP
+    points[148] = [180, 360, 0]    # chin contour left
+    points[377] = [460, 360, 0]    # chin contour right
     
     landmarks = Landmarks(
         points=points,
@@ -835,8 +857,7 @@ class TestAsymmetryThreshold:
         """
         Test bilateral feature with >10% asymmetry.
         
-        Should return 2 entries (left and right separately).
-        Requirement 19.4: >10% difference displays as separate entries
+        FM-BUG-009: Returns 1 entry with the mean ratio and records ratio_left, ratio_right, asymmetry_pct.
         """
         ratio_left = 1.618
         ratio_right = 1.820  # 12.5% higher
@@ -849,23 +870,22 @@ class TestAsymmetryThreshold:
             ratio_avg
         )
         
-        # Should return 2 entries (above 10% threshold)
-        assert len(results) == 2, \
-            f"Expected 2 entries for 12.5% asymmetry, got {len(results)}"
+        # Should return exactly 1 entry (overall breakdown has 8 features)
+        assert len(results) == 1, \
+            f"Expected 1 entry for bilateral feature under FM-BUG-009, got {len(results)}"
         
-        # Check that entries are named correctly
-        assert "Test Feature (Left)" in results[0].feature
-        assert "Test Feature (Right)" in results[1].feature
-        
-        # Check that left score is different from right score
-        assert results[0].score != results[1].score, \
-            "Left and right scores should differ for asymmetric feature"
+        # Check that entry retains bilateral metadata
+        assert results[0].feature == "Test Feature"
+        assert results[0].ratio_left == pytest.approx(ratio_left, rel=1e-3)
+        assert results[0].ratio_right == pytest.approx(ratio_right, rel=1e-3)
+        assert results[0].asymmetry_pct is not None
+        assert results[0].asymmetry_pct > 10.0
     
     def test_asymmetry_large_difference(self, scorer):
         """
-        Test bilateral feature with large asymmetry (20% difference).
+        Test bilateral feature with large asymmetry (30% difference).
         
-        Requirement 19.2: Each side scored independently
+        FM-BUG-009: Returns 1 entry with the mean ratio and records asymmetry percentage.
         """
         ratio_left = 1.618
         ratio_right = 2.106  # 30% higher (large asymmetry)
@@ -878,12 +898,10 @@ class TestAsymmetryThreshold:
             ratio_avg
         )
         
-        # Should return 2 entries
-        assert len(results) == 2
-        
-        # Left side (closer to φ) should score higher than right
-        assert results[0].score > results[1].score, \
-            "Left side (closer to φ) should score higher"
+        # Should return 1 entry
+        assert len(results) == 1
+        assert results[0].asymmetry_pct is not None
+        assert results[0].asymmetry_pct > 25.0
 
 
 class TestBoundaryAndEdgeCases:
@@ -970,6 +988,17 @@ class TestScoreDistribution:
         # Mouth: 10 / 16 ≈ 0.625 (inverse of ratio)
         points[61] = [304, 140, 0]     # mouth_left
         points[291] = [336, 140, 0]    # mouth_right (32px)
+        
+        # Midline & Additional Landmarks (Batches 2 & 3)
+        points[168] = [320, 60, 0]     # glabella
+        points[129] = [310, 120, 0]    # nose_left (alare)
+        points[358] = [330, 120, 0]    # nose_right (alare)
+        points[386] = [345, 95, 0]     # right eye top
+        points[374] = [345, 105, 0]    # right eye bottom
+        points[300] = [345, 85, 0]     # right eyebrow bottom
+        points[17] = [320, 145, 0]     # lower lip
+        points[148] = [300, 153.4, 0]  # chin contour left
+        points[377] = [340, 153.4, 0]  # chin contour right
         
         landmarks = Landmarks(
             points=points,

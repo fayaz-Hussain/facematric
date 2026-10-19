@@ -57,6 +57,10 @@ class GoldenRatioScorer:
     FACE_LEFT = 234
     FACE_RIGHT = 454
     
+    # Midline landmarks (FM-BUG-022)
+    MIDLINE_TOP = 168      # Glabella / mid-nasal bridge
+    MIDLINE_BOTTOM = 152   # Menton / chin tip
+    
     # Jaw
     JAW_LEFT = 172
     JAW_RIGHT = 397
@@ -68,116 +72,100 @@ class GoldenRatioScorer:
     RIGHT_EYE_OUTER = 263
     LEFT_EYE_TOP = 159
     LEFT_EYE_BOTTOM = 145
+    RIGHT_EYE_TOP = 386
+    RIGHT_EYE_BOTTOM = 374
     
-    # Eyebrows
+    # Eyebrows (FM-BUG-007)
     LEFT_EYEBROW_BOTTOM = 70
+    RIGHT_EYEBROW_BOTTOM = 300
     
-    # Nose
-    NOSE_LEFT = 219
-    NOSE_RIGHT = 439
+    # Nose - using widest outer alar wing landmarks (129, 358)
+    NOSE_LEFT = 129
+    NOSE_RIGHT = 358
     NOSE_BRIDGE = 6
     
     # Mouth
     MOUTH_LEFT = 61
     MOUTH_RIGHT = 291
     
+    # Chin landmarks (FM-BUG-026)
+    LIP_BOTTOM = 17
+    CHIN_TIP = 152
+    FACE_OVAL = [
+        10, 338, 297, 332, 284, 251, 389, 356, 454, 323, 361, 288, 397, 365, 379, 378,
+        400, 377, 152, 148, 176, 149, 150, 136, 172, 58, 132, 93, 234, 127, 162, 21,
+        54, 103, 67, 109
+    ]
     
     def score_all(self, landmarks: Landmarks) -> GoldenRatioResult:
         """
-        Compute all 8 ratios and generate scores, with asymmetric feature handling.
+        Compute all 8 ratios and generate scores, with equal-weighted 8-feature mean.
         
         For bilateral features (cheekbone-to-jaw, eye spacing, eye-to-brow), measures
-        left and right sides separately. If they differ by >10%, includes both in the
-        feature breakdown. Otherwise, uses the averaged ratio.
-        
-        Requirements: 19.1, 19.2, 19.3, 19.4 (Asymmetric Feature Handling)
+        left and right sides separately. Their mean is used as the single feature value
+        in the overall average, and left, right and asymmetry % are reported as extra
+        metadata (FM-BUG-009). The feature breakdown has exactly 8 features.
         
         Args:
             landmarks: 468 facial landmarks
         
         Returns:
-            GoldenRatioResult with overall score and feature breakdown.
-            Feature breakdown may contain >8 entries if asymmetric features are detected.
+            GoldenRatioResult with overall score and exactly 8 feature breakdown items.
         """
         points = landmarks.points
         
         # Compute all 8 ratios
         ratio_1 = self._measure_face_length_to_width(points)
         
-        # Ratio 2: Cheekbone to jaw - bilateral feature with asymmetry handling
-        # Requirement 19.1: Measure left and right sides separately
+        # Ratio 2: Cheekbone to jaw - bilateral feature measured to midline (FM-BUG-022)
         ratio_2_left, ratio_2_right = self._measure_cheekbone_to_jaw_bilateral(points)
-        ratio_2_avg = (ratio_2_left + ratio_2_right) / 2
+        ratio_2_avg = (ratio_2_left + ratio_2_right) / 2.0
         
-        # Ratio 3: Eye spacing - bilateral feature with asymmetry handling
-        # Requirement 19.1: Measure left and right eye widths separately
+        # Ratio 3: Eye spacing - bilateral feature
         ratio_3_left, ratio_3_right = self._measure_eye_spacing_to_width_bilateral(points)
-        ratio_3_avg = (ratio_3_left + ratio_3_right) / 2
+        ratio_3_avg = (ratio_3_left + ratio_3_right) / 2.0
         
         ratio_4 = self._measure_nose_to_mouth_width(points)
         ratio_5 = self._measure_mouth_to_face_width(points)
         ratio_6 = self._measure_vertical_thirds(points)
         
-        # Ratio 7: Eye to brow - bilateral feature with asymmetry handling
-        # Requirement 19.1: Measure left and right separately
+        # Ratio 7: Eye to brow - bilateral feature with mirror landmarks (FM-BUG-007)
         ratio_7_left, ratio_7_right = self._measure_eye_to_brow_distance_bilateral(points)
-        ratio_7_avg = (ratio_7_left + ratio_7_right) / 2
+        ratio_7_avg = (ratio_7_left + ratio_7_right) / 2.0
         
+        # Ratio 8: Chin width to nose width (FM-BUG-026)
         ratio_8 = self._measure_chin_to_nose_width(points)
         
-        # Score each ratio and handle asymmetry detection
-        # Requirement 19.3: Include asymmetric features using individual scores
-        feature_scores = []
+        # Build exactly 8 feature scores (FM-BUG-009)
+        feature_scores = [
+            self._score_feature("Face Length ÷ Face Width", ratio_1),
+            self._score_bilateral_feature_single(
+                "Cheekbone to Jaw Width",
+                ratio_2_left,
+                ratio_2_right,
+                ratio_2_avg
+            ),
+            self._score_bilateral_feature_single(
+                "Eye Spacing ÷ Eye Width",
+                ratio_3_left,
+                ratio_3_right,
+                ratio_3_avg
+            ),
+            self._score_feature("Nose Width ÷ Mouth Width", ratio_4),
+            self._score_feature("Mouth Width ÷ Face Width", ratio_5),
+            self._score_feature("Nose-Chin ÷ Hairline-Nose (Vertical Thirds) - Approx. Hairline", ratio_6),
+            self._score_bilateral_feature_single(
+                "Eye-Eyebrow Distance ÷ Eye Height",
+                ratio_7_left,
+                ratio_7_right,
+                ratio_7_avg
+            ),
+            self._score_feature("Chin Width ÷ Nose Width", ratio_8),
+        ]
         
-        # Ratio 1: Non-bilateral (symmetric)
-        feature_scores.append(self._score_feature("Face Length ÷ Face Width", ratio_1))
-        
-        # Ratio 2: Cheekbone to jaw with asymmetry detection
-        # Requirement 19.4: Display as separate entries if differ by >10%
-        feature_scores.extend(self._score_bilateral_feature(
-            "Cheekbone to Jaw Width",
-            ratio_2_left,
-            ratio_2_right,
-            ratio_2_avg
-        ))
-        
-        # Ratio 3: Eye spacing with asymmetry detection
-        feature_scores.extend(self._score_bilateral_feature(
-            "Eye Spacing ÷ Eye Width",
-            ratio_3_left,
-            ratio_3_right,
-            ratio_3_avg
-        ))
-        
-        # Ratio 4: Non-bilateral
-        feature_scores.append(self._score_feature("Nose Width ÷ Mouth Width", ratio_4))
-        
-        # Ratio 5: Non-bilateral
-        feature_scores.append(self._score_feature("Mouth Width ÷ Face Width", ratio_5))
-        
-        # Ratio 6: Non-bilateral
-        feature_scores.append(self._score_feature("Nose-Chin ÷ Hairline-Nose (Vertical Thirds)", ratio_6))
-        
-        # Ratio 7: Eye to brow with asymmetry detection
-        feature_scores.extend(self._score_bilateral_feature(
-            "Eye-Eyebrow Distance ÷ Eye Height",
-            ratio_7_left,
-            ratio_7_right,
-            ratio_7_avg
-        ))
-        
-        # Ratio 8: Non-bilateral
-        feature_scores.append(self._score_feature("Chin Width ÷ Nose Width", ratio_8))
-        
-        # Compute overall score
-        # Requirement 19.3: Include all feature scores (may be >8 if asymmetric)
-        # Requirement 7.1: Calculate as arithmetic mean
-        overall_score = sum(fs.score for fs in feature_scores) / len(feature_scores)
-        
-        # Requirement 7.3: Clamp to [0, 100] range
+        # Compute overall score as equal-weighted arithmetic mean of exactly 8 features
+        overall_score = sum(fs.score for fs in feature_scores) / 8.0
         overall_score = max(0.0, min(100.0, overall_score))
-        
-        # Requirement 7.2: Round to one decimal place
         overall_score = round(overall_score, 1)
         
         logger.info(
@@ -197,17 +185,10 @@ class GoldenRatioScorer:
         
         Formula: score = 100 × (1 - |ratio - φ| / φ)
         Clamped to [0, 100]
-        
-        Args:
-            feature_name: Name of the feature
-            ratio: Measured ratio value
-        
-        Returns:
-            FeatureScoreInternal with score and deviation
         """
         deviation = ratio - self.PHI
-        score = 100 * (1 - abs(deviation) / self.PHI)
-        score = max(0.0, min(100.0, score))  # Clamp to [0, 100]
+        score = 100.0 * (1.0 - abs(deviation) / self.PHI)
+        score = max(0.0, min(100.0, score))
         
         return FeatureScoreInternal(
             feature=feature_name,
@@ -215,6 +196,36 @@ class GoldenRatioScorer:
             ideal_ratio=self.PHI,
             score=round(score, 1),
             deviation=round(deviation, 3)
+        )
+    
+    def _score_bilateral_feature_single(
+        self,
+        feature_base_name: str,
+        ratio_left: float,
+        ratio_right: float,
+        ratio_avg: float
+    ) -> FeatureScoreInternal:
+        """
+        Score a bilateral feature using the mean ratio, reporting left/right and asymmetry % as extra metadata.
+        
+        FM-BUG-009: Left and right are averaged into one feature value, ensuring the overall
+        score is always the mean of exactly 8 features.
+        """
+        deviation = ratio_avg - self.PHI
+        score = 100.0 * (1.0 - abs(deviation) / self.PHI)
+        score = max(0.0, min(100.0, score))
+        
+        asymmetry_pct = (abs(ratio_left - ratio_right) / ratio_avg * 100.0) if ratio_avg > 0 else 0.0
+        
+        return FeatureScoreInternal(
+            feature=feature_base_name,
+            measured_ratio=round(ratio_avg, 3),
+            ideal_ratio=self.PHI,
+            score=round(score, 1),
+            deviation=round(deviation, 3),
+            ratio_left=round(ratio_left, 3),
+            ratio_right=round(ratio_right, 3),
+            asymmetry_pct=round(asymmetry_pct, 1)
         )
     
     def _score_bilateral_feature(
@@ -225,163 +236,31 @@ class GoldenRatioScorer:
         ratio_avg: float
     ) -> List[FeatureScoreInternal]:
         """
-        Score a bilateral feature, detecting and handling asymmetry.
-        
-        Requirement 19.1: Measure both left and right variants
-        Requirement 19.2: Score each side independently if asymmetric (>10% difference)
-        Requirement 19.3: Use individual scores in overall calculation
-        Requirement 19.4: Display as separate entries if differ by >10%
-        
-        Args:
-            feature_base_name: Base name of the feature (e.g., "Cheekbone to Jaw Width")
-            ratio_left: Left-side ratio measurement
-            ratio_right: Right-side ratio measurement
-            ratio_avg: Averaged ratio (used if symmetric)
-        
-        Returns:
-            List of FeatureScoreInternal - either 1 entry (symmetric) or 2 entries (asymmetric)
+        Backward-compatible helper returning a list with the single averaged bilateral feature.
         """
-        # Calculate the percentage difference
-        # Using average as denominator: |left - right| / avg
-        if ratio_avg > 0:
-            asymmetry_pct = abs(ratio_left - ratio_right) / ratio_avg
-        else:
-            asymmetry_pct = 0.0
-        
-        # Requirement 19.4: If asymmetry >10%, display as separate entries
-        if asymmetry_pct > ASYMMETRY_THRESHOLD:
-            logger.debug(
-                f"Asymmetry detected in '{feature_base_name}': "
-                f"left={ratio_left:.3f}, right={ratio_right:.3f}, "
-                f"asymmetry={asymmetry_pct*100:.1f}%"
-            )
-            # Requirement 19.2: Score each side independently
-            return [
-                self._score_feature(f"{feature_base_name} (Left)", ratio_left),
-                self._score_feature(f"{feature_base_name} (Right)", ratio_right),
-            ]
-        else:
-            # Symmetric: use averaged ratio
-            return [
-                self._score_feature(feature_base_name, ratio_avg),
-            ]
+        return [self._score_bilateral_feature_single(feature_base_name, ratio_left, ratio_right, ratio_avg)]
     
     def _euclidean_distance(self, p1: np.ndarray, p2: np.ndarray) -> float:
         """Compute 2D Euclidean distance."""
         return float(np.sqrt((p1[0] - p2[0])**2 + (p1[1] - p2[1])**2))
     
-    # === Bilateral Feature Measurement Methods ===
-    # These measure left and right sides separately for asymmetry detection
-    
-    def _measure_cheekbone_to_jaw_bilateral(self, points: np.ndarray) -> Tuple[float, float]:
+    def _perpendicular_distance_to_line(
+        self, point: np.ndarray, line_p1: np.ndarray, line_p2: np.ndarray
+    ) -> float:
         """
-        Ratio 2: Cheekbone to Jaw Width - bilateral measurement.
+        Compute 2D perpendicular distance from point (x0, y0) to line passing through line_p1 and line_p2.
         
-        Requirement 19.1: Measure both left and right variants
-        
-        Measures the ratio of cheekbone width to jaw width separately for
-        left and right sides.
-        
-        Left side: Left cheekbone (234) to left jaw (172)
-        Right side: Right cheekbone (454) to right jaw (397)
-        
-        Returns:
-            Tuple of (left_ratio, right_ratio)
+        Formula: |(x2 - x1)(y1 - y0) - (x1 - x0)(y2 - y1)| / sqrt((x2 - x1)^2 + (y2 - y1)^2)
         """
-        # Left side
-        left_cheekbone = points[self.FACE_LEFT]
-        left_jaw = points[self.JAW_LEFT]
-        left_width = self._euclidean_distance(left_cheekbone, left_jaw)
-        
-        # Right side
-        right_cheekbone = points[self.FACE_RIGHT]
-        right_jaw = points[self.JAW_RIGHT]
-        right_width = self._euclidean_distance(right_cheekbone, right_jaw)
-        
-        # Use full face width as denominator
-        face_width = self._euclidean_distance(
-            points[self.FACE_LEFT],
-            points[self.FACE_RIGHT]
-        )
-        
-        if face_width == 0:
-            return 0.0, 0.0
-        
-        left_ratio = left_width / face_width
-        right_ratio = right_width / face_width
-        
-        return left_ratio, right_ratio
-    
-    def _measure_eye_spacing_to_width_bilateral(self, points: np.ndarray) -> Tuple[float, float]:
-        """
-        Ratio 3: Eye Spacing - bilateral measurement.
-        
-        Requirement 19.1: Measure both left and right eye widths
-        
-        Measures left eye width and right eye width separately relative to
-        the distance between the eyes.
-        
-        Left eye width: From LEFT_EYE_OUTER to LEFT_EYE_INNER
-        Right eye width: From RIGHT_EYE_OUTER to RIGHT_EYE_INNER
-        Eye spacing: From LEFT_EYE_INNER to RIGHT_EYE_INNER
-        
-        Returns:
-            Tuple of (left_ratio, right_ratio) where each ratio is
-            eye_spacing / eye_width for that side
-        """
-        # Eye spacing (between inner corners)
-        left_eye_inner = points[self.LEFT_EYE_INNER]
-        right_eye_inner = points[self.RIGHT_EYE_INNER]
-        eye_spacing = self._euclidean_distance(left_eye_inner, right_eye_inner)
-        
-        if eye_spacing == 0:
-            return 0.0, 0.0
-        
-        # Left eye width
-        left_eye_outer = points[self.LEFT_EYE_OUTER]
-        left_eye_width = self._euclidean_distance(left_eye_outer, left_eye_inner)
-        left_ratio = eye_spacing / left_eye_width if left_eye_width > 0 else 0.0
-        
-        # Right eye width
-        right_eye_outer = points[self.RIGHT_EYE_OUTER]
-        right_eye_width = self._euclidean_distance(right_eye_outer, right_eye_inner)
-        right_ratio = eye_spacing / right_eye_width if right_eye_width > 0 else 0.0
-        
-        return left_ratio, right_ratio
-    
-    def _measure_eye_to_brow_distance_bilateral(self, points: np.ndarray) -> Tuple[float, float]:
-        """
-        Ratio 7: Eye-Eyebrow Distance - bilateral measurement.
-        
-        Requirement 19.1: Measure both left and right sides separately
-        
-        Measures the distance from eye to eyebrow relative to eye height,
-        separately for left and right sides.
-        
-        Left side: Distance from LEFT_EYE_TOP to LEFT_EYEBROW_BOTTOM
-                   relative to eye height (TOP to BOTTOM)
-        Right side: Distance from RIGHT_EYE_TOP to RIGHT_EYEBROW_BOTTOM
-                    relative to eye height (TOP to BOTTOM)
-        
-        Returns:
-            Tuple of (left_ratio, right_ratio)
-        """
-        # Left side
-        left_eye_top = points[self.LEFT_EYE_TOP]
-        left_eyebrow_bottom = points[self.LEFT_EYEBROW_BOTTOM]
-        left_eye_to_brow = self._euclidean_distance(left_eye_top, left_eyebrow_bottom)
-        
-        left_eye_bottom = points[self.LEFT_EYE_BOTTOM]
-        left_eye_height = self._euclidean_distance(left_eye_top, left_eye_bottom)
-        
-        left_ratio = left_eye_to_brow / left_eye_height if left_eye_height > 0 else 0.0
-        
-        # Right side - using left eye landmarks as proxy (MediaPipe doesn't have distinct right eyebrow indices)
-        # For now, we use the same landmarks as left for consistency
-        # In a more sophisticated implementation, we could calculate right-side equivalents
-        right_ratio = left_ratio  # Placeholder: would need right-side specific landmarks
-        
-        return left_ratio, right_ratio
+        x0, y0 = float(point[0]), float(point[1])
+        x1, y1 = float(line_p1[0]), float(line_p1[1])
+        x2, y2 = float(line_p2[0]), float(line_p2[1])
+        dx = x2 - x1
+        dy = y2 - y1
+        line_len = np.sqrt(dx * dx + dy * dy)
+        if line_len == 0.0:
+            return float(np.sqrt((x0 - x1) ** 2 + (y0 - y1) ** 2))
+        return float(abs(dx * (y1 - y0) - (x1 - x0) * dy) / line_len)
     
     # === Ratio Measurement Methods ===
     
@@ -397,30 +276,60 @@ class GoldenRatioScorer:
         
         return length / width if width > 0 else 0.0
     
-    def _measure_face_to_jaw_width(self, points: np.ndarray) -> float:
-        """Ratio 2: Face width ÷ jaw width."""
-        face_left = points[self.FACE_LEFT]
-        face_right = points[self.FACE_RIGHT]
-        jaw_left = points[self.JAW_LEFT]
-        jaw_right = points[self.JAW_RIGHT]
+    def _measure_cheekbone_to_jaw_bilateral(self, points: np.ndarray) -> Tuple[float, float]:
+        """
+        Ratio 2 (Bilateral): Cheekbone width to jaw width measured independently relative to facial midline.
         
-        face_width = self._euclidean_distance(face_left, face_right)
-        jaw_width = self._euclidean_distance(jaw_left, jaw_right)
+        FM-BUG-022: Midline is defined by the line passing through landmarks 168 (glabella) and 152 (menton).
+        Left side: perpendicular distance of left cheek (234) to midline / left jaw (172) to midline.
+        Right side: perpendicular distance of right cheek (454) to midline / right jaw (397) to midline.
+        """
+        p_top = points[self.MIDLINE_TOP][:2]
+        p_bot = points[self.MIDLINE_BOTTOM][:2]
         
-        return face_width / jaw_width if jaw_width > 0 else 0.0
+        d_cheek_left = self._perpendicular_distance_to_line(points[self.FACE_LEFT][:2], p_top, p_bot)
+        d_jaw_left = self._perpendicular_distance_to_line(points[self.JAW_LEFT][:2], p_top, p_bot)
+        
+        d_cheek_right = self._perpendicular_distance_to_line(points[self.FACE_RIGHT][:2], p_top, p_bot)
+        d_jaw_right = self._perpendicular_distance_to_line(points[self.JAW_RIGHT][:2], p_top, p_bot)
+        
+        ratio_left = d_cheek_left / d_jaw_left if d_jaw_left > 0 else 0.0
+        ratio_right = d_cheek_right / d_jaw_right if d_jaw_right > 0 else 0.0
+        
+        return ratio_left, ratio_right
     
-    def _measure_eye_spacing_to_width(self, points: np.ndarray) -> float:
-        """Ratio 3: Eye spacing ÷ eye width."""
-        # Distance between inner corners of eyes
+    def _measure_face_to_jaw_width(self, points: np.ndarray) -> float:
+        """Ratio 2: Face width ÷ jaw width (mean of bilateral measurements)."""
+        r_l, r_r = self._measure_cheekbone_to_jaw_bilateral(points)
+        return (r_l + r_r) / 2.0
+    
+    def _measure_eye_spacing_to_width_bilateral(self, points: np.ndarray) -> Tuple[float, float]:
+        """
+        Ratio 3 (Bilateral): Eye spacing to eye width, with left and right eye widths measured separately.
+        
+        Left eye width: From LEFT_EYE_OUTER (33) to LEFT_EYE_INNER (133)
+        Right eye width: From RIGHT_EYE_INNER (362) to RIGHT_EYE_OUTER (263)
+        Eye spacing: From LEFT_EYE_INNER (133) to RIGHT_EYE_INNER (362)
+        """
         left_eye_inner = points[self.LEFT_EYE_INNER]
         right_eye_inner = points[self.RIGHT_EYE_INNER]
         eye_spacing = self._euclidean_distance(left_eye_inner, right_eye_inner)
         
-        # Width of one eye (left eye)
         left_eye_outer = points[self.LEFT_EYE_OUTER]
-        eye_width = self._euclidean_distance(left_eye_outer, left_eye_inner)
+        left_eye_width = self._euclidean_distance(left_eye_outer, left_eye_inner)
         
-        return eye_spacing / eye_width if eye_width > 0 else 0.0
+        right_eye_outer = points[self.RIGHT_EYE_OUTER]
+        right_eye_width = self._euclidean_distance(right_eye_outer, right_eye_inner)
+        
+        ratio_left = eye_spacing / left_eye_width if left_eye_width > 0 else 0.0
+        ratio_right = eye_spacing / right_eye_width if right_eye_width > 0 else 0.0
+        
+        return ratio_left, ratio_right
+    
+    def _measure_eye_spacing_to_width(self, points: np.ndarray) -> float:
+        """Ratio 3: Eye spacing ÷ eye width (mean of bilateral measurements)."""
+        r_l, r_r = self._measure_eye_spacing_to_width_bilateral(points)
+        return (r_l + r_r) / 2.0
     
     def _measure_nose_to_mouth_width(self, points: np.ndarray) -> float:
         """Ratio 4: Nose width ÷ mouth width."""
@@ -447,7 +356,11 @@ class GoldenRatioScorer:
         return mouth_width / face_width if face_width > 0 else 0.0
     
     def _measure_vertical_thirds(self, points: np.ndarray) -> float:
-        """Ratio 6: Nose-chin distance ÷ hairline-nose distance (vertical thirds)."""
+        """
+        Ratio 6: Lower third ÷ forehead-nose distance (vertical thirds).
+        
+        FM-BUG-016: MediaPipe landmark 10 approximates the anatomical trichion (hairline).
+        """
         hairline = points[self.FACE_TOP]
         nose_bridge = points[self.NOSE_BRIDGE]
         chin = points[self.FACE_BOTTOM]
@@ -457,123 +370,65 @@ class GoldenRatioScorer:
         
         return lower_two_thirds / upper_third if upper_third > 0 else 0.0
     
+    def _measure_eye_to_brow_distance_bilateral(self, points: np.ndarray) -> Tuple[float, float]:
+        """
+        Ratio 7 (Bilateral): Eye-eyebrow distance ÷ eye height measured independently for left and right.
+        
+        FM-BUG-007: Left side uses eyebrow 70, eye top 159, eye bottom 145.
+        Right side uses mirror landmarks: eyebrow 300, eye top 386, eye bottom 374.
+        """
+        left_eye_top = points[self.LEFT_EYE_TOP]
+        left_eyebrow_bottom = points[self.LEFT_EYEBROW_BOTTOM]
+        left_eye_to_brow = self._euclidean_distance(left_eye_top, left_eyebrow_bottom)
+        
+        left_eye_bottom = points[self.LEFT_EYE_BOTTOM]
+        left_eye_height = self._euclidean_distance(left_eye_top, left_eye_bottom)
+        
+        ratio_left = left_eye_to_brow / left_eye_height if left_eye_height > 0 else 0.0
+        
+        right_eye_top = points[self.RIGHT_EYE_TOP]
+        right_eyebrow_bottom = points[self.RIGHT_EYEBROW_BOTTOM]
+        right_eye_to_brow = self._euclidean_distance(right_eye_top, right_eyebrow_bottom)
+        
+        right_eye_bottom = points[self.RIGHT_EYE_BOTTOM]
+        right_eye_height = self._euclidean_distance(right_eye_top, right_eye_bottom)
+        
+        ratio_right = right_eye_to_brow / right_eye_height if right_eye_height > 0 else 0.0
+        
+        return ratio_left, ratio_right
+    
     def _measure_eye_to_brow_distance(self, points: np.ndarray) -> float:
-        """Ratio 7: Eye-eyebrow distance ÷ eye height."""
-        eye_top = points[self.LEFT_EYE_TOP]
-        eyebrow_bottom = points[self.LEFT_EYEBROW_BOTTOM]
-        eye_to_brow = self._euclidean_distance(eye_top, eyebrow_bottom)
-        
-        eye_bottom = points[self.LEFT_EYE_BOTTOM]
-        eye_height = self._euclidean_distance(eye_top, eye_bottom)
-        
-        return eye_to_brow / eye_height if eye_height > 0 else 0.0
+        """Ratio 7: Eye-eyebrow distance ÷ eye height (mean of bilateral measurements)."""
+        r_l, r_r = self._measure_eye_to_brow_distance_bilateral(points)
+        return (r_l + r_r) / 2.0
     
     def _measure_chin_to_nose_width(self, points: np.ndarray) -> float:
-        """Ratio 8: Chin width ÷ nose width."""
-        # Chin width uses jaw points
-        jaw_left = points[self.JAW_LEFT]
-        jaw_right = points[self.JAW_RIGHT]
-        chin_width = self._euclidean_distance(jaw_left, jaw_right)
+        """
+        Ratio 8: Chin width ÷ nose width.
         
-        nose_left = points[self.NOSE_LEFT]
-        nose_right = points[self.NOSE_RIGHT]
-        nose_width = self._euclidean_distance(nose_left, nose_right)
+        FM-BUG-026: Chin width is the horizontal distance across the chin at the height
+        halfway between the lower lip (landmark 17) and the chin tip (landmark 152),
+        taken from the left and right face-oval contour points nearest to that height.
+        Nose width is the horizontal breadth across the outer alar wings (landmarks 129 to 358).
+        """
+        y_lip = points[self.LIP_BOTTOM][1]
+        y_chin = points[self.CHIN_TIP][1]
+        y_mid = (y_lip + y_chin) / 2.0
+        x_mid = points[self.CHIN_TIP][0]
+        
+        left_contour = [idx for idx in self.FACE_OVAL if points[idx][0] < x_mid]
+        right_contour = [idx for idx in self.FACE_OVAL if points[idx][0] >= x_mid]
+        
+        if not left_contour or not right_contour:
+            return 0.0
+            
+        best_left = min(left_contour, key=lambda idx: abs(points[idx][1] - y_mid))
+        best_right = min(right_contour, key=lambda idx: abs(points[idx][1] - y_mid))
+        
+        chin_width = abs(float(points[best_right][0] - points[best_left][0]))
+        nose_width = self._euclidean_distance(points[self.NOSE_LEFT], points[self.NOSE_RIGHT])
         
         return chin_width / nose_width if nose_width > 0 else 0.0
-    
-    # === Bilateral Feature Measurement Methods (Requirements 19.1-19.4) ===
-    
-    def _measure_cheekbone_to_jaw_bilateral(
-        self, points: np.ndarray
-    ) -> Tuple[float, float]:
-        """
-        Ratio 2 (Bilateral): Face width ÷ jaw width for left and right sides separately.
-        
-        Requirement 19.1: Measure left and right sides independently.
-        
-        Returns:
-            Tuple of (ratio_left, ratio_right)
-        """
-        face_left = points[self.FACE_LEFT]
-        face_right = points[self.FACE_RIGHT]
-        
-        # Left side: face width left to center
-        face_center = (face_left + face_right) / 2
-        face_width_left = self._euclidean_distance(face_left, face_center)
-        
-        # Right side: face width center to right
-        face_width_right = self._euclidean_distance(face_center, face_right)
-        
-        # Jaw measurements
-        jaw_left = points[self.JAW_LEFT]
-        jaw_right = points[self.JAW_RIGHT]
-        jaw_center = (jaw_left + jaw_right) / 2
-        
-        jaw_width_left = self._euclidean_distance(jaw_left, jaw_center)
-        jaw_width_right = self._euclidean_distance(jaw_center, jaw_right)
-        
-        ratio_left = face_width_left / jaw_width_left if jaw_width_left > 0 else 0.0
-        ratio_right = face_width_right / jaw_width_right if jaw_width_right > 0 else 0.0
-        
-        return ratio_left, ratio_right
-    
-    def _measure_eye_spacing_to_width_bilateral(
-        self, points: np.ndarray
-    ) -> Tuple[float, float]:
-        """
-        Ratio 3 (Bilateral): Eye spacing to eye width, with left and right eye widths measured separately.
-        
-        Requirement 19.1: Measure left and right eye widths independently.
-        
-        Returns:
-            Tuple of (ratio_left, ratio_right)
-        """
-        # Eye spacing (interocular distance) - shared measurement
-        left_eye_inner = points[self.LEFT_EYE_INNER]
-        right_eye_inner = points[self.RIGHT_EYE_INNER]
-        eye_spacing = self._euclidean_distance(left_eye_inner, right_eye_inner)
-        
-        # Left eye width
-        left_eye_outer = points[self.LEFT_EYE_OUTER]
-        left_eye_width = self._euclidean_distance(left_eye_outer, left_eye_inner)
-        
-        # Right eye width
-        right_eye_outer = points[self.RIGHT_EYE_OUTER]
-        right_eye_width = self._euclidean_distance(right_eye_outer, right_eye_inner)
-        
-        ratio_left = eye_spacing / left_eye_width if left_eye_width > 0 else 0.0
-        ratio_right = eye_spacing / right_eye_width if right_eye_width > 0 else 0.0
-        
-        return ratio_left, ratio_right
-    
-    def _measure_eye_to_brow_distance_bilateral(
-        self, points: np.ndarray
-    ) -> Tuple[float, float]:
-        """
-        Ratio 7 (Bilateral): Eye-eyebrow distance ÷ eye height, measured separately for left and right.
-        
-        Requirement 19.1: Measure left and right sides independently.
-        
-        Returns:
-            Tuple of (ratio_left, ratio_right)
-        """
-        # This implementation measures the left eye currently.
-        # For bilateral, we would need right eyebrow and eye landmarks.
-        # Using left eye for both since right eyebrow landmarks aren't clearly defined.
-        # This is a simplified bilateral implementation.
-        
-        eye_top = points[self.LEFT_EYE_TOP]
-        eyebrow_bottom = points[self.LEFT_EYEBROW_BOTTOM]
-        eye_to_brow = self._euclidean_distance(eye_top, eyebrow_bottom)
-        
-        eye_bottom = points[self.LEFT_EYE_BOTTOM]
-        eye_height = self._euclidean_distance(eye_top, eye_bottom)
-        
-        ratio_left = eye_to_brow / eye_height if eye_height > 0 else 0.0
-        # For symmetry with bilateral handling, return same value twice
-        ratio_right = ratio_left
-        
-        return ratio_left, ratio_right
 
 
 # Global instance

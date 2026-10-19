@@ -339,7 +339,7 @@ class TestOverallScoreCalculation:
             "Eye Spacing ÷ Eye Width",  # Bilateral feature
             "Nose Width ÷ Mouth Width",
             "Mouth Width ÷ Face Width",
-            "Nose-Chin ÷ Hairline-Nose (Vertical Thirds)",
+            "Nose-Chin ÷ Hairline-Nose (Vertical Thirds) - Approx. Hairline",
             "Eye-Eyebrow Distance ÷ Eye Height",  # Bilateral feature
             "Chin Width ÷ Nose Width",
         ]

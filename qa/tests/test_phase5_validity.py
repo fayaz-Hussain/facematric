@@ -79,112 +79,98 @@ class TestFaceShapeClassifierBoundaries:
         assert shape_below != SymmetryType.DIAMOND
         assert shape_below == SymmetryType.OVAL
 
-    def test_oval_shape_boundary(self, classifier):
-        # Condition: 1.4 <= ratio <= 1.6 and angle > 140
-        # Exactly at ratio 1.40, angle 140.1 -> OVAL
-        shape_min = classifier._classify_by_ratios(
-            length_width_ratio=1.40,
-            jawline_angle=140.1,
-            forehead_width=100.0,
-            jaw_width=100.0,
-            cheekbone_width=100.0
-        )
-        assert shape_min == SymmetryType.OVAL
-
-        # Exactly at ratio 1.60, angle 140.1 -> OVAL
-        shape_max = classifier._classify_by_ratios(
-            length_width_ratio=1.60,
-            jawline_angle=140.1,
-            forehead_width=100.0,
-            jaw_width=100.0,
-            cheekbone_width=100.0
-        )
-        assert shape_max == SymmetryType.OVAL
-
-        # Angle at 140.0 (not > 140) -> falls to default OVAL
-        shape_boundary_angle = classifier._classify_by_ratios(
-            length_width_ratio=1.50,
-            jawline_angle=140.0,
-            forehead_width=100.0,
-            jaw_width=100.0,
-            cheekbone_width=100.0
-        )
-        assert shape_boundary_angle == SymmetryType.OVAL
-
-    def test_rectangle_shape_boundary(self, classifier):
-        # Condition: ratio > 1.6 and angle < 130
-        # Above boundary (ratio 1.61, angle 129.9) -> RECTANGLE
-        shape_rect = classifier._classify_by_ratios(
-            length_width_ratio=1.61,
-            jawline_angle=129.9,
-            forehead_width=100.0,
-            jaw_width=100.0,
-            cheekbone_width=100.0
-        )
-        assert shape_rect == SymmetryType.RECTANGLE
-
-        # Ratio at 1.60 (not > 1.6) -> does not trigger rectangle
-        shape_ratio_fail = classifier._classify_by_ratios(
-            length_width_ratio=1.60,
-            jawline_angle=129.9,
-            forehead_width=100.0,
-            jaw_width=100.0,
-            cheekbone_width=100.0
-        )
-        assert shape_ratio_fail != SymmetryType.RECTANGLE
-
-        # Angle at 130.0 (not < 130) -> does not trigger rectangle (falls to default OVAL)
-        shape_angle_fail = classifier._classify_by_ratios(
-            length_width_ratio=1.65,
-            jawline_angle=130.0,
-            forehead_width=100.0,
-            jaw_width=100.0,
-            cheekbone_width=100.0
-        )
-        assert shape_angle_fail == SymmetryType.OVAL
-
-    def test_round_and_square_boundaries(self, classifier):
-        # Round Condition: 0.9 <= ratio <= 1.1 and angle > 140
-        shape_round = classifier._classify_by_ratios(
-            length_width_ratio=1.00,
-            jawline_angle=140.1,
-            forehead_width=100.0,
-            jaw_width=100.0,
-            cheekbone_width=100.0
-        )
-        assert shape_round == SymmetryType.ROUND
-
-        # Square Condition: 0.9 <= ratio <= 1.1 and angle < 130
+    def test_ratio_boundary_1_15(self, classifier):
+        # Boundary at length_width_ratio = 1.15
+        # Angular jaw (< 135.0): ratio < 1.15 is SQUARE, ratio >= 1.15 is RECTANGLE
         shape_square = classifier._classify_by_ratios(
-            length_width_ratio=1.00,
-            jawline_angle=129.9,
+            length_width_ratio=1.149,
+            jawline_angle=130.0,
             forehead_width=100.0,
             jaw_width=100.0,
             cheekbone_width=100.0
         )
         assert shape_square == SymmetryType.SQUARE
 
-        # Dead Zone for square/round: angle between 130 and 140 -> defaults to OVAL
-        shape_deadzone = classifier._classify_by_ratios(
+        shape_rect = classifier._classify_by_ratios(
+            length_width_ratio=1.150,
+            jawline_angle=130.0,
+            forehead_width=100.0,
+            jaw_width=100.0,
+            cheekbone_width=100.0
+        )
+        assert shape_rect == SymmetryType.RECTANGLE
+
+        # Rounded jaw (>= 135.0): ratio < 1.15 is ROUND, ratio >= 1.15 is OVAL
+        shape_round = classifier._classify_by_ratios(
+            length_width_ratio=1.149,
+            jawline_angle=140.0,
+            forehead_width=100.0,
+            jaw_width=100.0,
+            cheekbone_width=100.0
+        )
+        assert shape_round == SymmetryType.ROUND
+
+        shape_oval = classifier._classify_by_ratios(
+            length_width_ratio=1.150,
+            jawline_angle=140.0,
+            forehead_width=100.0,
+            jaw_width=100.0,
+            cheekbone_width=100.0
+        )
+        assert shape_oval == SymmetryType.OVAL
+
+    def test_jawline_angle_boundary_135(self, classifier):
+        # Boundary at jawline_angle = 135.0
+        # For ratio < 1.15: angle < 135 is SQUARE, angle >= 135 is ROUND
+        shape_square = classifier._classify_by_ratios(
+            length_width_ratio=1.00,
+            jawline_angle=134.9,
+            forehead_width=100.0,
+            jaw_width=100.0,
+            cheekbone_width=100.0
+        )
+        assert shape_square == SymmetryType.SQUARE
+
+        shape_round = classifier._classify_by_ratios(
             length_width_ratio=1.00,
             jawline_angle=135.0,
             forehead_width=100.0,
             jaw_width=100.0,
             cheekbone_width=100.0
         )
-        assert shape_deadzone == SymmetryType.OVAL
+        assert shape_round == SymmetryType.ROUND
 
-    def test_unclassified_middle_ratio_defaults_to_oval(self, classifier):
-        # Ratio 1.25 is between [0.9, 1.1] (round/square) and [1.4, 1.6] (oval)
-        # Without heart or diamond features, it must fall through to OVAL default
-        shape_default = classifier._classify_by_ratios(
-            length_width_ratio=1.25,
+        # For ratio >= 1.15: angle < 135 is RECTANGLE, angle >= 135 is OVAL
+        shape_rect = classifier._classify_by_ratios(
+            length_width_ratio=1.30,
+            jawline_angle=134.9,
+            forehead_width=100.0,
+            jaw_width=100.0,
+            cheekbone_width=100.0
+        )
+        assert shape_rect == SymmetryType.RECTANGLE
+
+        shape_oval = classifier._classify_by_ratios(
+            length_width_ratio=1.30,
             jawline_angle=135.0,
             forehead_width=100.0,
             jaw_width=100.0,
             cheekbone_width=100.0
         )
-        assert shape_default == SymmetryType.OVAL
+        assert shape_oval == SymmetryType.OVAL
+
+    def test_exhaustive_contiguous_classification(self, classifier):
+        # Verify no deadzones exist across a grid of ratios and angles
+        for ratio in [0.8, 1.0, 1.149, 1.15, 1.25, 1.45, 1.451, 1.8]:
+            for angle in [110.0, 134.9, 135.0, 140.0, 160.0]:
+                shape = classifier._classify_by_ratios(
+                    length_width_ratio=ratio,
+                    jawline_angle=angle,
+                    forehead_width=100.0,
+                    jaw_width=100.0,
+                    cheekbone_width=100.0
+                )
+                assert shape in [SymmetryType.SQUARE, SymmetryType.ROUND, SymmetryType.RECTANGLE, SymmetryType.OVAL]
 
 
 class TestScoreIndependenceFromFaceShape:
