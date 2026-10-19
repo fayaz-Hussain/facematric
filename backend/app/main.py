@@ -272,9 +272,16 @@ async def analyze_face(
         
         except ValidationError as e:
             logger.warning(f"[{request_id}] Validation error: {e.error_code.value}")
+            content = e.to_dict()
+            content["detail"] = {
+                "status": content.get("status", "error"),
+                "error_code": content.get("error_code"),
+                "message": content.get("message"),
+                "retry": content.get("retry", True)
+            }
             return JSONResponse(
                 status_code=400,
-                content=e.to_dict()
+                content=content
             )
         
         except Exception as e:
@@ -285,14 +292,27 @@ async def analyze_face(
                     "status": "error",
                     "error_code": ErrorCode.INTERNAL_ERROR.value,
                     "message": get_error_message(ErrorCode.INTERNAL_ERROR),
-                    "retry": True
+                    "retry": True,
+                    "detail": {
+                        "status": "error",
+                        "error_code": ErrorCode.INTERNAL_ERROR.value,
+                        "message": get_error_message(ErrorCode.INTERNAL_ERROR),
+                        "retry": True
+                    }
                 }
             )
     except ValidationError as e:
         logger.warning(f"[{request_id}] Validation error: {e.error_code.value}")
+        content = e.to_dict()
+        content["detail"] = {
+            "status": content.get("status", "error"),
+            "error_code": content.get("error_code"),
+            "message": content.get("message"),
+            "retry": content.get("retry", True)
+        }
         return JSONResponse(
             status_code=400,
-            content=e.to_dict()
+            content=content
         )
     finally:
         # === PRIVACY-PRESERVING CLEANUP ===
@@ -716,9 +736,16 @@ async def validation_exception_handler(request: Request, exc: ValidationError):
         }
     )
     
+    content = exc.to_dict()
+    content["detail"] = {
+        "status": content.get("status", "error"),
+        "error_code": content.get("error_code"),
+        "message": content.get("message"),
+        "retry": content.get("retry", True)
+    }
     return JSONResponse(
         status_code=400,
-        content=exc.to_dict()
+        content=content
     )
 
 
@@ -731,7 +758,8 @@ async def http_exception_handler(request: Request, exc: HTTPException):
                 "status": detail.get("status", "error"),
                 "error_code": detail["error_code"],
                 "message": detail.get("message", str(detail)),
-                "retry": detail.get("retry", True)
+                "retry": detail.get("retry", True),
+                "detail": detail
             }
         elif "detail" in detail and isinstance(detail["detail"], dict) and "error_code" in detail["detail"]:
             d = detail["detail"]
@@ -739,7 +767,8 @@ async def http_exception_handler(request: Request, exc: HTTPException):
                 "status": d.get("status", "error"),
                 "error_code": d["error_code"],
                 "message": d.get("message", str(d)),
-                "retry": d.get("retry", True)
+                "retry": d.get("retry", True),
+                "detail": d
             }
         else:
             error_code = "INVALID_REQUEST" if exc.status_code == 400 else "INTERNAL_ERROR"
@@ -747,7 +776,8 @@ async def http_exception_handler(request: Request, exc: HTTPException):
                 "status": "error",
                 "error_code": error_code,
                 "message": str(detail),
-                "retry": True
+                "retry": True,
+                "detail": str(detail)
             }
     else:
         error_code = "INVALID_REQUEST" if exc.status_code == 400 else "INTERNAL_ERROR"
@@ -755,7 +785,8 @@ async def http_exception_handler(request: Request, exc: HTTPException):
             "status": "error",
             "error_code": error_code,
             "message": str(detail),
-            "retry": True
+            "retry": True,
+            "detail": str(detail)
         }
     return JSONResponse(status_code=exc.status_code, content=content)
 
