@@ -238,7 +238,8 @@ class CelebrityMatcher:
     
     async def find_match(
         self,
-        image_data: ImageData
+        image_data: ImageData,
+        landmarks: Optional[Any] = None
     ) -> Optional[CelebrityMatchInternal]:
         """
         Find best celebrity match for user face.
@@ -248,6 +249,7 @@ class CelebrityMatcher:
         
         Args:
             image_data: Normalized user image
+            landmarks: Optional face landmarks
         
         Returns:
             CelebrityMatchInternal if match found, None if no match or failure
@@ -255,13 +257,7 @@ class CelebrityMatcher:
         # Check if celebrity matching is available
         if not self.is_available:
             logger.warning("Celebrity matching unavailable: database not loaded")
-            return CelebrityMatchInternal(
-                name=None,
-                confidence=None,
-                dataset_source=None,
-                thumbnail_path=None,
-                message="Celebrity matching is temporarily unavailable"
-            )
+            return None
         
         # Initialize FaceNet model
         if not self._initialize_facenet():
@@ -270,7 +266,7 @@ class CelebrityMatcher:
         
         try:
             # Generate embedding for user face
-            user_embedding = self._generate_embedding(image_data)
+            user_embedding = self._generate_embedding(image_data, landmarks=landmarks)
             
             # Find best match
             best_match = self._find_best_match(user_embedding)
@@ -285,37 +281,21 @@ class CelebrityMatcher:
     def get_best_match(
         self,
         ranked_celebrities: list,
-        threshold: float = 0.55
+        threshold: Optional[float] = None
     ) -> dict:
         """
         Get the best celebrity match from a ranked list with confidence thresholding.
-        
-        Task 8.4: Confidence thresholding method
-        
-        Takes output from task 8.3 (ranked celebrities) and applies threshold.
         
         Args:
             ranked_celebrities: List of (name, score) tuples sorted by score (descending)
             threshold: Minimum confidence score required (default: 0.55)
         
         Returns:
-            dict with either:
-            - On match (score >= threshold): 
-              {
-                "name": str,
-                "confidence_score": float (rounded to 2 decimals),
-                "dataset_source": str,
-                "thumbnail_url": str
-              }
-            - No match (score < threshold or empty list):
-              {
-                "name": None,
-                "message": "No close match found in our dataset"
-              }
-        
-        Raises:
-            ValueError: If threshold not in [0.0, 1.0]
+            dict with match details or no match message
         """
+        if threshold is None:
+            threshold = settings.celebrity_threshold_strong
+            
         # Validate threshold
         if not 0.0 <= threshold <= 1.0:
             raise ValueError(f"Threshold must be in [0.0, 1.0], got {threshold}")
@@ -330,12 +310,13 @@ class CelebrityMatcher:
         
         # Extract highest-scoring celebrity (first element)
         best_celebrity_name, best_score = ranked_celebrities[0]
+        unrounded_score = float(best_score)
         
         # Check if score meets threshold
-        if best_score >= threshold:
+        if unrounded_score >= threshold:
             logger.info(
                 f"get_best_match: Match found - {best_celebrity_name} "
-                f"(score: {best_score:.2f}, threshold: {threshold})"
+                f"(score: {unrounded_score:.4f}, threshold: {threshold})"
             )
             
             # Get celebrity data from celebrity_embeddings or full_database
@@ -345,18 +326,30 @@ class CelebrityMatcher:
             elif self.full_database:
                 celeb_data = self.full_database.get(best_celebrity_name, {})
             
+            display_name = celeb_data.get("display_name")
+            if not display_name:
+                display_name = best_celebrity_name.replace("_", " ").title()
+                
             thumbnail_url = celeb_data.get("thumbnail_url") or celeb_data.get("thumbnail_path") or ""
+            sim_2dec = round(unrounded_score, 2)
+            
+            if unrounded_score >= settings.celebrity_threshold_strong:
+                strength = "strong"
+            elif unrounded_score >= settings.celebrity_threshold_moderate:
+                strength = "moderate"
+            else:
+                strength = "weak"
             
             return {
-                "name": best_celebrity_name.replace("_", " "),  # Format name
-                "confidence_score": round(best_score, 2),
+                "name": display_name,
+                "confidence_score": sim_2dec,
                 "dataset_source": celeb_data.get("dataset_source", "Unknown"),
                 "thumbnail_url": thumbnail_url
             }
         else:
             logger.info(
                 f"get_best_match: No confident match - {best_celebrity_name} "
-                f"(score: {best_score:.2f}, threshold: {threshold})"
+                f"(score: {unrounded_score:.4f}, threshold: {threshold})"
             )
             
             return {
@@ -364,29 +357,31 @@ class CelebrityMatcher:
                 "message": "No close match found in our dataset"
             }
     
-    def _generate_embedding(self, image_data: ImageData) -> np.ndarray:
+    def _generate_embedding(self, image_data: ImageData, landmarks: Optional[Any] = None) -> np.ndarray:
         """
-        Generate FaceNet embedding for image.
+        Generate FaceNet embedding for image using face crop with margin.
         
         Args:
             image_data: Normalized image data
+            landmarks: Optional face landmarks
         
         Returns:
-            128-dimensional embedding vector
+            512-dimensional embedding vector
         
         Raises:
             Exception: If embedding generation fails
         """
-        # DeepFace expects image as numpy array (RGB format)
-        # Our ImageData already has this format
-        
         try:
             import cv2
-            # Resize image to (160, 160) and normalize to [-1, 1]
-            rgb_img = image_data.array
-            resized = cv2.resize(rgb_img, (160, 160))
-            normalized = (resized.astype(np.float32) / 127.5) - 1.0
-            batch = np.expand_dims(normalized, axis=0)
+            from app.utils.face_crop import extract_face_crop
+            
+            # Crop image to face bounding box plus 10% margin, resized to (160, 160) and normalized to [-1, 1]
+            crop = extract_face_crop(image_data.array, landmarks=landmarks, margin=0.10)
+            if crop is None:
+                resized = cv2.resize(image_data.array, (160, 160))
+                crop = (resized.astype(np.float32) / 127.5) - 1.0
+
+            batch = np.expand_dims(crop, axis=0)
             
             # Predict 512-D embedding
             if hasattr(self.facenet_model, "predict"):
@@ -474,13 +469,13 @@ class CelebrityMatcher:
     
     def _find_best_match(self, user_embedding: np.ndarray) -> CelebrityMatchInternal:
         """
-        Find best matching celebrity using cosine similarity.
+        Find best matching celebrity using raw cosine similarity and strength bands.
         
         Args:
-            user_embedding: User face embedding
+            user_embedding: User face embedding (512-D unit vector)
         
         Returns:
-            CelebrityMatchInternal with best match or no-match message
+            CelebrityMatchInternal with best match or weak resemblance message
         """
         # Use rank_celebrities to get sorted list
         rankings = self.rank_celebrities(user_embedding)
@@ -490,55 +485,87 @@ class CelebrityMatcher:
             logger.warning("No celebrities available for matching")
             return CelebrityMatchInternal(
                 name=None,
+                similarity=None,
+                strength=None,
                 confidence=None,
                 dataset_source=None,
                 thumbnail_path=None,
-                message="No close match found in our dataset"
+                message="No close resemblance found",
+                top_matches=[]
             )
         
         # Extract top 5 matches
         top_5_rankings = rankings[:5]
         top_matches_list = []
         
-        # Calculate human-intuitive similarity percentage:
-        # In 512-D FaceNet embeddings, cosine similarities between different faces range ~0.0 to ~0.50.
-        # We scale cosine similarity to an intuitive 70-95% look-alike match rating.
-        best_celebrity, best_similarity = top_5_rankings[0]
-        c1 = max(0.60, min(0.96, 0.50 + float(best_similarity)))
-        last_conf = c1
-        
         for rank_idx, (celeb_name, sim) in enumerate(top_5_rankings, start=1):
             celeb_data = self.celebrity_embeddings.get(celeb_name, {})
-            if rank_idx == 1:
-                conf = round(c1, 2)
-            else:
-                raw_scaled = 0.50 + float(sim)
-                max_allowed = last_conf - 0.02
-                conf = round(max(0.55, min(max_allowed, raw_scaled)), 2)
-            last_conf = conf
+            unrounded_sim = float(sim)
+            sim_2dec = round(unrounded_sim, 2)
             
+            if unrounded_sim >= settings.celebrity_threshold_strong:
+                strength = "strong"
+            elif unrounded_sim >= settings.celebrity_threshold_moderate:
+                strength = "moderate"
+            else:
+                strength = "weak"
+                
+            display_name = celeb_data.get("display_name")
+            if not display_name:
+                display_name = celeb_name.replace("_", " ").title()
+                
             top_matches_list.append({
                 "rank": rank_idx,
-                "name": celeb_name.replace("_", " "),
-                "confidence": conf,
+                "name": display_name,
+                "similarity": sim_2dec,
+                "strength": strength,
+                "confidence": sim_2dec,
                 "dataset_source": celeb_data.get("dataset_source", "Unknown"),
                 "thumbnail_path": celeb_data.get("thumbnail_path", "")
             })
         
+        best_celebrity, best_similarity = top_5_rankings[0]
+        unrounded_best = float(best_similarity)
+        best_sim_2dec = round(unrounded_best, 2)
+        
+        if unrounded_best >= settings.celebrity_threshold_strong:
+            best_strength = "strong"
+        elif unrounded_best >= settings.celebrity_threshold_moderate:
+            best_strength = "moderate"
+        else:
+            best_strength = "weak"
+            
         logger.info(
             f"Celebrity top match: {best_celebrity} "
-            f"(cosine: {best_similarity:.2f}, calibrated: {c1*100:.1f}%), "
+            f"(cosine: {unrounded_best:.4f}, strength: {best_strength}), "
             f"top 5 matches generated: {len(top_matches_list)}"
         )
         
-        return CelebrityMatchInternal(
-            name=top_matches_list[0]["name"],
-            confidence=top_matches_list[0]["confidence"],
-            dataset_source=top_matches_list[0]["dataset_source"],
-            thumbnail_path=top_matches_list[0]["thumbnail_path"],
-            message=None,
-            top_matches=top_matches_list
-        )
+        if best_strength == "weak":
+            logger.info(
+                f"Best celebrity match is weak (< {settings.celebrity_threshold_moderate}); returning no close resemblance"
+            )
+            return CelebrityMatchInternal(
+                name=None,
+                similarity=best_sim_2dec,
+                strength="weak",
+                confidence=best_sim_2dec,
+                dataset_source=None,
+                thumbnail_path=None,
+                message="No close resemblance found",
+                top_matches=top_matches_list
+            )
+        else:
+            return CelebrityMatchInternal(
+                name=top_matches_list[0]["name"],
+                similarity=best_sim_2dec,
+                strength=best_strength,
+                confidence=best_sim_2dec,
+                dataset_source=top_matches_list[0]["dataset_source"],
+                thumbnail_path=top_matches_list[0]["thumbnail_path"],
+                message=None,
+                top_matches=top_matches_list
+            )
     
     
 # Global instance (lazy-loaded)

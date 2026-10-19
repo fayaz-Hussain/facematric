@@ -146,9 +146,12 @@ Run in parallel using the same uploaded photo:
 - **FaceNet** generates a face embedding vector
 - Compare against precomputed celebrity embedding database
 - Calculate cosine similarity scores
-- **Confidence threshold: 0.55**
-  - If best match has confidence ≥ 0.55 → display match with confidence percentage
-  - If best match has confidence < 0.55 → display "No close match found in our dataset"
+- **Thresholds & Strength Bands:**
+  - Strong: raw cosine similarity ≥ 0.55 (strength: "strong")
+  - Moderate: 0.40 to 0.55 (strength: "moderate")
+  - Weak: < 0.40 (strength: "weak")
+  - Returns raw cosine similarity (2 decimals) as `similarity`, match `strength`, and deprecated alias `confidence`.
+  - If best match is weak (< 0.40), `name` is null and `message` is "No close resemblance found".
 - Where a celebrity has multiple photos, embeddings are averaged into a single representative vector
 
 **Step 4 — Timeout Handling**
@@ -165,7 +168,7 @@ Backend returns structured response (see API Contract below) containing:
 - Face symmetry type (classification label)
 - Per-feature breakdown with individual scores
 - Visual overlay data (landmarks, golden ratio guides)
-- Celebrity match (if confidence ≥ 0.55, else null)
+- Celebrity match (consistent object shape when matcher ran, with similarity, strength, and confidence; name is null if weak < 0.40; null only when matcher is unavailable)
 
 ## 9. API Contract
 
@@ -218,15 +221,28 @@ Backend returns structured response (see API Contract below) containing:
     },
     "celebrity_match": {
       "name": "Shahrukh Khan",
+      "similarity": 0.67,
+      "strength": "strong",
       "confidence": 0.67,
       "dataset_source": "Bollywood Celeb Dataset",
-      "thumbnail_url": "/celebrities/shahrukh_khan.jpg"
+      "thumbnail_url": "/celebrities/shahrukh_khan.jpg",
+      "top_matches": [
+        {
+          "rank": 1,
+          "name": "Shahrukh Khan",
+          "similarity": 0.67,
+          "strength": "strong",
+          "confidence": 0.67,
+          "dataset_source": "Bollywood Celeb Dataset",
+          "thumbnail_url": "/celebrities/shahrukh_khan.jpg"
+        }
+      ]
     }
   }
 }
 ```
 
-**Response (No Celebrity Match - 200 OK):**
+**Response (Weak Resemblance / No Confident Match — 200 OK):**
 ```json
 {
   "status": "success",
@@ -234,12 +250,19 @@ Backend returns structured response (see API Contract below) containing:
     // ... (same as above)
     "celebrity_match": {
       "name": null,
-      "confidence": 0.42,
-      "message": "No close match found in our dataset"
+      "similarity": 0.35,
+      "strength": "weak",
+      "confidence": 0.35,
+      "dataset_source": null,
+      "thumbnail_url": null,
+      "message": "No close resemblance found",
+      "top_matches": []
     }
   }
 }
 ```
+*(Note: `celebrity_match` is `null` only when the celebrity matcher is unavailable or `include_celebrity_match` is `false`.)*
+
 
 **Response (Error - 400 Bad Request):**
 ```json

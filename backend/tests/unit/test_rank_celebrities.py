@@ -315,6 +315,8 @@ class TestRankCelebritiesIntegration:
         if best_score >= matcher_with_sample_db.confidence_threshold:
             assert match.name == best_name.replace("_", " ")
             assert match.confidence == round(best_score, 2)
+            assert match.similarity == round(best_score, 2)
+            assert match.strength in ("strong", "moderate", "weak")
 
 
 if __name__ == "__main__":

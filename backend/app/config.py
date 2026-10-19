@@ -40,8 +40,10 @@ class Settings(BaseSettings):
     # Golden Ratio
     phi: float = 1.618
     
-    # Celebrity Matching
-    celebrity_confidence_threshold: float = 0.35
+    # Celebrity Matching Thresholds
+    celebrity_threshold_strong: float = 0.55
+    celebrity_threshold_moderate: float = 0.40
+    celebrity_confidence_threshold: float = 0.55  # Deprecated alias pointing to strong threshold
     
     # MediaPipe Configuration
     mediapipe_max_faces: int = 1

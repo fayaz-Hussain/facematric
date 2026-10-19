@@ -415,10 +415,13 @@ class TestResponseStructure:
         # Create a proper mock object for celebrity match
         celebrity_match_result = Mock()
         celebrity_match_result.name = "Test Celebrity"
+        celebrity_match_result.similarity = 0.65
+        celebrity_match_result.strength = "strong"
         celebrity_match_result.confidence = 0.65
         celebrity_match_result.dataset_source = "Western"
         celebrity_match_result.thumbnail_path = "/path/to/thumbnail.jpg"
         celebrity_match_result.message = None
+        celebrity_match_result.top_matches = []
         
         mock_matcher.find_match = AsyncMock(return_value=celebrity_match_result)
         mock_get_matcher.return_value = mock_matcher

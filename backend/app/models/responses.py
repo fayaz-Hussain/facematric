@@ -115,7 +115,9 @@ class CelebrityMatchItem(BaseModel):
     """Individual celebrity match in ranked look-alike results."""
     rank: int = Field(..., description="Rank position (1 to 5)", example=1)
     name: str = Field(..., description="Celebrity name", example="Shah Rukh Khan")
-    confidence: float = Field(..., description="Match confidence score (0.0-1.0)", example=0.92)
+    similarity: float = Field(..., description="Raw cosine similarity score (2 decimals)", example=0.72)
+    strength: str = Field(..., description="Match strength: strong, moderate, or weak", example="strong")
+    confidence: float = Field(..., description="Deprecated alias equal to similarity", example=0.72)
     dataset_source: Optional[str] = Field(None, description="Dataset source", example="Bollywood")
     thumbnail_url: Optional[str] = Field(None, description="URL to thumbnail image")
 
@@ -125,15 +127,27 @@ class CelebrityMatch(BaseModel):
     
     name: Optional[str] = Field(
         None,
-        description="Celebrity name (null if confidence below threshold)",
+        description="Celebrity name (null if best match is weak)",
         example="Ryan Gosling"
     )
     
+    similarity: Optional[float] = Field(
+        None,
+        description="Raw cosine similarity score (2 decimals)",
+        example=0.72
+    )
+
+    strength: Optional[str] = Field(
+        None,
+        description="Match strength: strong (>= 0.55), moderate (0.40 to 0.55), or weak (< 0.40)",
+        example="strong"
+    )
+
     confidence: Optional[float] = Field(
         None,
         ge=0.0,
         le=1.0,
-        description="Match confidence score (0.0-1.0, null if no match)",
+        description="Deprecated alias equal to similarity",
         example=0.72
     )
     
@@ -151,8 +165,8 @@ class CelebrityMatch(BaseModel):
     
     message: Optional[str] = Field(
         None,
-        description="Message when no match found or feature unavailable",
-        example="No close match found in our dataset"
+        description="Message when no match found or weak resemblance",
+        example="No close resemblance found"
     )
 
     top_matches: Optional[List[CelebrityMatchItem]] = Field(

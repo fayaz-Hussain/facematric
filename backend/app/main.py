@@ -69,6 +69,10 @@ app.add_middleware(
 # Mount static files for celebrity thumbnails
 import os
 celebrity_dataset_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "celebrity_dataset"))
+if not os.path.exists(celebrity_dataset_dir):
+    alt_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..", "FaceMatric", "celebrity_dataset"))
+    if os.path.exists(alt_dir):
+        celebrity_dataset_dir = alt_dir
 if os.path.exists(celebrity_dataset_dir):
     app.mount("/celebrities", StaticFiles(directory=celebrity_dataset_dir), name="celebrities")
 
@@ -595,7 +599,10 @@ async def _process_analysis(
                 
                 celebrity_matcher = get_celebrity_matcher()
                 if celebrity_matcher.is_available:
-                    celebrity_match_internal = await celebrity_matcher.find_match(image_data=image_data)
+                    celebrity_match_internal = await celebrity_matcher.find_match(
+                        image_data=image_data,
+                        landmarks=landmarks
+                    )
                     metadata.add_component_time("celebrity_matching", int((time.time() - component_start) * 1000))
                 else:
                     logger.debug(f"[{request_id}] Celebrity matching skipped: unavailable")
@@ -650,11 +657,14 @@ async def _process_analysis(
             if celebrity_match_internal.top_matches:
                 for item in celebrity_match_internal.top_matches:
                     item_thumb = normalize_thumb_url(item.get("thumbnail_path"))
+                    sim_val = item.get("similarity", item.get("confidence", 0.0))
                     top_matches.append(
                         CelebrityMatchItem(
                             rank=item["rank"],
                             name=item["name"],
-                            confidence=item["confidence"],
+                            similarity=sim_val,
+                            strength=item.get("strength", "weak"),
+                            confidence=item.get("confidence", sim_val),
                             dataset_source=item.get("dataset_source"),
                             thumbnail_url=item_thumb
                         )
@@ -662,6 +672,8 @@ async def _process_analysis(
             
             celebrity_match = CelebrityMatch(
                 name=celebrity_match_internal.name,
+                similarity=celebrity_match_internal.similarity,
+                strength=celebrity_match_internal.strength,
                 confidence=celebrity_match_internal.confidence,
                 dataset_source=celebrity_match_internal.dataset_source,
                 thumbnail_url=thumb_url,

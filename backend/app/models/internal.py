@@ -260,21 +260,28 @@ class CelebrityMatchInternal:
         message: Optional message (e.g., "No close match found in our dataset")
     """
     name: Optional[str]
-    confidence: Optional[float]
+    confidence: Optional[float] = None
     dataset_source: Optional[str] = None
     thumbnail_path: Optional[str] = None
     message: Optional[str] = None
     top_matches: Optional[List[dict]] = None
+    similarity: Optional[float] = None
+    strength: Optional[str] = None
     
     def __post_init__(self):
         """Validate celebrity match data."""
-        if self.confidence is not None:
-            if not 0.0 <= self.confidence <= 1.0:
-                raise ValueError(f"Confidence must be in [0.0, 1.0], got {self.confidence}")
-        
+        if self.similarity is not None and self.confidence is None:
+            self.confidence = self.similarity
+        elif self.confidence is not None and self.similarity is None:
+            self.similarity = self.confidence
+
         # If name is provided, confidence should also be provided
         if self.name is not None and self.confidence is None:
             raise ValueError("Confidence must be provided when name is set")
+
+        if self.confidence is not None:
+            if not 0.0 <= self.confidence <= 1.0:
+                raise ValueError(f"Confidence must be in [0.0, 1.0], got {self.confidence}")
         
         # If no match, message should be provided
         if self.name is None and self.message is None:

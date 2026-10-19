@@ -173,9 +173,19 @@ class ResultsManager {
                 nameEl.textContent = celebrity.name.replace(/_/g, ' ');
                 nameEl.style.display = 'block';
             }
-            if (badgeEl && celebrity.confidence !== null && celebrity.confidence !== undefined) {
+            const simVal = (celebrity.similarity !== null && celebrity.similarity !== undefined) 
+                ? celebrity.similarity 
+                : celebrity.confidence;
+            const strengthLabel = celebrity.strength 
+                ? (celebrity.strength.charAt(0).toUpperCase() + celebrity.strength.slice(1).toLowerCase())
+                : '';
+                
+            if (badgeEl && simVal !== null && simVal !== undefined) {
                 badgeEl.style.display = 'block';
-                badgeEl.textContent = `${Math.round(celebrity.confidence * 100)}%`;
+                const pct = Math.round(simVal * 100);
+                badgeEl.textContent = strengthLabel 
+                    ? `Similarity: ${pct}% (${strengthLabel})`
+                    : `Similarity: ${pct}%`;
             } else if (badgeEl) {
                 badgeEl.style.display = 'none';
                 badgeEl.textContent = '';
@@ -212,6 +222,12 @@ class ResultsManager {
                         matchImg = backendBase + matchImg;
                     }
                     const safeImgSrc = matchImg ? encodeURI(matchImg) : '';
+                    const matchSim = (match.similarity !== null && match.similarity !== undefined)
+                        ? match.similarity
+                        : match.confidence;
+                    const matchStrength = match.strength
+                        ? ` (${match.strength.charAt(0).toUpperCase() + match.strength.slice(1).toLowerCase()})`
+                        : '';
                     const itemDiv = document.createElement('div');
                     itemDiv.className = 'lookalike-item';
                     itemDiv.innerHTML = `
@@ -221,14 +237,14 @@ class ResultsManager {
                         </div>
                         <div class="lookalike-item-info">
                             <span class="lookalike-item-name">${match.name}</span>
-                            <span class="lookalike-item-match">${Math.round(match.confidence * 100)}%</span>
+                            <span class="lookalike-item-match">Similarity: ${Math.round(matchSim * 100)}%${matchStrength}</span>
                         </div>
                     `;
                     othersContainer.appendChild(itemDiv);
                 });
             }
         } else {
-            // When celebrity_match is null, has no name, or no match found
+            // When celebrity_match is null, has no name, or weak resemblance
             if (rankBadge) rankBadge.style.display = 'none';
             if (imageContainer) imageContainer.style.display = 'none';
             if (imageEl) {
@@ -240,17 +256,16 @@ class ResultsManager {
                 badgeEl.textContent = '';
             }
             if (nameEl) {
-                nameEl.textContent = 'No look-alike match found';
+                if (!celebrity) {
+                    nameEl.textContent = 'Look-alike matching is unavailable';
+                } else {
+                    nameEl.textContent = celebrity.message || 'No close resemblance found';
+                }
                 nameEl.style.display = 'block';
             }
             if (subtitleEl) {
-                if (celebrity && celebrity.message) {
-                    subtitleEl.textContent = celebrity.message;
-                    subtitleEl.style.display = 'block';
-                } else {
-                    subtitleEl.textContent = '';
-                    subtitleEl.style.display = 'none';
-                }
+                subtitleEl.textContent = '';
+                subtitleEl.style.display = 'none';
             }
             if (othersContainer) {
                 othersContainer.innerHTML = '';

@@ -75,11 +75,9 @@ class TestCelebrityThresholdBehavior:
         assert res["name"] == "Priyanka Chopra"
         assert res["confidence_score"] == 0.82
 
-    @pytest.mark.xfail(strict=True, reason="FM-BUG-010: _find_best_match has no threshold check, always returning a match with clamped score 0.60-0.96")
     def test_find_best_match_enforces_threshold_on_low_similarity(self, matcher):
         """
         Production _find_best_match should return name=None when similarity is very low (e.g. 0.15).
-        Currently, it clamps (0.50 + 0.15 = 0.65) and returns a false match.
         """
         # Mock rank_celebrities to return a very low similarity
         matcher.rank_celebrities = Mock(return_value=[("Emma_Stone", 0.15)])
@@ -88,7 +86,7 @@ class TestCelebrityThresholdBehavior:
         
         # Expected behavior: low similarity face should return no match
         assert result.name is None, f"Expected None but got {result.name} with confidence {result.confidence}"
-        assert result.message == "No close match found in our dataset"
+        assert result.message in ("No close resemblance found", "No close match found in our dataset")
 
 
 class TestAPIProgressiveDegradation:

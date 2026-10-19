@@ -16,6 +16,7 @@ from .logger import (
     log_processing_complete,
     log_processing_error
 )
+from .face_crop import extract_face_crop
 
 __all__ = [
     "ErrorCode",
@@ -28,4 +29,5 @@ __all__ = [
     "log_processing_start",
     "log_processing_complete",
     "log_processing_error",
+    "extract_face_crop",
 ]
