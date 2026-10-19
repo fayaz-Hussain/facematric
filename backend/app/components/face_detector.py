@@ -8,7 +8,8 @@ import mediapipe as mp
 from mediapipe.tasks import python
 from mediapipe.tasks.python import vision
 import numpy as np
-from typing import Optional
+import cv2
+from typing import Optional, Tuple
 
 from app.models.internal import ImageData, Landmarks
 from app.utils.errors import ValidationError, ErrorCode
@@ -16,6 +17,16 @@ from app.utils.logger import get_logger
 from app.config import settings
 
 logger = get_logger(__name__)
+
+# 3D canonical model points for solvePnP head pose estimation (in mm)
+MODEL_POINTS_6 = np.array([
+    (0.0, 0.0, 0.0),             # Nose tip (landmark 1)
+    (0.0, -330.0, -65.0),        # Chin (landmark 152)
+    (-225.0, 170.0, -135.0),     # Left eye outer corner (landmark 33)
+    (225.0, 170.0, -135.0),      # Right eye outer corner (landmark 263)
+    (-150.0, -150.0, -125.0),    # Left mouth corner (landmark 61)
+    (150.0, -150.0, -125.0)      # Right mouth corner (landmark 291)
+], dtype=np.float64)
 
 
 class FaceDetector:
@@ -139,6 +150,9 @@ class FaceDetector:
                 "Photo quality is too low. Please ensure your face is well-lit "
                 "and facing the camera directly."
             )
+        
+        # Check head pose (yaw and roll gates)
+        self._check_pose(landmarks_array, image_data)
         
         # Check for occlusions
         self._check_occlusions(landmarks_array, image_data)
@@ -268,12 +282,107 @@ class FaceDetector:
         in_bounds_ratio = np.mean(np.logical_and(in_bounds_x, in_bounds_y))
         quality_score *= in_bounds_ratio
         
-        # Clamp final score to reasonable range
-        # Ensure floor of 0.65 for valid detections to prevent false-positive quality rejections
-        quality_score = max(0.65, min(1.0, quality_score))
+        # Clamp final score to reasonable range [0.0, 1.0]
+        quality_score = max(0.0, min(1.0, quality_score))
         
         return float(quality_score)
     
+    @staticmethod
+    def estimate_head_pose(
+        landmarks: np.ndarray,
+        width: int,
+        height: int
+    ) -> Tuple[float, float, float]:
+        """
+        Estimate head pose (yaw, pitch, roll in degrees) using solvePnP on 6 standard facial landmarks.
+        
+        Args:
+            landmarks: Array of 468 3D landmarks with coordinates in pixels
+            width: Image width in pixels
+            height: Image height in pixels
+            
+        Returns:
+            Tuple of (yaw, pitch, roll) in degrees
+        """
+        image_points = np.array([
+            landmarks[1, :2],      # Nose tip
+            landmarks[152, :2],    # Chin
+            landmarks[33, :2],     # Left eye outer corner
+            landmarks[263, :2],    # Right eye outer corner
+            landmarks[61, :2],     # Left mouth corner
+            landmarks[291, :2]     # Right mouth corner
+        ], dtype=np.float64)
+
+        focal_length = float(width)
+        center = (width / 2.0, height / 2.0)
+        camera_matrix = np.array([
+            [focal_length, 0, center[0]],
+            [0, focal_length, center[1]],
+            [0, 0, 1]
+        ], dtype=np.float64)
+        dist_coeffs = np.zeros((4, 1), dtype=np.float64)
+
+        try:
+            success, rvec, tvec = cv2.solvePnP(
+                MODEL_POINTS_6, image_points, camera_matrix, dist_coeffs,
+                flags=cv2.SOLVEPNP_ITERATIVE
+            )
+            if not success:
+                logger.warning("solvePnP head pose estimation failed")
+                return 0.0, 0.0, 0.0
+        except Exception as e:
+            logger.warning(f"solvePnP head pose estimation failed: {e}")
+            return 0.0, 0.0, 0.0
+
+        rmat, _ = cv2.Rodrigues(rvec)
+        angles, _, _, _, _, _ = cv2.RQDecomp3x3(rmat)
+        pitch = float(angles[0])
+        yaw = float(angles[1])
+        roll = float(angles[2])
+
+        # Normalize/unwrap angles to [-90, +90]
+        if yaw > 90.0:
+            yaw -= 180.0
+        elif yaw < -90.0:
+            yaw += 180.0
+
+        if roll > 90.0:
+            roll -= 180.0
+        elif roll < -90.0:
+            roll += 180.0
+
+        return yaw, pitch, roll
+
+    def _check_pose(
+        self,
+        landmarks: np.ndarray,
+        image_data: ImageData
+    ) -> None:
+        """
+        Validate that the head is facing the camera straight on.
+        
+        Rejects when |yaw| > 12 degrees or |roll| > 10 degrees with POOR_QUALITY error.
+        
+        Args:
+            landmarks: Array of 468 3D landmarks
+            image_data: Normalized image data
+            
+        Raises:
+            ValidationError: If yaw or roll exceeds configured thresholds
+        """
+        yaw, pitch, roll = self.estimate_head_pose(landmarks, image_data.width, image_data.height)
+        logger.debug(f"Estimated head pose: yaw={yaw:.2f}°, pitch={pitch:.2f}°, roll={roll:.2f}°")
+
+        if abs(yaw) > settings.max_pose_yaw_deg or abs(roll) > settings.max_pose_roll_deg:
+            logger.warning(
+                f"Head pose exceeds threshold: yaw={yaw:.2f}° (max {settings.max_pose_yaw_deg}°), "
+                f"roll={roll:.2f}° (max {settings.max_pose_roll_deg}°)"
+            )
+            raise ValidationError(
+                ErrorCode.POOR_QUALITY,
+                "Please face the camera straight on"
+            )
+
     def _check_occlusions(
         self,
         landmarks: np.ndarray,

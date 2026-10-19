@@ -7,6 +7,7 @@ Converts golden ratio scores to population percentile rankings.
 import os
 import csv
 from pathlib import Path
+from typing import Optional, List
 from scipy import stats
 import numpy as np
 
@@ -15,24 +16,45 @@ from app.utils.logger import get_logger
 logger = get_logger(__name__)
 
 
+# Calibrated empirical benchmark parameters (N=959 celebrity portraits)
+DEFAULT_EMPIRICAL_MEAN = 61.28
+DEFAULT_EMPIRICAL_STD = 4.65
+DEFAULT_EMPIRICAL_P25 = 58.50
+DEFAULT_EMPIRICAL_P75 = 64.60
+DEFAULT_SAMPLE_SIZE = 959
+
+
 class PercentileEngine:
     """
-    Converts golden ratio scores (0-100) to percentile rankings.
+    Converts golden ratio scores (0-100) to percentile rankings and population bands.
     
-    Uses a bootstrap normal distribution until sufficient real user data collected.
-    Distribution: N(μ=70, σ=10)
+    Calibrated empirically against a 959-image benchmark of celebrity portraits.
+    Empirical distribution: μ = 61.28, σ = 4.65, P25 = 58.50, P75 = 64.60.
     """
     
-    def __init__(self, mean: float = 70.0, std: float = 10.0):
+    def __init__(
+        self,
+        mean: float = DEFAULT_EMPIRICAL_MEAN,
+        std: float = DEFAULT_EMPIRICAL_STD,
+        p25: float = DEFAULT_EMPIRICAL_P25,
+        p75: float = DEFAULT_EMPIRICAL_P75,
+        sample_size: int = DEFAULT_SAMPLE_SIZE
+    ):
         """
         Initialize percentile engine with distribution parameters.
         
         Args:
-            mean: Mean of score distribution (default: 70)
-            std: Standard deviation of score distribution (default: 10)
+            mean: Mean of score distribution (default: 61.28 from 959 benchmark photos)
+            std: Standard deviation of score distribution (default: 4.65)
+            p25: 25th percentile (default: 58.50)
+            p75: 75th percentile (default: 64.60)
+            sample_size: Number of benchmark reference photos (default: 959)
         """
         self.mean = mean
         self.std = std
+        self.p25 = p25
+        self.p75 = p75
+        self.sample_size = sample_size
         self.distribution = stats.norm(loc=mean, scale=std)
         
         # Initialize empirical distribution attributes
@@ -43,8 +65,8 @@ class PercentileEngine:
         self.empirical_std = None
         
         logger.info(
-            f"PercentileEngine initialized with bootstrap distribution: "
-            f"N(μ={mean}, σ={std})"
+            f"PercentileEngine initialized with distribution: "
+            f"μ={mean:.2f}, σ={std:.2f}, P25={p25:.2f}, P75={p75:.2f} (N={sample_size})"
         )
     
     def score_to_percentile(self, score: float) -> int:
@@ -122,17 +144,51 @@ class PercentileEngine:
         
         return True
     
-    def get_percentile_message(self, percentile: int) -> str:
+    def get_band(self, score: float) -> str:
         """
-        Generate user-friendly percentile message.
+        Classify score into population band based on quartiles:
+        - 'below typical' (< 25th percentile, score < P25)
+        - 'typical' (25th to 75th percentile, P25 <= score <= P75)
+        - 'above typical' (> 75th percentile, score > P75)
+        """
+        if score < self.p25:
+            return "below typical"
+        elif score <= self.p75:
+            return "typical"
+        else:
+            return "above typical"
+
+    def get_band_message(self, score: float) -> str:
+        """
+        Generate band message comparing against the benchmark dataset:
+        e.g. 'typical (compared with 959 celebrity photos)'
+        """
+        band = self.get_band(score)
+        return f"{band} (compared with {self.sample_size} celebrity photos)"
+
+    def get_percentile_message(self, percentile: int, score: Optional[float] = None) -> str:
+        """
+        Generate user-friendly percentile band message.
+        Replaces legacy 'You score higher than X% of people'.
         
         Args:
             percentile: Percentile rank (0-100)
+            score: Optional raw score
         
         Returns:
-            Formatted message string
+            Formatted band message string:
+            '<band> (compared with 959 celebrity photos)'
         """
-        return f"You score higher than {percentile}% of people"
+        if score is not None:
+            return self.get_band_message(score)
+        
+        if percentile < 25:
+            band = "below typical"
+        elif percentile <= 75:
+            band = "typical"
+        else:
+            band = "above typical"
+        return f"{band} (compared with {self.sample_size} celebrity photos)"
     
     def load_empirical_distribution(self, csv_path: str) -> None:
         """
@@ -212,18 +268,23 @@ class PercentileEngine:
             logger.error(f"Failed to fit Gaussian KDE: {str(e)}")
             raise ValueError(f"Failed to fit distribution: {str(e)}")
         
-        # Replace bootstrap distribution with empirical distribution
-        # Store KDE and mark that we're using empirical distribution
+        # Replace distribution with empirical parameters
         self.kde = kde
         self.is_empirical = True
         self.empirical_scores = np.array(scores)
         self.empirical_mean = float(np.mean(scores))
         self.empirical_std = float(np.std(scores))
+        self.mean = self.empirical_mean
+        self.std = self.empirical_std
+        self.p25 = float(np.percentile(scores, 25))
+        self.p75 = float(np.percentile(scores, 75))
+        self.sample_size = len(scores)
+        self.distribution = stats.norm(loc=self.mean, scale=self.std)
         
         logger.info(
             f"Empirical distribution loaded successfully. "
-            f"Mean: {self.empirical_mean:.2f}, Std: {self.empirical_std:.2f}. "
-            f"Empirical distribution loaded"
+            f"Mean: {self.empirical_mean:.2f}, Std: {self.empirical_std:.2f}, "
+            f"P25: {self.p25:.2f}, P75: {self.p75:.2f} (N={self.sample_size})"
         )
     
     def _parse_csv_scores(self, csv_path: Path) -> list[float]:
@@ -311,4 +372,13 @@ class PercentileEngine:
 
 # Global instance
 percentile_engine = PercentileEngine()
+
+# Preload calibrated benchmark distribution if available
+_benchmark_csv = Path(__file__).resolve().parent.parent.parent / "data" / "celebrity_scores_benchmark.csv"
+if _benchmark_csv.exists():
+    try:
+        percentile_engine.load_empirical_distribution(str(_benchmark_csv))
+    except Exception as e:
+        logger.debug(f"Could not preload benchmark distribution: {e}")
+
 

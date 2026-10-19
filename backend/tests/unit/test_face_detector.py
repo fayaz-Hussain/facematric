@@ -61,11 +61,20 @@ def mock_detection_result_with_confidence(mock_mediapipe_landmark):
     result = Mock()
     
     # Create 468 landmarks with high confidence
-    # Use realistic facial landmark distribution
+    # Use realistic facial landmark distribution with frontal alignment
+    canonical_frontal = {
+        1: (0.50, 0.50),     # Nose tip
+        152: (0.50, 0.77),   # Chin
+        33: (0.36, 0.36),    # Left eye outer corner
+        263: (0.64, 0.36),   # Right eye outer corner
+        61: (0.41, 0.625),   # Left mouth corner
+        291: (0.59, 0.625),  # Right mouth corner
+    }
     landmarks = []
     for i in range(468):
-        # Realistic distribution: spread across face area (30%-70% horizontally, 20%-80% vertically)
-        if i < 234:
+        if i in canonical_frontal:
+            x, y = canonical_frontal[i]
+        elif i < 234:
             # First half: upper half of face
             x = 0.35 + (i % 18) * 0.025
             y = 0.25 + (i // 18) * 0.015
@@ -92,10 +101,21 @@ def mock_detection_result_no_confidence(mock_mediapipe_landmark):
     result = Mock()
     
     # Create 468 landmarks without confidence scores
+    canonical_frontal = {
+        1: (0.50, 0.50),
+        152: (0.50, 0.77),
+        33: (0.36, 0.36),
+        263: (0.64, 0.36),
+        61: (0.41, 0.625),
+        291: (0.59, 0.625),
+    }
     landmarks = []
     for i in range(468):
-        x = 0.3 + (i % 20) * 0.02
-        y = 0.2 + (i // 20) * 0.02
+        if i in canonical_frontal:
+            x, y = canonical_frontal[i]
+        else:
+            x = 0.3 + (i % 20) * 0.02
+            y = 0.2 + (i // 20) * 0.02
         z = 0.001 * (i % 10)
         
         # Create landmark without visibility/presence
@@ -411,15 +431,18 @@ class TestFaceDetectorGeometricQuality:
     
     @patch('app.components.face_detector.vision.FaceLandmarker.create_from_options')
     @patch.object(FaceDetector, '_check_occlusions')
+    @patch.object(FaceDetector, '_check_pose')
     def test_geometric_quality_well_distributed(
         self,
+        mock_check_pose,
         mock_check_occlusions,
         mock_create,
         sample_image_data
     ):
         """Test geometric quality for well-distributed landmarks."""
-        # Skip occlusion check for this test
+        # Skip occlusion and pose checks for this test
         mock_check_occlusions.return_value = None
+        mock_check_pose.return_value = None
         
         # Create landmarks with good spatial distribution
         result = Mock()
@@ -552,13 +575,16 @@ class TestFaceDetectorOcclusionDetection:
         mock_check_occlusions.assert_called_once()
     
     @patch('app.components.face_detector.vision.FaceLandmarker.create_from_options')
+    @patch.object(FaceDetector, '_check_pose')
     def test_glasses_detection_high_z_variance(
         self,
+        mock_check_pose,
         mock_create,
         sample_image_data,
         mock_mediapipe_landmark
     ):
         """Test glasses detection via high z-depth variance in eye region."""
+        mock_check_pose.return_value = None
         # Create landmarks with high z-variance in eye region (simulating glasses)
         result = Mock()
         landmarks = []
@@ -596,13 +622,16 @@ class TestFaceDetectorOcclusionDetection:
         assert "accessories" in exc_info.value.message.lower()
     
     @patch('app.components.face_detector.vision.FaceLandmarker.create_from_options')
+    @patch.object(FaceDetector, '_check_pose')
     def test_mask_detection_high_z_variance(
         self,
+        mock_check_pose,
         mock_create,
         sample_image_data,
         mock_mediapipe_landmark
     ):
         """Test mask detection via high z-depth variance in mouth region."""
+        mock_check_pose.return_value = None
         # Create landmarks with high z-variance in mouth region (simulating mask)
         result = Mock()
         landmarks = []
@@ -765,8 +794,10 @@ class TestFaceDetectorCoordinateConversion:
     
     @patch('app.components.face_detector.vision.FaceLandmarker.create_from_options')
     @patch.object(FaceDetector, '_check_occlusions')
+    @patch.object(FaceDetector, '_check_pose')
     def test_x_coordinate_conversion(
         self,
+        mock_check_pose,
         mock_check_occlusions,
         mock_create,
         sample_image_data,
@@ -774,6 +805,7 @@ class TestFaceDetectorCoordinateConversion:
     ):
         """Test that normalized x coordinates are correctly converted to pixels."""
         mock_check_occlusions.return_value = None
+        mock_check_pose.return_value = None
         
         result = Mock()
         # Create specific landmarks with known normalized coordinates
@@ -801,8 +833,10 @@ class TestFaceDetectorCoordinateConversion:
     
     @patch('app.components.face_detector.vision.FaceLandmarker.create_from_options')
     @patch.object(FaceDetector, '_check_occlusions')
+    @patch.object(FaceDetector, '_check_pose')
     def test_y_coordinate_conversion(
         self,
+        mock_check_pose,
         mock_check_occlusions,
         mock_create,
         sample_image_data,
@@ -810,6 +844,7 @@ class TestFaceDetectorCoordinateConversion:
     ):
         """Test that normalized y coordinates are correctly converted to pixels."""
         mock_check_occlusions.return_value = None
+        mock_check_pose.return_value = None
         
         result = Mock()
         landmarks_list = []
@@ -840,8 +875,10 @@ class TestFaceDetectorConfidenceCalculationFormula:
     
     @patch('app.components.face_detector.vision.FaceLandmarker.create_from_options')
     @patch.object(FaceDetector, '_check_occlusions')
+    @patch.object(FaceDetector, '_check_pose')
     def test_confidence_formula_averaging(
         self,
+        mock_check_pose,
         mock_check_occlusions,
         mock_create,
         sample_image_data,
@@ -849,6 +886,7 @@ class TestFaceDetectorConfidenceCalculationFormula:
     ):
         """Test that confidence is calculated as average of visibility and presence."""
         mock_check_occlusions.return_value = None
+        mock_check_pose.return_value = None
         
         result = Mock()
         landmarks_list = []
@@ -877,14 +915,17 @@ class TestFaceDetectorConfidenceCalculationFormula:
     @patch('app.components.face_detector.vision.FaceLandmarker.create_from_options')
     @patch('app.components.face_detector.settings.landmark_confidence_threshold', 0.8)
     @patch.object(FaceDetector, '_check_occlusions')
+    @patch.object(FaceDetector, '_check_pose')
     def test_confidence_below_threshold_raises_error(
         self,
+        mock_check_pose,
         mock_check_occlusions,
         mock_create,
         sample_image_data,
         mock_mediapipe_landmark
     ):
         """Test that confidence below threshold raises POOR_QUALITY error."""
+        mock_check_pose.return_value = None
         # Don't skip occlusion check
         result = Mock()
         landmarks_list = []
@@ -936,3 +977,62 @@ class TestFaceDetectorVisibilityPresenceScores:
         
         # High visibility (0.9) and presence (0.95) should give ~0.925 confidence
         assert landmarks.confidence > 0.80
+
+
+class TestHeadPoseQualityGate:
+    """Test head pose estimation and pose gates."""
+
+    @patch('app.components.face_detector.vision.FaceLandmarker.create_from_options')
+    def test_frontal_pose_passes(self, mock_create):
+        """Frontal face within yaw <= 12 and roll <= 10 should pass."""
+        detector = FaceDetector(model_path='dummy_path.task')
+        w, h = 640, 480
+        landmarks = np.zeros((468, 3), dtype=np.float32)
+        landmarks[1] = [0.50 * w, 0.50 * h, 0.0]
+        landmarks[152] = [0.50 * w, 0.77 * h, 0.0]
+        landmarks[33] = [0.36 * w, 0.36 * h, 0.0]
+        landmarks[263] = [0.64 * w, 0.36 * h, 0.0]
+        landmarks[61] = [0.41 * w, 0.625 * h, 0.0]
+        landmarks[291] = [0.59 * w, 0.625 * h, 0.0]
+
+        img_data = ImageData(array=np.zeros((h, w, 3), dtype=np.uint8), width=w, height=h, original_format='JPEG')
+        detector._check_pose(landmarks, img_data)
+
+    @patch('app.components.face_detector.vision.FaceLandmarker.create_from_options')
+    def test_extreme_yaw_rejected(self, mock_create):
+        """Yaw > 12 degrees must be rejected with POOR_QUALITY."""
+        detector = FaceDetector(model_path='dummy_path.task')
+        w, h = 640, 480
+        with patch.object(FaceDetector, 'estimate_head_pose', return_value=(15.0, 0.0, 0.0)):
+            landmarks = np.zeros((468, 3), dtype=np.float32)
+            img_data = ImageData(array=np.zeros((h, w, 3), dtype=np.uint8), width=w, height=h, original_format='JPEG')
+            with pytest.raises(ValidationError) as exc_info:
+                detector._check_pose(landmarks, img_data)
+            assert exc_info.value.error_code == ErrorCode.POOR_QUALITY
+            assert exc_info.value.message == "Please face the camera straight on"
+
+    @patch('app.components.face_detector.vision.FaceLandmarker.create_from_options')
+    def test_extreme_roll_rejected(self, mock_create):
+        """Roll > 10 degrees must be rejected with POOR_QUALITY."""
+        detector = FaceDetector(model_path='dummy_path.task')
+        w, h = 640, 480
+        with patch.object(FaceDetector, 'estimate_head_pose', return_value=(0.0, 0.0, 12.0)):
+            landmarks = np.zeros((468, 3), dtype=np.float32)
+            img_data = ImageData(array=np.zeros((h, w, 3), dtype=np.uint8), width=w, height=h, original_format='JPEG')
+            with pytest.raises(ValidationError) as exc_info:
+                detector._check_pose(landmarks, img_data)
+            assert exc_info.value.error_code == ErrorCode.POOR_QUALITY
+            assert exc_info.value.message == "Please face the camera straight on"
+
+    @patch('app.components.face_detector.vision.FaceLandmarker.create_from_options')
+    def test_landmark_confidence_floor_removed(self, mock_create):
+        """Low quality landmark distribution below threshold can score below 0.65."""
+        detector = FaceDetector(model_path='dummy_path.task')
+        w, h = 640, 480
+        landmarks = np.zeros((468, 3), dtype=np.float32)
+        landmarks[:, 0] = -500.0
+        landmarks[:, 1] = -500.0
+        img_data = ImageData(array=np.zeros((h, w, 3), dtype=np.uint8), width=w, height=h, original_format='JPEG')
+        score = detector._calculate_landmark_confidence([], landmarks, img_data)
+        assert score < 0.65
+

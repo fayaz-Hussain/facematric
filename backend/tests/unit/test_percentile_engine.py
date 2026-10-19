@@ -18,11 +18,11 @@ class TestPercentileEngineInitialization:
     """Test bootstrap normal distribution initialization."""
     
     def test_initialize_with_default_parameters(self):
-        """Test initialization with default bootstrap parameters (mean=70, std=10)."""
+        """Test initialization with default empirical parameters (mean=61.28, std=4.65)."""
         engine = PercentileEngine()
         
-        assert engine.mean == 70.0
-        assert engine.std == 10.0
+        assert engine.mean == 61.28
+        assert engine.std == 4.65
         assert engine.distribution is not None
     
     def test_distribution_is_frozen_scipy_norm(self):
@@ -39,10 +39,10 @@ class TestPercentileEngineInitialization:
         engine = PercentileEngine()
         
         # Verify mean and scale (std) using ppf and cdf properties
-        # For a normal distribution N(70, 10):
-        # ppf(0.5) should return ~70 (50th percentile = mean)
+        # For a distribution N(61.28, 4.65):
+        # ppf(0.5) should return ~61.28 (50th percentile = mean)
         median = engine.distribution.ppf(0.5)
-        assert abs(median - 70.0) < 0.1  # Should be very close to 70
+        assert abs(median - 61.28) < 0.1
     
     def test_initialize_with_custom_parameters(self):
         """Test initialization with custom mean and std."""
@@ -56,13 +56,12 @@ class TestPercentileEngineInitialization:
         assert abs(median - 75.0) < 0.1
     
     def test_distribution_docstring(self):
-        """Test that class has proper docstring explaining bootstrap parameters."""
+        """Test that class has proper docstring explaining calibrated parameters."""
         engine = PercentileEngine()
         
         # Check class docstring
         assert PercentileEngine.__doc__ is not None
-        assert "bootstrap" in PercentileEngine.__doc__.lower()
-        assert "N(μ=70, σ=10)" in PercentileEngine.__doc__
+        assert "61.28" in PercentileEngine.__doc__ or "empirical" in PercentileEngine.__doc__.lower()
 
 
 class TestScoreToPercentileConversion:
@@ -191,8 +190,8 @@ class TestDistributionUpdate:
         
         assert result is False
         # Original parameters should be unchanged
-        assert engine.mean == 70.0
-        assert engine.std == 10.0
+        assert engine.mean == 61.28
+        assert engine.std == 4.65
     
     def test_update_with_sufficient_samples(self):
         """Test successful distribution update with sufficient samples."""
@@ -219,7 +218,7 @@ class TestDistributionUsability:
         engine = PercentileEngine()
         
         # CDF should be callable
-        cdf_value = engine.distribution.cdf(70.0)
+        cdf_value = engine.distribution.cdf(61.28)
         
         assert 0.0 <= cdf_value <= 1.0
         assert abs(cdf_value - 0.5) < 0.1  # Should be close to 0.5 for mean
@@ -231,20 +230,20 @@ class TestDistributionUsability:
         # PPF should be callable and return score for given percentile
         score_at_50th = engine.distribution.ppf(0.5)
         
-        assert abs(score_at_50th - 70.0) < 0.1  # Should be close to mean
+        assert abs(score_at_50th - 61.28) < 0.1  # Should be close to mean
     
     def test_pdf_operation(self):
         """Test that PDF (probability density) operation is available."""
         engine = PercentileEngine()
         
         # PDF should be callable
-        density = engine.distribution.pdf(70.0)
+        density = engine.distribution.pdf(61.28)
         
         assert density > 0.0  # PDF should be positive at any point
 
 
 class TestBootstrapDistributionIntegration:
-    """Integration tests for bootstrap distribution workflow."""
+    """Integration tests for distribution workflow."""
     
     def test_full_score_to_percentile_workflow(self):
         """Test complete workflow from score to percentile to message."""
@@ -253,12 +252,13 @@ class TestBootstrapDistributionIntegration:
         # Process a score
         score = 75.3
         percentile = engine.score_to_percentile(score)
-        message = engine.get_percentile_message(percentile)
+        message = engine.get_percentile_message(percentile, score=score)
         
         # Verify workflow
         assert isinstance(percentile, int)
         assert 0 <= percentile <= 100
-        assert str(percentile) in message
+        assert "above typical" in message
+        assert "959 celebrity photos" in message
     
     def test_multiple_scores_produce_ordered_percentiles(self):
         """Test that multiple scores produce correctly ordered percentiles."""
@@ -538,9 +538,8 @@ class TestPercentileMessageFormatting:
         
         message = engine.get_percentile_message(75)
         
-        assert "75" in message
-        assert "%" in message
-        assert "higher" in message.lower()
+        assert "typical" in message
+        assert "compared with 959 celebrity photos" in message
     
     def test_percentile_message_with_various_values(self):
         """Test message generation for different percentile values."""
@@ -550,18 +549,21 @@ class TestPercentileMessageFormatting:
         message_50 = engine.get_percentile_message(50)
         message_100 = engine.get_percentile_message(100)
         
-        assert "0" in message_0
-        assert "50" in message_50
-        assert "100" in message_100
+        assert "below typical" in message_0
+        assert "typical" in message_50
+        assert "above typical" in message_100
+        assert "compared with 959 celebrity photos" in message_50
     
     def test_percentile_message_template(self):
         """Test that message uses expected template."""
         engine = PercentileEngine()
         
-        # Message should follow format: "You score higher than X% of people"
+        # Message should follow format: "<band> (compared with 959 celebrity photos)"
         message = engine.get_percentile_message(75)
+        assert message == "typical (compared with 959 celebrity photos)"
         
-        assert message == "You score higher than 75% of people"
+        message_above = engine.get_percentile_message(80)
+        assert message_above == "above typical (compared with 959 celebrity photos)"
 
 
 class TestMonotonicIncrease:

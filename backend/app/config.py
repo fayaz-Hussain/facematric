@@ -50,6 +50,10 @@ class Settings(BaseSettings):
     mediapipe_min_detection_confidence: float = 0.5
     landmark_confidence_threshold: float = 0.6
     
+    # Pose Quality Gates
+    max_pose_yaw_deg: float = 12.0
+    max_pose_roll_deg: float = 10.0
+    
     class Config:
         env_file = ".env"
         case_sensitive = False

@@ -93,6 +93,7 @@ Students/portfolio reviewers, casual users curious about the golden ratio, and â
   - **Multiple faces detected:** "Multiple faces detected. Please upload a photo with only one person."
   - **Poor lighting/angle:** "Photo quality is too low. Please ensure your face is well-lit and facing the camera directly."
   - **Occlusion detected (glasses/mask):** "We detected accessories covering your face. Please upload a photo without glasses, masks, or other obstructions for accurate analysis."
+  - *Note on Occlusion Detection Limitations:* Occlusion detection relies on landmark-based geometric and depth heuristics (z-depth variance around the eyes and landmark distribution around the mouth) rather than a semantic segmentation model. Consequently, occlusion detection is limited: thin-rimmed glasses, tinted lenses, or subtle facial obstructions may not be reliably detected, while unique natural facial topography may occasionally trigger heuristics.
 - If validation passes, extract 468 (x, y, z) landmark coordinates
 
 **Step 3a â€” Face Symmetry Type Classification (Informational Only)**
@@ -437,6 +438,7 @@ Backend returns structured response (see API Contract below) containing:
 ### Technical Risks
 - **Non-frontal photos:** Will skew ratios; v1 relies on user following guidance (acceptable tradeoff)
 - **MediaPipe accuracy:** Occasional landmark errors on difficult photos (handle via quality validation)
+- **Occlusion detection limitations:** Occlusion detection is limited to landmark heuristics (z-depth variance and aspect ratios) without semantic segmentation; thin frames and partial obstructions may not be reliably detected.
 - **Celebrity dataset licensing:** Both datasets are public Kaggle datasets for educational/research use; keep project framed as portfolio/educational (not commercial)
 
 ### Open Questions

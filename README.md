@@ -6,12 +6,13 @@ An AI-powered application that evaluates facial symmetry types and golden ratio 
 
 ---
 
-## 📌 Master Blueprint & PRD
+## 📌 Master Blueprint & Specifications
 
-The complete project vision, methodology, architecture, API contract, and task breakdown are maintained in:
-- 📄 **`FaceMatric-prd.md`** *(Master Product Requirements Document & Task Breakdown)*
+The complete project vision, methodology, architecture, API contract, and testing specifications are maintained in:
+- 📄 [**FaceMatric-prd.md**](FaceMatric-prd.md) — Master Product Requirements Document & API Contract
+- 🧪 [**TESTING_PLAN.md**](TESTING_PLAN.md) — Source of truth for testing, validation, and QA verification
 
-Please refer to `FaceMatric-prd.md` when implementing backend features, landmark extraction, scoring formulas, and celebrity look-alike matching.
+Please refer to `FaceMatric-prd.md` when implementing features, landmark extraction, scoring formulas, and celebrity look-alike matching, and `TESTING_PLAN.md` for quality criteria and test plans.
 
 ---
 

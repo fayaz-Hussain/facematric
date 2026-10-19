@@ -88,7 +88,26 @@ class ResultsManager {
 
         const percentileStatus = document.getElementById('percentileStatus');
         if (percentileStatus) {
-            percentileStatus.style.display = 'none';
+            let band = 'typical';
+            if (scoreValue !== undefined && scoreValue !== null) {
+                if (scoreValue < 58.5) {
+                    band = 'below typical';
+                } else if (scoreValue > 64.6) {
+                    band = 'above typical';
+                } else {
+                    band = 'typical';
+                }
+            } else if (percentileValue !== undefined && percentileValue !== null) {
+                if (percentileValue < 25) {
+                    band = 'below typical';
+                } else if (percentileValue > 75) {
+                    band = 'above typical';
+                } else {
+                    band = 'typical';
+                }
+            }
+            percentileStatus.textContent = `${band} (compared with 959 celebrity photos)`;
+            percentileStatus.style.display = 'block';
         }
 
         const symmetryType = this.analysisData.face_symmetry_type;
