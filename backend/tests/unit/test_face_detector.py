@@ -1000,29 +1000,29 @@ class TestHeadPoseQualityGate:
 
     @patch('app.components.face_detector.vision.FaceLandmarker.create_from_options')
     def test_extreme_yaw_rejected(self, mock_create):
-        """Yaw > 12 degrees must be rejected with POOR_QUALITY."""
+        """Yaw > 25 degrees must be rejected with POOR_QUALITY."""
         detector = FaceDetector(model_path='dummy_path.task')
         w, h = 640, 480
-        with patch.object(FaceDetector, 'estimate_head_pose', return_value=(15.0, 0.0, 0.0)):
+        with patch.object(FaceDetector, 'estimate_head_pose', return_value=(30.0, 0.0, 0.0)):
             landmarks = np.zeros((468, 3), dtype=np.float32)
             img_data = ImageData(array=np.zeros((h, w, 3), dtype=np.uint8), width=w, height=h, original_format='JPEG')
             with pytest.raises(ValidationError) as exc_info:
                 detector._check_pose(landmarks, img_data)
             assert exc_info.value.error_code == ErrorCode.POOR_QUALITY
-            assert exc_info.value.message == "Please face the camera straight on"
+            assert "face the camera" in exc_info.value.message.lower()
 
     @patch('app.components.face_detector.vision.FaceLandmarker.create_from_options')
     def test_extreme_roll_rejected(self, mock_create):
-        """Roll > 10 degrees must be rejected with POOR_QUALITY."""
+        """Roll > 20 degrees must be rejected with POOR_QUALITY."""
         detector = FaceDetector(model_path='dummy_path.task')
         w, h = 640, 480
-        with patch.object(FaceDetector, 'estimate_head_pose', return_value=(0.0, 0.0, 12.0)):
+        with patch.object(FaceDetector, 'estimate_head_pose', return_value=(0.0, 0.0, 25.0)):
             landmarks = np.zeros((468, 3), dtype=np.float32)
             img_data = ImageData(array=np.zeros((h, w, 3), dtype=np.uint8), width=w, height=h, original_format='JPEG')
             with pytest.raises(ValidationError) as exc_info:
                 detector._check_pose(landmarks, img_data)
             assert exc_info.value.error_code == ErrorCode.POOR_QUALITY
-            assert exc_info.value.message == "Please face the camera straight on"
+            assert "head level" in exc_info.value.message.lower()
 
     @patch('app.components.face_detector.vision.FaceLandmarker.create_from_options')
     def test_landmark_confidence_floor_removed(self, mock_create):

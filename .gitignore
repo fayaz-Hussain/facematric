@@ -25,6 +25,8 @@ wheels/
 
 # Virtual environments
 venv/
+venv_new/
+*venv*/
 ENV/
 env/
 

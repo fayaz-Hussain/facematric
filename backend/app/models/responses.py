@@ -128,6 +128,15 @@ class OverlayData(BaseModel):
         description="Golden ratio guide lines and reference points"
     )
 
+    image_width: Optional[int] = Field(
+        None,
+        description="Width of the processed image whose pixel space the landmarks use"
+    )
+    image_height: Optional[int] = Field(
+        None,
+        description="Height of the processed image whose pixel space the landmarks use"
+    )
+
 
 class CelebrityMatchItem(BaseModel):
     """Individual celebrity match in ranked look-alike results."""
@@ -157,7 +166,7 @@ class CelebrityMatch(BaseModel):
 
     strength: Optional[str] = Field(
         None,
-        description="Match strength: strong (>= 0.55), moderate (0.40 to 0.55), or weak (< 0.40)",
+        description="Match strength: strong (>= 0.70), moderate (>= 0.55), or weak (< 0.55)",
         example="strong"
     )
 

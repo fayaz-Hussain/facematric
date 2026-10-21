@@ -446,7 +446,7 @@ async def _validate_and_read_file(
     """
     # Get file size
     # Note: UploadFile doesn't provide direct size, so we track as we read
-    max_file_size_bytes = 10 * 1024 * 1024  # 10MB
+    max_file_size_bytes = settings.max_image_size_mb * 1024 * 1024
     
     # Validate MIME type
     if file.content_type is None or not file.content_type.startswith('image/'):
@@ -488,7 +488,7 @@ async def _validate_and_read_file(
                 )
                 raise ValidationError(
                     ErrorCode.FILE_TOO_LARGE,
-                    f"File size exceeds 10MB limit. Your file: {len(file_bytes) / (1024*1024):.1f}MB"
+                    f"File size exceeds {settings.max_image_size_mb}MB limit. Your file: {len(file_bytes) / (1024*1024):.1f}MB"
                 )
     except ValidationError:
         raise
@@ -664,7 +664,9 @@ async def _process_analysis(
                 vertical_midline=overlay_data_internal.midline_x,
                 horizontal_thirds=overlay_data_internal.horizontal_thirds_y,
                 phi_spiral_center=list(overlay_data_internal.phi_spiral_center)
-            )
+            ),
+            image_width=landmarks.image_width,
+            image_height=landmarks.image_height,
         )
         
         # Convert celebrity match

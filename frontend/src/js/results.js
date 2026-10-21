@@ -172,7 +172,7 @@ class ResultsManager {
                             <path d="M12 8V16M8 12H16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
                         </svg>
                     </div>
-                    <span class="proportion-label">${feature.feature}</span>
+                    <span class="proportion-label"></span>
                 </div>
                 <div class="proportion-comparison">
                     <div class="proportion-bar-wrapper">
@@ -183,6 +183,8 @@ class ResultsManager {
                     <span class="proportion-percentage">${scorePct}%</span>
                 </div>
             `;
+            const labelEl = rowDiv.querySelector('.proportion-label');
+            if (labelEl) labelEl.textContent = feature.feature || '';
             breakdownContainer.appendChild(rowDiv);
         });
 
@@ -265,15 +267,31 @@ class ResultsManager {
                     const itemDiv = document.createElement('div');
                     itemDiv.className = 'lookalike-item';
                     itemDiv.innerHTML = `
-                        <span class="lookalike-item-rank">#${match.rank}</span>
-                        <div class="lookalike-item-image-wrapper">
-                            ${safeImgSrc ? `<img src="${safeImgSrc}" alt="${match.name}" class="lookalike-item-image" onerror="this.onerror=null;this.parentElement.style.display='none';"/>` : ''}
-                        </div>
+                        <span class="lookalike-item-rank"></span>
+                        <div class="lookalike-item-image-wrapper"></div>
                         <div class="lookalike-item-info">
-                            <span class="lookalike-item-name">${match.name}</span>
-                            <span class="lookalike-item-match" style="font-size: 0.8rem; opacity: 0.85;">Similarity: ${Math.round(matchSim * 100)}%${matchStrength}</span>
+                            <span class="lookalike-item-name"></span>
+                            <span class="lookalike-item-match" style="font-size: 0.8rem; opacity: 0.85;"></span>
                         </div>
                     `;
+                    const rankEl = itemDiv.querySelector('.lookalike-item-rank');
+                    if (rankEl) rankEl.textContent = '#' + match.rank;
+                    const wrap = itemDiv.querySelector('.lookalike-item-image-wrapper');
+                    if (wrap && safeImgSrc) {
+                        const img = document.createElement('img');
+                        img.src = safeImgSrc;
+                        img.alt = match.name || '';
+                        img.className = 'lookalike-item-image';
+                        img.onerror = function () {
+                            this.onerror = null;
+                            if (this.parentElement) this.parentElement.style.display = 'none';
+                        };
+                        wrap.appendChild(img);
+                    }
+                    const nameNode = itemDiv.querySelector('.lookalike-item-name');
+                    if (nameNode) nameNode.textContent = match.name || '';
+                    const simNode = itemDiv.querySelector('.lookalike-item-match');
+                    if (simNode) simNode.textContent = `Similarity: ${Math.round(matchSim * 100)}%${matchStrength}`;
                     othersContainer.appendChild(itemDiv);
                 });
             }
@@ -314,14 +332,28 @@ class ResultsManager {
                     const itemDiv = document.createElement('div');
                     itemDiv.className = 'lookalike-item';
                     itemDiv.innerHTML = `
-                        <div class="lookalike-item-image-wrapper">
-                            ${safeImgSrc ? `<img src="${safeImgSrc}" alt="${match.name}" class="lookalike-item-image" onerror="this.onerror=null;this.parentElement.style.display='none';"/>` : ''}
-                        </div>
+                        <div class="lookalike-item-image-wrapper"></div>
                         <div class="lookalike-item-info">
-                            <span class="lookalike-item-name">${match.name}</span>
-                            <span class="lookalike-item-match" style="font-size: 0.8rem; opacity: 0.85;">Similarity: ${Math.round(matchSim * 100)}%</span>
+                            <span class="lookalike-item-name"></span>
+                            <span class="lookalike-item-match" style="font-size: 0.8rem; opacity: 0.85;"></span>
                         </div>
                     `;
+                    const wrap = itemDiv.querySelector('.lookalike-item-image-wrapper');
+                    if (wrap && safeImgSrc) {
+                        const img = document.createElement('img');
+                        img.src = safeImgSrc;
+                        img.alt = match.name || '';
+                        img.className = 'lookalike-item-image';
+                        img.onerror = function () {
+                            this.onerror = null;
+                            if (this.parentElement) this.parentElement.style.display = 'none';
+                        };
+                        wrap.appendChild(img);
+                    }
+                    const nameNode = itemDiv.querySelector('.lookalike-item-name');
+                    if (nameNode) nameNode.textContent = match.name || '';
+                    const simNode = itemDiv.querySelector('.lookalike-item-match');
+                    if (simNode) simNode.textContent = `Similarity: ${Math.round(matchSim * 100)}%`;
                     othersContainer.appendChild(itemDiv);
                 });
             }
@@ -416,11 +448,11 @@ class ResultsManager {
         const landmarks = overlayData.landmarks;
         const guides = overlayData.golden_ratio_guides;
 
-        // Landmarks coordinates are in pre-processed image dimensions (max 640px)
-        const naturalWidth = img.naturalWidth || displayWidth;
-        const naturalHeight = img.naturalHeight || displayHeight;
-        const scaleX = displayWidth / naturalWidth;
-        const scaleY = displayHeight / naturalHeight;
+        // Landmarks are in processed (resized) image pixels, not the original upload.
+        const processedWidth = overlayData.image_width || img.naturalWidth || displayWidth;
+        const processedHeight = overlayData.image_height || img.naturalHeight || displayHeight;
+        const scaleX = displayWidth / processedWidth;
+        const scaleY = displayHeight / processedHeight;
 
         if (landmarks && landmarks.length > 0) {
             this.drawLandmarks(landmarks, scaleX, scaleY);
@@ -499,12 +531,14 @@ class ResultsManager {
             <div class="results-container">
                 <div style="text-align: center; padding: 2rem; color: red;">
                     <h2>Error</h2>
-                    <p>${message}</p>
+                    <p class="results-error-message"></p>
                     <a href="index.html" style="color: var(--accent-teal);">Back to Home</a>
                 </div>
                 ${disclaimerHtml}
             </div>
         `;
+        const msgEl = container.querySelector('.results-error-message');
+        if (msgEl) msgEl.textContent = message;
     }
 }
 

@@ -382,21 +382,15 @@ class CelebrityMatcher:
                 crop = (resized.astype(np.float32) / 127.5) - 1.0
 
             batch = np.expand_dims(crop, axis=0)
-            
-            # Predict 512-D embedding
-            if hasattr(self.facenet_model, "predict"):
-                pred = self.facenet_model.predict(batch, verbose=0)
-                embedding = np.array(pred[0], dtype=np.float32)
-            else:
-                embedding_obj = self.facenet_model.represent(
-                    img_path=image_data.array,
-                    model_name="Facenet",
-                    enforce_detection=False
+
+            # FaceNet512 only. Do not fall back to 128-d Facenet — the celebrity
+            # index is 512-d, and mixed dimensions would silently fail or mis-rank.
+            if self.facenet_model is None or not hasattr(self.facenet_model, "predict"):
+                raise RuntimeError(
+                    "FaceNet512 model is not loaded or does not support predict()"
                 )
-                if isinstance(embedding_obj, list) and len(embedding_obj) > 0:
-                    embedding = np.array(embedding_obj[0]["embedding"])
-                else:
-                    embedding = np.array(embedding_obj["embedding"])
+            pred = self.facenet_model.predict(batch, verbose=0)
+            embedding = np.array(pred[0], dtype=np.float32)
             
             norm = np.linalg.norm(embedding)
             if norm > 1e-10:
@@ -514,6 +508,11 @@ class CelebrityMatcher:
             if not display_name:
                 display_name = celeb_name.replace("_", " ").title()
                 
+            thumb = (
+                celeb_data.get("thumbnail_path")
+                or celeb_data.get("thumbnail_url")
+                or ""
+            )
             top_matches_list.append({
                 "rank": rank_idx,
                 "name": display_name,
@@ -521,7 +520,7 @@ class CelebrityMatcher:
                 "strength": strength,
                 "confidence": sim_2dec,
                 "dataset_source": celeb_data.get("dataset_source", "Unknown"),
-                "thumbnail_path": celeb_data.get("thumbnail_path", "")
+                "thumbnail_path": thumb
             })
         
         best_celebrity, best_similarity = top_5_rankings[0]

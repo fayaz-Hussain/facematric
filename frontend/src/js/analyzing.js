@@ -150,6 +150,9 @@ class AnalyzingManager {
             } else if (error.message.includes('We detected')) {
                 userTitle = 'Photo Adjustment Needed';
                 userMessage = error.message;
+            } else if (error.message.includes('face the camera') || error.message.includes('head level')) {
+                userTitle = 'Pose Adjustment Needed';
+                userMessage = error.message;
             } else if (error.message.includes('resolution too low') || error.message.includes('quality is too low')) {
                 userTitle = 'Lighting or Quality Issue';
                 userMessage = error.message;
@@ -216,13 +219,13 @@ class AnalyzingManager {
                     font-weight: 600;
                     color: var(--text-primary, #FFFFFF);
                     letter-spacing: -0.02em;
-                ">${title}</h3>
+                "></h3>
                 <p style="
                     margin: 0 0 1.75rem;
                     font-size: 0.95rem;
                     line-height: 1.55;
                     color: var(--text-secondary, rgba(255, 255, 255, 0.75));
-                ">${message}</p>
+                "></p>
                 <div style="display: flex; gap: 0.75rem; justify-content: center;">
                     <button id="modal-retry-btn" style="
                         flex: 1;
@@ -242,6 +245,11 @@ class AnalyzingManager {
         `;
 
         document.body.appendChild(modal);
+
+        const titleEl = modal.querySelector('h3');
+        const messageEl = modal.querySelector('p');
+        if (titleEl) titleEl.textContent = title;
+        if (messageEl) messageEl.textContent = message;
 
         const btn = document.getElementById('modal-retry-btn');
         if (btn) {

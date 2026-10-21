@@ -49,6 +49,10 @@ class FaceDetector:
         """
         self.model_path = model_path or settings.mediapipe_model_path
         self.detector = None
+        # MediaPipe only reports up to num_faces detections. The PRD requires
+        # MULTIPLE_FACES when a group photo is uploaded, so we must request at
+        # least 2 faces even if settings.mediapipe_max_faces is 1.
+        self.num_faces_limit = max(2, int(settings.mediapipe_max_faces))
         self._initialize_detector()
     
     def _initialize_detector(self) -> None:
@@ -60,7 +64,7 @@ class FaceDetector:
             options = vision.FaceLandmarkerOptions(
                 base_options=base_options,
                 running_mode=vision.RunningMode.IMAGE,
-                num_faces=settings.mediapipe_max_faces,
+                num_faces=self.num_faces_limit,
                 min_face_detection_confidence=settings.mediapipe_min_detection_confidence,
                 min_face_presence_confidence=settings.mediapipe_min_detection_confidence,
                 min_tracking_confidence=settings.mediapipe_min_detection_confidence
@@ -373,14 +377,23 @@ class FaceDetector:
         yaw, pitch, roll = self.estimate_head_pose(landmarks, image_data.width, image_data.height)
         logger.debug(f"Estimated head pose: yaw={yaw:.2f}°, pitch={pitch:.2f}°, roll={roll:.2f}°")
 
-        if abs(yaw) > settings.max_pose_yaw_deg or abs(roll) > settings.max_pose_roll_deg:
+        yaw_exceeded = abs(yaw) > settings.max_pose_yaw_deg
+        roll_exceeded = abs(roll) > settings.max_pose_roll_deg
+
+        if yaw_exceeded or roll_exceeded:
             logger.warning(
                 f"Head pose exceeds threshold: yaw={yaw:.2f}° (max {settings.max_pose_yaw_deg}°), "
                 f"roll={roll:.2f}° (max {settings.max_pose_roll_deg}°)"
             )
+            if yaw_exceeded and roll_exceeded:
+                msg = "Please face the camera directly and keep your head level."
+            elif yaw_exceeded:
+                msg = "Please face the camera directly."
+            else:
+                msg = "Please keep your head level."
             raise ValidationError(
                 ErrorCode.POOR_QUALITY,
-                "Please face the camera straight on"
+                msg
             )
 
     def _check_occlusions(
