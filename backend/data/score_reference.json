@@ -1,0 +1,323 @@
+{
+  "dataset_name": "FairFace",
+  "dataset_config": "1.25",
+  "license": "CC BY 4.0",
+  "citation": "Karkkainen, K., & Joo, J. (2021). FairFace: Face Attribute Dataset for Balanced Race, Gender, and Age for Bias Measurement and Mitigation. WACV 2021.",
+  "filters": "Adults (ages 20-59), frontal pose (|yaw| <= 12 deg, |roll| <= 10 deg), no severe occlusion, upscaled bicubic to >= 300px",
+  "seed": 42,
+  "scorer_commit": "3a1cb063e6dd742d65e21e98187d256e14863e36",
+  "within_person_sd": 1.26,
+  "n_sampled_total": 9800,
+  "n_accepted_total": 2017,
+  "overall_acceptance_rate": 20.58,
+  "pooled_mean": 59.058,
+  "pooled_std": 2.029,
+  "quantiles_0_to_100": [
+    49.5,
+    52.8,
+    53.8,
+    54.8,
+    55.2,
+    55.6,
+    55.9,
+    56.1,
+    56.3,
+    56.5,
+    56.6,
+    56.8,
+    56.9,
+    57.1,
+    57.1,
+    57.3,
+    57.4,
+    57.4,
+    57.5,
+    57.5,
+    57.6,
+    57.6,
+    57.7,
+    57.8,
+    57.9,
+    58.0,
+    58.0,
+    58.1,
+    58.2,
+    58.2,
+    58.3,
+    58.3,
+    58.4,
+    58.4,
+    58.4,
+    58.5,
+    58.5,
+    58.6,
+    58.6,
+    58.7,
+    58.7,
+    58.8,
+    58.8,
+    58.9,
+    58.9,
+    59.0,
+    59.0,
+    59.1,
+    59.1,
+    59.2,
+    59.2,
+    59.3,
+    59.3,
+    59.4,
+    59.4,
+    59.5,
+    59.5,
+    59.6,
+    59.6,
+    59.6,
+    59.7,
+    59.7,
+    59.8,
+    59.8,
+    59.8,
+    59.9,
+    59.9,
+    59.9,
+    60.0,
+    60.0,
+    60.1,
+    60.1,
+    60.2,
+    60.3,
+    60.3,
+    60.4,
+    60.5,
+    60.5,
+    60.5,
+    60.6,
+    60.7,
+    60.7,
+    60.8,
+    60.8,
+    60.9,
+    61.0,
+    61.0,
+    61.1,
+    61.2,
+    61.3,
+    61.3,
+    61.5,
+    61.6,
+    61.7,
+    61.8,
+    61.9,
+    62.1,
+    62.3,
+    62.7,
+    63.4,
+    67.4
+  ],
+  "acceptance_by_cell": {
+    "Black_Female": {
+      "race": "Black",
+      "gender": "Female",
+      "sampled": 700,
+      "accepted": 176,
+      "acceptance_rate": 25.14,
+      "rejections": {
+        "other": 484,
+        "no_face_detected": 40
+      }
+    },
+    "Black_Male": {
+      "race": "Black",
+      "gender": "Male",
+      "sampled": 700,
+      "accepted": 154,
+      "acceptance_rate": 22.0,
+      "rejections": {
+        "no_face_detected": 70,
+        "other": 476
+      }
+    },
+    "East Asian_Female": {
+      "race": "East Asian",
+      "gender": "Female",
+      "sampled": 700,
+      "accepted": 145,
+      "acceptance_rate": 20.71,
+      "rejections": {
+        "other": 522,
+        "no_face_detected": 33
+      }
+    },
+    "East Asian_Male": {
+      "race": "East Asian",
+      "gender": "Male",
+      "sampled": 700,
+      "accepted": 120,
+      "acceptance_rate": 17.14,
+      "rejections": {
+        "no_face_detected": 60,
+        "other": 520
+      }
+    },
+    "Indian_Female": {
+      "race": "Indian",
+      "gender": "Female",
+      "sampled": 700,
+      "accepted": 163,
+      "acceptance_rate": 23.29,
+      "rejections": {
+        "other": 493,
+        "no_face_detected": 44
+      }
+    },
+    "Indian_Male": {
+      "race": "Indian",
+      "gender": "Male",
+      "sampled": 700,
+      "accepted": 158,
+      "acceptance_rate": 22.57,
+      "rejections": {
+        "other": 480,
+        "no_face_detected": 62
+      }
+    },
+    "Latino_Hispanic_Female": {
+      "race": "Latino_Hispanic",
+      "gender": "Female",
+      "sampled": 700,
+      "accepted": 171,
+      "acceptance_rate": 24.43,
+      "rejections": {
+        "other": 477,
+        "no_face_detected": 52
+      }
+    },
+    "Latino_Hispanic_Male": {
+      "race": "Latino_Hispanic",
+      "gender": "Male",
+      "sampled": 700,
+      "accepted": 130,
+      "acceptance_rate": 18.57,
+      "rejections": {
+        "other": 506,
+        "no_face_detected": 64
+      }
+    },
+    "Middle Eastern_Female": {
+      "race": "Middle Eastern",
+      "gender": "Female",
+      "sampled": 700,
+      "accepted": 113,
+      "acceptance_rate": 16.14,
+      "rejections": {
+        "other": 513,
+        "no_face_detected": 74
+      }
+    },
+    "Middle Eastern_Male": {
+      "race": "Middle Eastern",
+      "gender": "Male",
+      "sampled": 700,
+      "accepted": 103,
+      "acceptance_rate": 14.71,
+      "rejections": {
+        "other": 524,
+        "no_face_detected": 73
+      }
+    },
+    "Southeast Asian_Female": {
+      "race": "Southeast Asian",
+      "gender": "Female",
+      "sampled": 700,
+      "accepted": 156,
+      "acceptance_rate": 22.29,
+      "rejections": {
+        "other": 509,
+        "no_face_detected": 35
+      }
+    },
+    "Southeast Asian_Male": {
+      "race": "Southeast Asian",
+      "gender": "Male",
+      "sampled": 700,
+      "accepted": 134,
+      "acceptance_rate": 19.14,
+      "rejections": {
+        "other": 512,
+        "no_face_detected": 54
+      }
+    },
+    "White_Female": {
+      "race": "White",
+      "gender": "Female",
+      "sampled": 700,
+      "accepted": 150,
+      "acceptance_rate": 21.43,
+      "rejections": {
+        "other": 498,
+        "no_face_detected": 52
+      }
+    },
+    "White_Male": {
+      "race": "White",
+      "gender": "Male",
+      "sampled": 700,
+      "accepted": 144,
+      "acceptance_rate": 20.57,
+      "rejections": {
+        "other": 469,
+        "no_face_detected": 87
+      }
+    }
+  },
+  "distribution_by_race": {
+    "Black": {
+      "n": 330,
+      "mean": 58.97,
+      "std": 2.339
+    },
+    "East Asian": {
+      "n": 265,
+      "mean": 59.982,
+      "std": 1.567
+    },
+    "Indian": {
+      "n": 321,
+      "mean": 58.512,
+      "std": 1.818
+    },
+    "Latino_Hispanic": {
+      "n": 301,
+      "mean": 58.775,
+      "std": 2.102
+    },
+    "Middle Eastern": {
+      "n": 216,
+      "mean": 59.159,
+      "std": 2.059
+    },
+    "Southeast Asian": {
+      "n": 290,
+      "mean": 59.431,
+      "std": 1.791
+    },
+    "White": {
+      "n": 294,
+      "mean": 58.612,
+      "std": 1.998
+    }
+  },
+  "distribution_by_gender": {
+    "Female": {
+      "n": 1074,
+      "mean": 59.112,
+      "std": 1.974
+    },
+    "Male": {
+      "n": 943,
+      "mean": 58.948,
+      "std": 2.085
+    }
+  }
+}

@@ -476,3 +476,43 @@ class TestEmptyFileHandling:
         error_data = get_error_data(response)
         assert error_data.get("error_code") == ErrorCode.INVALID_IMAGE.value
         assert "empty" in error_data.get("message", "").lower()
+
+
+class TestBase64BodyValidation:
+    """Requirement 3c: Base64 body validation (12MB, malformed, prefixed)."""
+
+    def test_oversized_12mb_base64_rejected(self, client):
+        """12 MB body is rejected early with FILE_TOO_LARGE without decoding fully."""
+        oversized_b64 = "A" * (16 * 1024 * 1024)
+        response = client.post(
+            "/api/analyze",
+            json={"image_base64": oversized_b64}
+        )
+        assert response.status_code == 400
+        error_data = get_error_data(response)
+        assert error_data.get("status") == "error"
+        assert error_data.get("error_code") == ErrorCode.FILE_TOO_LARGE.value
+
+    def test_malformed_base64_rejected(self, client):
+        """Malformed base64 body gives INVALID_IMAGE error."""
+        response = client.post(
+            "/api/analyze",
+            json={"image_base64": "Not-Valid-Base64!@#$%^&*()"}
+        )
+        assert response.status_code == 400
+        error_data = get_error_data(response)
+        assert error_data.get("status") == "error"
+        assert error_data.get("error_code") == ErrorCode.INVALID_IMAGE.value
+
+    def test_prefixed_base64_accepted(self, client, valid_base64_image):
+        """data:image/...;base64, prefix is accepted."""
+        prefixed_b64 = f"data:image/jpeg;base64,{valid_base64_image}"
+        response = client.post(
+            "/api/analyze",
+            json={"image_base64": prefixed_b64, "include_celebrity_match": False}
+        )
+        assert response.status_code in [200, 400]
+        if response.status_code == 400:
+            error_data = get_error_data(response)
+            assert error_data.get("error_code") != ErrorCode.INVALID_IMAGE.value
+            assert error_data.get("error_code") != ErrorCode.FILE_TOO_LARGE.value

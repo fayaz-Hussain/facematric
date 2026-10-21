@@ -43,13 +43,23 @@ FaceMatric/
 ## 🚀 Getting Started
 
 ### Prerequisites
+- **Python**: 3.12
 - **Node.js**: v18 or higher
 
-### Frontend Development Server
-To launch the frontend preview with live reload:
+### Setup & Run Commands
+
 ```bash
-npm run dev
+cd backend
+py -3.12 -m venv venv
+venv\Scripts\activate
+pip install -r requirements.txt
+uvicorn app.main:app --reload
+cd ../frontend && npm install && npm run dev
 ```
+
+> [!NOTE]
+> The first run downloads Facenet512 model weights (~94 MB). Note that TensorFlow has a large disk footprint.
+
 Open `http://localhost:3000` in your browser.
 
 ---
@@ -66,3 +76,21 @@ Open `http://localhost:3000` in your browser.
 ## 🔒 Privacy First
 
 User uploaded images are processed transiently in memory and discarded immediately after scoring. No user photo is saved or stored server-side.
+
+
+---
+
+## 📄 Data and Licensing
+
+The celebrity look-alike matching feature uses face reference images from:
+- **Pins Face Recognition Dataset** (scraped from Pinterest)
+- **Bollywood Celeb Localized Face Dataset**
+
+These datasets are intended strictly for educational and portfolio demonstration purposes. Their original licenses, copyright restrictions, and terms of use must be thoroughly reviewed and verified prior to any public or commercial deployment.
+
+### Population Percentile Reference & FairFace Attribution
+
+The percentile ranking compares each analyzed photograph with a public benchmark dataset, not with everyone. The population distribution is calibrated empirically on adult faces from the **FairFace** dataset:
+- **Dataset Attribution:** Karkkainen, K., & Joo, J. (2021). *FairFace: Face Attribute Dataset for Balanced Race, Gender, and Age for Bias Measurement and Mitigation*. IEEE/CVF Winter Conference on Applications of Computer Vision (WACV 2021).
+- **License:** Licensed under [Creative Commons Attribution 4.0 International (CC BY 4.0)](https://creativecommons.org/licenses/by/4.0/).
+- **Stratification:** Reference quantiles are derived from 2,017 accepted adult faces (ages 20-59) passing production frontal pose gates, sampled evenly across 7 demographic groups (East Asian, Indian, Black, White, Middle Eastern, Latino/Hispanic, Southeast Asian) and balanced by gender.

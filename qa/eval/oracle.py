@@ -35,6 +35,18 @@ def euclidean_dist(p1: Union[np.ndarray, list, tuple], p2: Union[np.ndarray, lis
     x2, y2 = float(p2[0]), float(p2[1])
     return math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2)
 
+def perp_dist_to_line(p: Union[np.ndarray, list, tuple], l1: Union[np.ndarray, list, tuple], l2: Union[np.ndarray, list, tuple]) -> float:
+    """Perpendicular distance from point p to line through l1 and l2."""
+    x0, y0 = float(p[0]), float(p[1])
+    x1, y1 = float(l1[0]), float(l1[1])
+    x2, y2 = float(l2[0]), float(l2[1])
+    dx = x2 - x1
+    dy = y2 - y1
+    line_len = math.sqrt(dx * dx + dy * dy)
+    if line_len == 0.0:
+        return math.sqrt((x0 - x1) ** 2 + (y0 - y1) ** 2)
+    return abs(dx * (y1 - y0) - (x1 - x0) * dy) / line_len
+
 class GoldenRatioOracle:
     """
     Independent reference implementation of facial ratio measurement and scoring.
@@ -59,11 +71,15 @@ class GoldenRatioOracle:
     RIGHT_EYE_BOTTOM = 374
     LEFT_EYEBROW_BOTTOM = 70
     RIGHT_EYEBROW_BOTTOM = 300
-    NOSE_LEFT = 219
-    NOSE_RIGHT = 439
+    NOSE_LEFT = 129
+    NOSE_RIGHT = 358
     NOSE_BRIDGE = 6
     MOUTH_LEFT = 61
     MOUTH_RIGHT = 291
+    MIDLINE_TOP = 168
+    MIDLINE_BOTTOM = 152
+    CHIN_LEFT = 176
+    CHIN_RIGHT = 400
 
     @classmethod
     def calculate_ratios(cls, points: np.ndarray) -> Dict[str, float]:
@@ -76,16 +92,20 @@ class GoldenRatioOracle:
         wid_face = euclidean_dist(points[cls.FACE_LEFT], points[cls.FACE_RIGHT])
         r1 = len_face / wid_face if wid_face > 0 else 0.0
 
-        # Ratio 2: Face width / Jaw width
-        wid_jaw = euclidean_dist(points[cls.JAW_LEFT], points[cls.JAW_RIGHT])
-        r2 = wid_face / wid_jaw if wid_jaw > 0 else 0.0
+        # Ratio 2: Midline distance for Ratio 2
+        p_top = points[cls.MIDLINE_TOP]
+        p_bot = points[cls.MIDLINE_BOTTOM]
+        r2_l = perp_dist_to_line(points[cls.FACE_LEFT], p_top, p_bot) / perp_dist_to_line(points[cls.JAW_LEFT], p_top, p_bot)
+        r2_r = perp_dist_to_line(points[cls.FACE_RIGHT], p_top, p_bot) / perp_dist_to_line(points[cls.JAW_RIGHT], p_top, p_bot)
+        r2 = (r2_l + r2_r) / 2.0
 
         # Ratio 3: Eye spacing / Eye width
         eye_spacing = euclidean_dist(points[cls.LEFT_EYE_INNER], points[cls.RIGHT_EYE_INNER])
         left_eye_wid = euclidean_dist(points[cls.LEFT_EYE_OUTER], points[cls.LEFT_EYE_INNER])
         right_eye_wid = euclidean_dist(points[cls.RIGHT_EYE_INNER], points[cls.RIGHT_EYE_OUTER])
-        avg_eye_wid = (left_eye_wid + right_eye_wid) / 2.0
-        r3 = eye_spacing / avg_eye_wid if avg_eye_wid > 0 else 0.0
+        r3_l = eye_spacing / left_eye_wid if left_eye_wid > 0 else 0.0
+        r3_r = eye_spacing / right_eye_wid if right_eye_wid > 0 else 0.0
+        r3 = (r3_l + r3_r) / 2.0
 
         # Ratio 4: Nose width / Mouth width
         wid_nose = euclidean_dist(points[cls.NOSE_LEFT], points[cls.NOSE_RIGHT])
@@ -100,20 +120,18 @@ class GoldenRatioOracle:
         upper_dist = euclidean_dist(points[cls.FACE_TOP], points[cls.NOSE_BRIDGE])
         r6 = lower_dist / upper_dist if upper_dist > 0 else 0.0
 
-        # Ratio 7: Eye-to-brow / Eye height
-        # Left side
+        # Ratio 7: Eye-to-brow / Inner-eye distance (stabilized)
+        intercanthal = euclidean_dist(points[cls.LEFT_EYE_INNER], points[cls.RIGHT_EYE_INNER])
         dist_brow_left = euclidean_dist(points[cls.LEFT_EYEBROW_BOTTOM], points[cls.LEFT_EYE_TOP])
-        height_eye_left = euclidean_dist(points[cls.LEFT_EYE_TOP], points[cls.LEFT_EYE_BOTTOM])
-        r7_left = dist_brow_left / height_eye_left if height_eye_left > 0 else 0.0
-        # Right side
         dist_brow_right = euclidean_dist(points[cls.RIGHT_EYEBROW_BOTTOM], points[cls.RIGHT_EYE_TOP])
-        height_eye_right = euclidean_dist(points[cls.RIGHT_EYE_TOP], points[cls.RIGHT_EYE_BOTTOM])
-        r7_right = dist_brow_right / height_eye_right if height_eye_right > 0 else 0.0
+        r7_left = dist_brow_left / intercanthal if intercanthal > 0 else 0.0
+        r7_right = dist_brow_right / intercanthal if intercanthal > 0 else 0.0
         r7 = (r7_left + r7_right) / 2.0
 
-        # Ratio 8: Chin width / Nose width
-        dist_chin = euclidean_dist(points[cls.JAW_LEFT], points[cls.JAW_RIGHT])  # Production uses JAW_LEFT to JAW_RIGHT
-        r8 = dist_chin / wid_nose if wid_nose > 0 else 0.0
+        # Ratio 8: Jaw width / Chin width (stabilized)
+        jaw_width = euclidean_dist(points[cls.JAW_LEFT], points[cls.JAW_RIGHT])
+        chin_width = euclidean_dist(points[cls.CHIN_LEFT], points[cls.CHIN_RIGHT])
+        r8 = jaw_width / chin_width if chin_width > 0 else 0.0
 
         return {
             "r1": r1,
@@ -137,6 +155,7 @@ class GoldenRatioOracle:
         # R1: Face Length / Face Width
         r1 = euclidean_dist(points[cls.FACE_TOP], points[cls.FACE_BOTTOM]) / euclidean_dist(points[cls.FACE_LEFT], points[cls.FACE_RIGHT])
 
+<<<<<<< HEAD
         # R2: Bilateral Face width / Jaw width relative to facial midline (FM-BUG-022)
         p_top = points[168][:2]
         p_bot = points[152][:2]
@@ -146,6 +165,13 @@ class GoldenRatioOracle:
         d_j_r = perp_dist(points[cls.JAW_RIGHT][:2], p_top, p_bot)
         r2_l = d_c_l / d_j_l if d_j_l > 0 else 0.0
         r2_r = d_c_r / d_j_r if d_j_r > 0 else 0.0
+=======
+        # R2: Bilateral Face width / Jaw width relative to midline
+        p_top = points[cls.MIDLINE_TOP]
+        p_bot = points[cls.MIDLINE_BOTTOM]
+        r2_l = perp_dist_to_line(points[cls.FACE_LEFT], p_top, p_bot) / perp_dist_to_line(points[cls.JAW_LEFT], p_top, p_bot)
+        r2_r = perp_dist_to_line(points[cls.FACE_RIGHT], p_top, p_bot) / perp_dist_to_line(points[cls.JAW_RIGHT], p_top, p_bot)
+>>>>>>> fix/ui-honesty
         r2 = (r2_l + r2_r) / 2.0
 
         # R3: Bilateral Eye Spacing / Eye Width
@@ -168,6 +194,7 @@ class GoldenRatioOracle:
         # R6: Vertical Thirds (Nose-Chin / Hairline-Nose)
         r6 = euclidean_dist(points[cls.NOSE_BRIDGE], points[cls.FACE_BOTTOM]) / euclidean_dist(points[cls.FACE_TOP], points[cls.NOSE_BRIDGE])
 
+<<<<<<< HEAD
         # R7: Eye-to-Brow / Eye Height (bilateral mirror landmarks: FM-BUG-007)
         dist_brow_l = euclidean_dist(points[cls.LEFT_EYE_TOP], points[cls.LEFT_EYEBROW_BOTTOM])
         h_eye_l = euclidean_dist(points[cls.LEFT_EYE_TOP], points[cls.LEFT_EYE_BOTTOM])
@@ -194,6 +221,20 @@ class GoldenRatioOracle:
             r8 = chin_width / wid_nose if wid_nose > 0 else 0.0
         else:
             r8 = 0.0
+=======
+        # R7: Eye-to-Brow / Inner-Eye Distance (bilateral)
+        intercanthal = euclidean_dist(points[cls.LEFT_EYE_INNER], points[cls.RIGHT_EYE_INNER])
+        dist_brow_l = euclidean_dist(points[cls.LEFT_EYE_TOP], points[cls.LEFT_EYEBROW_BOTTOM])
+        dist_brow_r = euclidean_dist(points[cls.RIGHT_EYE_TOP], points[cls.RIGHT_EYEBROW_BOTTOM])
+        r7_l = dist_brow_l / intercanthal
+        r7_r = dist_brow_r / intercanthal
+        r7 = (r7_l + r7_r) / 2.0
+
+        # R8: Jaw Width / Chin Width
+        jaw_width = euclidean_dist(points[cls.JAW_LEFT], points[cls.JAW_RIGHT])
+        chin_width = euclidean_dist(points[cls.CHIN_LEFT], points[cls.CHIN_RIGHT])
+        r8 = jaw_width / chin_width
+>>>>>>> fix/ui-honesty
 
         return {
             "r1": r1, "r2": r2, "r3": r3, "r4": r4,

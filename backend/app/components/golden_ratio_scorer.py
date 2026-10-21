@@ -39,8 +39,8 @@ class GoldenRatioScorer:
     4. Nose Width ÷ Mouth Width
     5. Mouth Width ÷ Face Width
     6. Nose-Chin ÷ Hairline-Nose (Vertical Thirds)
-    7. Eye-Eyebrow Distance ÷ Eye Height (bilateral: left/right)
-    8. Chin Width ÷ Nose Width
+    7. Eye-Eyebrow Distance ÷ Inner-Eye Distance (bilateral: left/right)
+    8. Jaw Width ÷ Chin Width
     
     For bilateral features, if left/right measurements differ by >10%,
     they are scored separately and included as individual entries in the
@@ -88,7 +88,9 @@ class GoldenRatioScorer:
     MOUTH_LEFT = 61
     MOUTH_RIGHT = 291
     
-    # Chin landmarks (FM-BUG-026)
+    # Chin landmarks (FM-BUG-026, Batch 5)
+    CHIN_LEFT = 176
+    CHIN_RIGHT = 400
     LIP_BOTTOM = 17
     CHIN_TIP = 152
     FACE_OVAL = [
@@ -129,12 +131,12 @@ class GoldenRatioScorer:
         ratio_5 = self._measure_mouth_to_face_width(points)
         ratio_6 = self._measure_vertical_thirds(points)
         
-        # Ratio 7: Eye to brow - bilateral feature with mirror landmarks (FM-BUG-007)
+        # Ratio 7: Eye to brow - bilateral feature normalized by inner-eye distance (Batch 5)
         ratio_7_left, ratio_7_right = self._measure_eye_to_brow_distance_bilateral(points)
         ratio_7_avg = (ratio_7_left + ratio_7_right) / 2.0
         
-        # Ratio 8: Chin width to nose width (FM-BUG-026)
-        ratio_8 = self._measure_chin_to_nose_width(points)
+        # Ratio 8: Jaw width to chin width (Batch 5)
+        ratio_8 = self._measure_jaw_to_chin_width(points)
         
         # Build exactly 8 feature scores (FM-BUG-009)
         feature_scores = [
@@ -155,12 +157,12 @@ class GoldenRatioScorer:
             self._score_feature("Mouth Width ÷ Face Width", ratio_5),
             self._score_feature("Nose-Chin ÷ Hairline-Nose (Vertical Thirds) - Approx. Hairline", ratio_6),
             self._score_bilateral_feature_single(
-                "Eye-Eyebrow Distance ÷ Eye Height",
+                "Eye-Eyebrow Distance ÷ Inner-Eye Distance",
                 ratio_7_left,
                 ratio_7_right,
                 ratio_7_avg
             ),
-            self._score_feature("Chin Width ÷ Nose Width", ratio_8),
+            self._score_feature("Jaw Width ÷ Chin Width", ratio_8),
         ]
         
         # Compute overall score as equal-weighted arithmetic mean of exactly 8 features
@@ -372,63 +374,48 @@ class GoldenRatioScorer:
     
     def _measure_eye_to_brow_distance_bilateral(self, points: np.ndarray) -> Tuple[float, float]:
         """
-        Ratio 7 (Bilateral): Eye-eyebrow distance ÷ eye height measured independently for left and right.
+        Ratio 7 (Bilateral): Eye-eyebrow distance ÷ inner-eye distance (intercanthal distance).
         
-        FM-BUG-007: Left side uses eyebrow 70, eye top 159, eye bottom 145.
-        Right side uses mirror landmarks: eyebrow 300, eye top 386, eye bottom 374.
+        Batch 5: Measured independently for left and right eye-eyebrow distances, normalized by
+        the intercanthal distance between inner eye corners (landmarks 133 to 362).
+        Left eyebrow uses landmark 70 to eye top 159.
+        Right eyebrow uses mirror landmark 300 to eye top 386.
         """
+        intercanthal = self._euclidean_distance(points[self.LEFT_EYE_INNER], points[self.RIGHT_EYE_INNER])
+        if intercanthal <= 0:
+            return 0.0, 0.0
+            
         left_eye_top = points[self.LEFT_EYE_TOP]
         left_eyebrow_bottom = points[self.LEFT_EYEBROW_BOTTOM]
         left_eye_to_brow = self._euclidean_distance(left_eye_top, left_eyebrow_bottom)
-        
-        left_eye_bottom = points[self.LEFT_EYE_BOTTOM]
-        left_eye_height = self._euclidean_distance(left_eye_top, left_eye_bottom)
-        
-        ratio_left = left_eye_to_brow / left_eye_height if left_eye_height > 0 else 0.0
+        ratio_left = left_eye_to_brow / intercanthal
         
         right_eye_top = points[self.RIGHT_EYE_TOP]
         right_eyebrow_bottom = points[self.RIGHT_EYEBROW_BOTTOM]
         right_eye_to_brow = self._euclidean_distance(right_eye_top, right_eyebrow_bottom)
-        
-        right_eye_bottom = points[self.RIGHT_EYE_BOTTOM]
-        right_eye_height = self._euclidean_distance(right_eye_top, right_eye_bottom)
-        
-        ratio_right = right_eye_to_brow / right_eye_height if right_eye_height > 0 else 0.0
+        ratio_right = right_eye_to_brow / intercanthal
         
         return ratio_left, ratio_right
     
     def _measure_eye_to_brow_distance(self, points: np.ndarray) -> float:
-        """Ratio 7: Eye-eyebrow distance ÷ eye height (mean of bilateral measurements)."""
+        """Ratio 7: Eye-eyebrow distance ÷ inner-eye distance (mean of bilateral measurements)."""
         r_l, r_r = self._measure_eye_to_brow_distance_bilateral(points)
         return (r_l + r_r) / 2.0
     
+    def _measure_jaw_to_chin_width(self, points: np.ndarray) -> float:
+        """
+        Ratio 8: Jaw width ÷ chin width.
+        
+        Batch 5: Jaw width is measured between landmarks 172 (left jaw) and 397 (right jaw).
+        Chin width is measured between landmarks 176 (left chin) and 400 (right chin).
+        """
+        jaw_width = self._euclidean_distance(points[self.JAW_LEFT], points[self.JAW_RIGHT])
+        chin_width = self._euclidean_distance(points[self.CHIN_LEFT], points[self.CHIN_RIGHT])
+        return jaw_width / chin_width if chin_width > 0 else 0.0
+
     def _measure_chin_to_nose_width(self, points: np.ndarray) -> float:
-        """
-        Ratio 8: Chin width ÷ nose width.
-        
-        FM-BUG-026: Chin width is the horizontal distance across the chin at the height
-        halfway between the lower lip (landmark 17) and the chin tip (landmark 152),
-        taken from the left and right face-oval contour points nearest to that height.
-        Nose width is the horizontal breadth across the outer alar wings (landmarks 129 to 358).
-        """
-        y_lip = points[self.LIP_BOTTOM][1]
-        y_chin = points[self.CHIN_TIP][1]
-        y_mid = (y_lip + y_chin) / 2.0
-        x_mid = points[self.CHIN_TIP][0]
-        
-        left_contour = [idx for idx in self.FACE_OVAL if points[idx][0] < x_mid]
-        right_contour = [idx for idx in self.FACE_OVAL if points[idx][0] >= x_mid]
-        
-        if not left_contour or not right_contour:
-            return 0.0
-            
-        best_left = min(left_contour, key=lambda idx: abs(points[idx][1] - y_mid))
-        best_right = min(right_contour, key=lambda idx: abs(points[idx][1] - y_mid))
-        
-        chin_width = abs(float(points[best_right][0] - points[best_left][0]))
-        nose_width = self._euclidean_distance(points[self.NOSE_LEFT], points[self.NOSE_RIGHT])
-        
-        return chin_width / nose_width if nose_width > 0 else 0.0
+        """Deprecated alias for Ratio 8 measurement."""
+        return self._measure_jaw_to_chin_width(points)
 
 
 # Global instance

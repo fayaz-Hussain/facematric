@@ -48,13 +48,45 @@ from app.utils.logger import setup_logging, get_logger
 setup_logging()
 logger = get_logger(__name__)
 
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """Lifespan context manager for startup and shutdown."""
+    logger.info(f"Starting {settings.app_name} v{settings.app_version}")
+    
+    # Pre-initialize MediaPipe FaceDetector and Crop Detector
+    try:
+        get_face_detector()
+        from app.utils.face_crop import get_crop_detector
+        get_crop_detector()
+        logger.info("MediaPipe models initialized successfully")
+    except Exception as e:
+        logger.error(f"Failed to initialize face detector: {str(e)}")
+        
+    # Pre-initialize Celebrity Matcher and FaceNet512 model
+    if settings.enable_celebrity_matching:
+        try:
+            matcher = get_celebrity_matcher()
+            if matcher.is_available:
+                matcher._initialize_facenet()
+                logger.info("Celebrity matcher and FaceNet512 model initialized successfully")
+            else:
+                logger.warning("Celebrity matcher unavailable")
+        except Exception as e:
+            logger.error(f"Failed to initialize celebrity matcher: {str(e)}")
+            
+    yield
+    
+    logger.info(f"Shutting down {settings.app_name}")
+
+
 # Create FastAPI app
 app = FastAPI(
     title=settings.app_name,
     version=settings.app_version,
     description="Facial geometry analysis using the Golden Ratio (φ = 1.618)",
     docs_url="/docs",
-    redoc_url="/redoc"
+    redoc_url="/redoc",
+    lifespan=lifespan
 )
 
 # Configure CORS
@@ -77,28 +109,7 @@ if os.path.exists(celebrity_dataset_dir):
     app.mount("/celebrities", StaticFiles(directory=celebrity_dataset_dir), name="celebrities")
 
 
-@app.on_event("startup")
-async def startup_event():
-    """Initialize components on startup."""
-    logger.info(f"Starting {settings.app_name} v{settings.app_version}")
-    
-    # Initialize face detector
-    try:
-        get_face_detector()
-        logger.info("Face detector initialized successfully")
-    except Exception as e:
-        logger.error(f"Failed to initialize face detector: {str(e)}")
-    
-    # Initialize celebrity matcher
-    if settings.enable_celebrity_matching:
-        try:
-            matcher = get_celebrity_matcher()
-            if matcher.is_available:
-                logger.info("Celebrity matcher initialized successfully")
-            else:
-                logger.warning("Celebrity matcher unavailable")
-        except Exception as e:
-            logger.error(f"Failed to initialize celebrity matcher: {str(e)}")
+
 
 
 @app.get("/health", response_model=HealthCheckResponse)
@@ -239,7 +250,7 @@ async def analyze_face(
             analysis_succeeded = True
             
             # Calculate processing time
-            processing_time = int((time.time() - start_time) * 1000)
+            processing_time = max(1, int((time.time() - start_time) * 1000))
             
             logger.info(
                 f"[{request_id}] Analysis completed successfully "
@@ -386,6 +397,22 @@ async def _validate_request_format(
             ErrorCode.NO_IMAGE,
             "No image provided. Please upload a file or provide a base64-encoded image."
         )
+        
+    if has_base64:
+        clean_b64 = str(image_base64).strip()
+        if "," in clean_b64 and clean_b64.startswith("data:"):
+            clean_b64 = clean_b64.split(",", 1)[1]
+        clean_b64 = clean_b64.strip()
+        max_bytes = settings.max_image_size_mb * 1024 * 1024
+        est_size = (len(clean_b64) * 3) // 4
+        if est_size > max_bytes:
+            logger.warning(
+                f"[{request_id}] Base64 image exceeds {settings.max_image_size_mb}MB limit (est: {est_size})"
+            )
+            raise ValidationError(
+                ErrorCode.FILE_TOO_LARGE,
+                f"File size exceeds {settings.max_image_size_mb}MB limit"
+            )
     
     logger.debug(
         f"[{request_id}] Request format valid: "

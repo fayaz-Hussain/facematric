@@ -1,7 +1,7 @@
 """
 Unit tests for celebrity match strength bands, null shape consistency, and shared face crop function.
 Covers Batch 2 requirements:
-- Strength bands: 0.39 (weak, name=None), 0.40 (moderate), 0.54 (moderate), 0.55 (strong)
+- Strength bands: 0.54 (weak, name=None), 0.55 (moderate), 0.69 (moderate), 0.70 (strong)
 - Null shape: object when matcher ran, None only when matcher is unavailable
 - Shared face crop function (extract_face_crop)
 """
@@ -17,7 +17,7 @@ from app.config import settings
 
 
 class TestCelebrityStrengthBands:
-    """Test the strength band thresholds at 0.39, 0.40, 0.54, 0.55."""
+    """Test the strength band thresholds at 0.54, 0.55, 0.69, 0.70."""
 
     @pytest.fixture
     def mock_matcher(self):
@@ -33,54 +33,54 @@ class TestCelebrityStrengthBands:
         matcher.is_available = True
         return matcher
 
-    def test_strength_band_0_39_weak(self, mock_matcher):
-        """At similarity 0.39 (< 0.40), strength is weak, name is None, message is 'No close resemblance found'."""
-        mock_matcher.rank_celebrities = Mock(return_value=[("Shah_Rukh_Khan", 0.39)])
+    def test_strength_band_0_54_weak(self, mock_matcher):
+        """At similarity 0.54 (< 0.55), strength is weak, name is None, message is 'No close resemblance found'."""
+        mock_matcher.rank_celebrities = Mock(return_value=[("Shah_Rukh_Khan", 0.54)])
         result = mock_matcher._find_best_match(np.zeros(512))
 
         assert result.strength == "weak"
         assert result.name is None
         assert result.message == "No close resemblance found"
-        assert result.similarity == 0.39
-        assert result.confidence == 0.39
+        assert result.similarity == 0.54
+        assert result.confidence == 0.54
         assert len(result.top_matches) == 1
         assert result.top_matches[0]["strength"] == "weak"
 
-    def test_strength_band_0_40_moderate(self, mock_matcher):
-        """At similarity 0.40 (>= 0.40 and < 0.55), strength is moderate and name is present."""
-        mock_matcher.rank_celebrities = Mock(return_value=[("Shah_Rukh_Khan", 0.40)])
+    def test_strength_band_0_55_moderate(self, mock_matcher):
+        """At similarity 0.55 (>= 0.55 and < 0.70), strength is moderate and name is present."""
+        mock_matcher.rank_celebrities = Mock(return_value=[("Shah_Rukh_Khan", 0.55)])
         result = mock_matcher._find_best_match(np.zeros(512))
 
         assert result.strength == "moderate"
         assert result.name == "Shah Rukh Khan"
         assert result.message is None
-        assert result.similarity == 0.40
-        assert result.confidence == 0.40
+        assert result.similarity == 0.55
+        assert result.confidence == 0.55
         assert len(result.top_matches) == 1
         assert result.top_matches[0]["strength"] == "moderate"
 
-    def test_strength_band_0_54_moderate(self, mock_matcher):
-        """At similarity 0.54 (< 0.55), strength is moderate and name is present."""
-        mock_matcher.rank_celebrities = Mock(return_value=[("Shah_Rukh_Khan", 0.54)])
+    def test_strength_band_0_69_moderate(self, mock_matcher):
+        """At similarity 0.69 (< 0.70), strength is moderate and name is present."""
+        mock_matcher.rank_celebrities = Mock(return_value=[("Shah_Rukh_Khan", 0.69)])
         result = mock_matcher._find_best_match(np.zeros(512))
 
         assert result.strength == "moderate"
         assert result.name == "Shah Rukh Khan"
         assert result.message is None
-        assert result.similarity == 0.54
-        assert result.confidence == 0.54
+        assert result.similarity == 0.69
+        assert result.confidence == 0.69
         assert result.top_matches[0]["strength"] == "moderate"
 
-    def test_strength_band_0_55_strong(self, mock_matcher):
-        """At similarity 0.55 (>= 0.55), strength is strong and name is present."""
-        mock_matcher.rank_celebrities = Mock(return_value=[("Shah_Rukh_Khan", 0.55)])
+    def test_strength_band_0_70_strong(self, mock_matcher):
+        """At similarity 0.70 (>= 0.70), strength is strong and name is present."""
+        mock_matcher.rank_celebrities = Mock(return_value=[("Shah_Rukh_Khan", 0.70)])
         result = mock_matcher._find_best_match(np.zeros(512))
 
         assert result.strength == "strong"
         assert result.name == "Shah Rukh Khan"
         assert result.message is None
-        assert result.similarity == 0.55
-        assert result.confidence == 0.55
+        assert result.similarity == 0.70
+        assert result.confidence == 0.70
         assert result.top_matches[0]["strength"] == "strong"
 
 

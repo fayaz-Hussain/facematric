@@ -294,7 +294,7 @@ class CelebrityMatcher:
             dict with match details or no match message
         """
         if threshold is None:
-            threshold = settings.celebrity_threshold_strong
+            threshold = settings.celebrity_threshold_moderate
             
         # Validate threshold
         if not 0.0 <= threshold <= 1.0:

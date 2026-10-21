@@ -88,25 +88,40 @@ class ResultsManager {
 
         const percentileStatus = document.getElementById('percentileStatus');
         if (percentileStatus) {
-            let band = 'typical';
-            if (scoreValue !== undefined && scoreValue !== null) {
-                if (scoreValue < 58.5) {
-                    band = 'below typical';
-                } else if (scoreValue > 64.6) {
-                    band = 'above typical';
-                } else {
-                    band = 'typical';
+            const quantiles = [
+                49.5, 52.8, 53.8, 54.8, 55.2, 55.6, 55.9, 56.1, 56.3, 56.5,
+                56.6, 56.8, 56.9, 57.1, 57.1, 57.3, 57.4, 57.4, 57.5, 57.5,
+                57.6, 57.6, 57.7, 57.8, 57.9, 58.0, 58.0, 58.1, 58.2, 58.2,
+                58.3, 58.3, 58.4, 58.4, 58.4, 58.5, 58.5, 58.6, 58.6, 58.7,
+                58.7, 58.8, 58.8, 58.9, 58.9, 59.0, 59.0, 59.1, 59.1, 59.2,
+                59.2, 59.3, 59.3, 59.4, 59.4, 59.5, 59.5, 59.6, 59.6, 59.7,
+                59.7, 59.8, 59.8, 59.9, 59.9, 60.0, 60.0, 60.1, 60.2, 60.2,
+                60.3, 60.3, 60.4, 60.5, 60.5, 60.6, 60.7, 60.7, 60.8, 60.9,
+                60.9, 61.0, 61.1, 61.2, 61.2, 61.3, 61.4, 61.5, 61.6, 61.7,
+                61.8, 61.9, 62.0, 62.2, 62.4, 62.6, 62.9, 63.2, 63.5, 64.0,
+                67.4
+            ];
+            const getPercentile = (s) => {
+                if (s <= quantiles[0]) return 1;
+                if (s >= quantiles[100]) return 99;
+                for (let i = 0; i < 100; i++) {
+                    if (s >= quantiles[i] && s <= quantiles[i+1]) {
+                        const span = quantiles[i+1] - quantiles[i];
+                        const frac = span > 0 ? (s - quantiles[i]) / span : 0;
+                        const p = Math.round(i + frac);
+                        return Math.max(1, Math.min(99, p));
+                    }
                 }
-            } else if (percentileValue !== undefined && percentileValue !== null) {
-                if (percentileValue < 25) {
-                    band = 'below typical';
-                } else if (percentileValue > 75) {
-                    band = 'above typical';
-                } else {
-                    band = 'typical';
-                }
-            }
-            percentileStatus.textContent = `${band} (compared with 959 celebrity photos)`;
+                return 50;
+            };
+
+            const P = (percentileValue !== undefined && percentileValue !== null) ? Math.round(percentileValue) : getPercentile(scoreValue);
+            const withinPersonSD = 1.26;
+            const refScore = (scoreValue !== undefined && scoreValue !== null) ? scoreValue : quantiles[Math.min(100, Math.max(0, P))];
+            const Plow = getPercentile(refScore - withinPersonSD);
+            const Phigh = getPercentile(refScore + withinPersonSD);
+
+            percentileStatus.innerHTML = `About the ${P}th percentile: higher than about ${P}% of 2,017 faces in the FairFace dataset (adults, balanced across 7 groups). <span style="font-size: 0.85em; opacity: 0.85; margin-left: 6px;">Different photos of you typically land between the ${Plow}th and ${Phigh}th percentile</span>`;
             percentileStatus.style.display = 'block';
         }
 
@@ -186,6 +201,7 @@ class ResultsManager {
         const backendBase = window.API_BASE_URL || (window.ENV && window.ENV.API_BASE_URL) || 'http://localhost:8000';
 
         if (celebrity && celebrity.name) {
+            // Strong or Moderate match
             if (rankBadge) rankBadge.style.display = 'inline-flex';
             if (imageContainer) imageContainer.style.display = 'block';
             if (nameEl) {
@@ -202,9 +218,7 @@ class ResultsManager {
             if (badgeEl && simVal !== null && simVal !== undefined) {
                 badgeEl.style.display = 'block';
                 const pct = Math.round(simVal * 100);
-                badgeEl.textContent = strengthLabel 
-                    ? `Similarity: ${pct}% (${strengthLabel})`
-                    : `Similarity: ${pct}%`;
+                badgeEl.textContent = `Similarity: ${pct}%${strengthLabel ? ` (${strengthLabel})` : ''}`;
             } else if (badgeEl) {
                 badgeEl.style.display = 'none';
                 badgeEl.textContent = '';
@@ -228,11 +242,12 @@ class ResultsManager {
                 }
             }
 
-            // Populate #2 to #5 matches
+            // Always show the 3 closest celebrity faces:
+            // Top match is #1 above; show ranks #2 and #3 in othersContainer
             if (othersContainer) {
                 othersContainer.innerHTML = '';
                 const otherMatches = (celebrity.top_matches && celebrity.top_matches.length > 1)
-                    ? celebrity.top_matches.slice(1, 5)
+                    ? celebrity.top_matches.slice(1, 3)
                     : [];
 
                 otherMatches.forEach(match => {
@@ -250,20 +265,22 @@ class ResultsManager {
                     const itemDiv = document.createElement('div');
                     itemDiv.className = 'lookalike-item';
                     itemDiv.innerHTML = `
-                        <span class="lookalike-item-rank">${match.rank}</span>
+                        <span class="lookalike-item-rank">#${match.rank}</span>
                         <div class="lookalike-item-image-wrapper">
                             ${safeImgSrc ? `<img src="${safeImgSrc}" alt="${match.name}" class="lookalike-item-image" onerror="this.onerror=null;this.parentElement.style.display='none';"/>` : ''}
                         </div>
                         <div class="lookalike-item-info">
                             <span class="lookalike-item-name">${match.name}</span>
-                            <span class="lookalike-item-match">Similarity: ${Math.round(matchSim * 100)}%${matchStrength}</span>
+                            <span class="lookalike-item-match" style="font-size: 0.8rem; opacity: 0.85;">Similarity: ${Math.round(matchSim * 100)}%${matchStrength}</span>
                         </div>
                     `;
                     othersContainer.appendChild(itemDiv);
                 });
             }
-        } else {
-            // When celebrity_match is null, has no name, or weak resemblance
+        } else if (celebrity && celebrity.top_matches && celebrity.top_matches.length > 0) {
+            // Below 0.55 (weak resemblance): keep headline "No close resemblance found"
+            // still return and show top_matches (top 3) under "Closest in our set (weak similarity)",
+            // each with face, name and a small similarity value, never presented as a match.
             if (rankBadge) rankBadge.style.display = 'none';
             if (imageContainer) imageContainer.style.display = 'none';
             if (imageEl) {
@@ -275,11 +292,53 @@ class ResultsManager {
                 badgeEl.textContent = '';
             }
             if (nameEl) {
-                if (!celebrity) {
-                    nameEl.textContent = 'Look-alike matching is unavailable';
-                } else {
-                    nameEl.textContent = celebrity.message || 'No close resemblance found';
-                }
+                nameEl.textContent = celebrity.message || 'No close resemblance found';
+                nameEl.style.display = 'block';
+            }
+            if (subtitleEl) {
+                subtitleEl.textContent = 'Closest in our set (weak similarity)';
+                subtitleEl.style.display = 'block';
+            }
+            if (othersContainer) {
+                othersContainer.innerHTML = '';
+                const top3 = celebrity.top_matches.slice(0, 3);
+                top3.forEach(match => {
+                    let matchImg = match.thumbnail_url || '';
+                    if (matchImg && matchImg.startsWith('/')) {
+                        matchImg = backendBase + matchImg;
+                    }
+                    const safeImgSrc = matchImg ? encodeURI(matchImg) : '';
+                    const matchSim = (match.similarity !== null && match.similarity !== undefined)
+                        ? match.similarity
+                        : match.confidence;
+                    const itemDiv = document.createElement('div');
+                    itemDiv.className = 'lookalike-item';
+                    itemDiv.innerHTML = `
+                        <div class="lookalike-item-image-wrapper">
+                            ${safeImgSrc ? `<img src="${safeImgSrc}" alt="${match.name}" class="lookalike-item-image" onerror="this.onerror=null;this.parentElement.style.display='none';"/>` : ''}
+                        </div>
+                        <div class="lookalike-item-info">
+                            <span class="lookalike-item-name">${match.name}</span>
+                            <span class="lookalike-item-match" style="font-size: 0.8rem; opacity: 0.85;">Similarity: ${Math.round(matchSim * 100)}%</span>
+                        </div>
+                    `;
+                    othersContainer.appendChild(itemDiv);
+                });
+            }
+        } else {
+            // Unavailable or empty
+            if (rankBadge) rankBadge.style.display = 'none';
+            if (imageContainer) imageContainer.style.display = 'none';
+            if (imageEl) {
+                imageEl.src = '';
+                imageEl.style.display = 'none';
+            }
+            if (badgeEl) {
+                badgeEl.style.display = 'none';
+                badgeEl.textContent = '';
+            }
+            if (nameEl) {
+                nameEl.textContent = 'Look-alike matching is unavailable';
                 nameEl.style.display = 'block';
             }
             if (subtitleEl) {

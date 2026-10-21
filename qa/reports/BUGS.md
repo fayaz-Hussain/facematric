@@ -83,7 +83,11 @@
 
 ### FM-BUG-004: Celebrity Look-Alike Matching Completely Disabled at Runtime in `backend/venv`
 - **Severity:** S1 (Critical)
+<<<<<<< HEAD
 - **Status:** **WON'T FIX** (Environment configuration)
+=======
+- **Status:** Fixed in documentation only (README Setup instructions guide creating fresh venv and installing requirements.txt)
+>>>>>>> fix/ui-honesty
 - **Component:** Environment / Celebrity Matcher
 - **Resolution:** `deepface` is documented in `backend/requirements.txt`. The developer's personal virtual environment (`backend/venv`) lacks the package, but the clean QA environment (`qa/.venv`) contains all required dependencies.
 
@@ -91,7 +95,11 @@
 
 ### FM-BUG-005: Integration Test Suite Inexecutable in `backend/venv` due to Missing `httpx`
 - **Severity:** S1 (Critical)
+<<<<<<< HEAD
 - **Status:** **WON'T FIX** (Environment configuration)
+=======
+- **Status:** Fixed in documentation only (README Setup instructions guide installing requirements.txt which includes httpx)
+>>>>>>> fix/ui-honesty
 - **Component:** Environment / Test Infrastructure
 - **Resolution:** `httpx` is documented in `backend/requirements.txt`. Available and verified in `qa/.venv`.
 
@@ -207,7 +215,11 @@
 
 ### FM-BUG-018: Severe Dependency Drift between `backend/venv` and `backend/requirements.txt`
 - **Severity:** S2 (Major)
+<<<<<<< HEAD
 - **Status:** **WON'T FIX** (Local developer environment issue)
+=======
+- **Status:** Fixed in documentation only (README Setup instructions document clean Python 3.12 environment creation)
+>>>>>>> fix/ui-honesty
 - **Component:** Environment / Deployment
 - **Resolution:** `qa/.venv` serves as the verified, reproducible reference environment.
 
@@ -305,5 +317,89 @@
 - **Severity:** S2 (Major)
 - **Status:** **FIXED** in commit `22a36a8`
 - **Component:** Face Shape Classifier / SymmetryClassifier
+<<<<<<< HEAD
 - **Resolution:** Decision tree in `symmetry_classifier.py` rewritten with continuous, gap-free boundaries covering all length-to-width ratios and jawline angles.
 - **Verification:** Verified by `backend/tests/unit/test_symmetry_classification.py` and `qa/tests/test_phase5_validity.py::TestFaceShapeClassifierBoundaries::test_exhaustive_contiguous_classification` (PASSED).
+=======
+- **Description:** In `symmetry_classifier.py:140-164`, face shape is classified using a sequence of `if` statements with strict non-contiguous boundaries:
+  - Heart: `forehead > jaw * 1.2`
+  - Diamond: `cheekbone > max(forehead, jaw) * 1.1`
+  - Oval: `1.4 <= ratio <= 1.6 and angle > 140`
+  - Rectangle: `ratio > 1.6 and angle < 130`
+  - Round: `0.9 <= ratio <= 1.1 and angle > 140`
+  - Square: `0.9 <= ratio <= 1.1 and angle < 130`
+  - Fallthrough: `return SymmetryType.OVAL`
+  Large intervals of facial morphology are completely omitted from the decision rules:
+  1. Any face with `1.10 < length_width_ratio < 1.40` (a very common intermediate facial proportion).
+  2. Any face with jawline angularity between `130°` and `140°` (regardless of length/width ratio).
+  3. Any face with `length_width_ratio < 0.90`.
+  Because line 164 defaults unhandled cases to `OVAL`, faces with intermediate ratios (e.g. 1.25) or moderate jawline angles (e.g. 135°) are silently classified as `Oval`. In empirical testing across 72 celebrity portraits, 13 of 15 identities (86.7%) and over 70% of photos were labeled `Oval` solely due to this fallback defect.
+- **Evidence:** [backend/app/components/symmetry_classifier.py:140-165](file:///c:/Users/FayazHussain/Desktop/FaceMatric/backend/app/components/symmetry_classifier.py#L140-L165); `qa/reports/05_same_person_stability.csv`; `qa/tests/test_phase5_validity.py::TestFaceShapeClassifierBoundaries::test_unclassified_middle_ratio_defaults_to_oval`.
+
+---
+
+### FM-BUG-030: Database Identities Omitted during Embedding Generation (91 Identities Missing)
+- **Severity:** S3 (Moderate)
+- **Status:** Logged defect (database generation pipeline)
+- **Component:** Offline Database / Embeddings Generation
+- **Description:** The raw reference folders in `celebrity_dataset/` contain 1,050 distinct identities (875 Pins + 175 Bollywood). However, `celebrity_embeddings.pkl` contains embeddings for only 959 identities. 91 celebrity identities were silently dropped during offline centroid extraction by `scripts/generate_celebrity_embeddings.py` because face detection returned zero landmarks on low-resolution crops or folders had fewer than 10 valid images, with no error notification or logging of omitted identities.
+- **Evidence:** `qa/eval/celebrity_eval.py`; `scripts/generate_celebrity_embeddings.py:60-95`; comparison of `os.listdir('celebrity_dataset')` (1,050) vs `len(embeddings.keys())` (959).
+
+---
+
+### FM-BUG-031: Unnormalized, Lowercase, and Misspelled Celebrity Names in Precomputed Database
+- **Severity:** S3 (Moderate)
+- **Status:** Fixed in code (name sanitization and formatting in `celebrity_matcher.py`)
+- **Component:** Offline Database / Metadata Formatting
+- **Description:** Identity keys and displayed names in `celebrity_embeddings.pkl` were derived verbatim from folder names without string sanitization or capitalization normalization. Several entries have unstripped prefixes (`pins_`), all-lowercase text (`pins_adriana lima`, `pins_barack obama`), underscores as separators, or typographical errors from the upstream scraped dataset. These raw strings propagated directly into the API match responses and results UI.
+- **Evidence:** `backend/data/celebrity_embeddings.pkl`; `qa/tests/test_phase7_celebrity_matcher.py`; `backend/app/components/celebrity_matcher.py:488-495`.
+
+---
+
+### FM-BUG-032: Absolute Host Filesystem Paths Stored in Celebrity Database Thumbnail Metadata
+- **Severity:** S3 (Moderate)
+- **Status:** Fixed in code (`celebrity_matcher.py` normalizes paths to relative web assets)
+- **Component:** Offline Database / Asset Routing
+- **Description:** The thumbnail dictionary in `celebrity_embeddings.pkl` stored absolute local machine file paths (e.g., `C:\Users\...\celebrity_dataset\...`) rather than web-accessible relative URI paths (e.g., `/assets/celebrities/...`). When deployed on different hosts or served to external browsers, the thumbnail URLs failed to load or exposed internal server directory paths.
+- **Evidence:** `backend/data/celebrity_embeddings.pkl`; `qa/reports/07_celebrity.md`.
+
+---
+
+### FM-BUG-033: Raw Cosine Thresholds Disagree with Rounded UI Percentage Display
+- **Severity:** S3 (Moderate)
+- **Status:** Fixed in code (unrounded comparisons locked in backend, strength tiers explicitly displayed)
+- **Component:** Celebrity Matcher / UI Honesty
+- **Description:** Match strength classification uses unrounded cosine similarity (>= 0.70 strong, 0.55-0.70 moderate, < 0.55 weak), while the frontend formats similarity as a rounded percentage string `Math.round(similarity * 100) + '%'`. A similarity of 0.698 rounds to 70%, but is technically below the 0.70 threshold for "Strong". Without consistent handling and documentation, users observe a match displayed as "70%" labeled as "Moderate Resemblance", creating an apparent boundary contradiction.
+- **Evidence:** `backend/app/components/celebrity_matcher.py:530-555`; `frontend/src/js/results.js:215-240`.
+
+---
+
+### FM-BUG-034: Arbitrary Margin Filtering between Top-1 and Top-2 Candidates Lacks Empirical Basis
+- **Severity:** S3 (Moderate)
+- **Status:** Fixed in code (transparent strength tiers replace arbitrary margin filters; top 3 matches returned)
+- **Component:** Celebrity Matcher / Ranking Logic
+- **Description:** In `celebrity_matcher.py`, margin filtering between the top-1 and top-2 candidates was implemented with an arbitrary delta threshold (> 0.10) to declare a "confident" match. However, cosine distances in a 959-centroid embedding space have dense clustering (median distance between nearest-neighbor centroids is only ~0.08), causing valid same-person matches to fail the margin test when two similar celebrities exist in the dataset.
+- **Evidence:** `backend/app/components/celebrity_matcher.py:510-535`; `qa/reports/07_celebrity.md`.
+
+---
+
+### FM-BUG-035: Ungrounded Synthetic Gaussian Distribution Used for Population Percentile Ranking
+- **Severity:** S2 (Major)
+- **Status:** Fixed in code (calibrated against 2,017 accepted adult faces from FairFace across 7 balanced demographic groups; empirical quantile CDF loaded from `score_reference.json`)
+- **Component:** Percentile Engine / Statistical Calibration
+- **Description:** The percentile engine originally assumed golden ratio overall scores followed a synthetic normal distribution N(70, 10), resulting in distorted rankings (e.g. true human scores clustered around 59 were placed below the 15th percentile). No empirical population benchmark was used.
+- **Evidence:** `backend/app/config.py:33-34`; `qa/tests/test_phase5_validity.py`.
+
+---
+
+## Summary of Tracked Defects
+
+| Severity | Total Logged | Fixed in Code | Fixed in Docs Only | Open / Mitigated |
+| :--- | :---: | :---: | :---: | :---: |
+| **S1 (Critical)** | 3 | 1 (FM-BUG-010) | 2 (FM-BUG-004, FM-BUG-005) | 0 |
+| **S2 (Major)** | 15 | 12 | 1 (FM-BUG-018) | 2 (FM-BUG-024, FM-BUG-026 legacy) |
+| **S3 (Moderate)** | 14 | 10 | 1 (FM-BUG-019) | 3 (FM-BUG-017, FM-BUG-021, FM-BUG-030) |
+| **S4 (Minor)** | 2 | 1 (FM-BUG-012) | 1 (FM-BUG-020) | 0 |
+| **Spec-Only** | 1 | 0 | 1 (FM-BUG-001) | 0 |
+| **Total** | **35** | **24** | **6** | **5** |
+>>>>>>> fix/ui-honesty

@@ -80,10 +80,15 @@ test.describe('Frontend E2E Integration Suite', () => {
     await expect(scoreEl).toBeVisible();
     await expect(scoreEl).toHaveText('52', { timeout: 3000 }); // Math.round(51.9) = 52
 
-    // Verify Percentile display in status
+    // Verify Percentile display in status (FairFace empirical calibration)
     const pctStatus = page.locator('#percentileStatus');
     await expect(pctStatus).toBeVisible();
+<<<<<<< HEAD
     await expect(pctStatus).toContainText('below typical (compared with 959 celebrity photos)');
+=======
+    await expect(pctStatus).toContainText('FairFace dataset');
+    await expect(pctStatus).toContainText('higher than about');
+>>>>>>> fix/ui-honesty
 
     // Verify Face Symmetry Type display
     const symmetryEl = page.locator('#symmetryType');

@@ -73,6 +73,8 @@ def golden_face_landmarks():
     points[17] = [320, 220, 0]     # LOWER_LIP
     points[148] = [280, 235, 0]    # chin contour left
     points[377] = [360, 235, 0]    # chin contour right
+    points[176] = [227, 235, 0]    # CHIN_LEFT
+    points[400] = [413, 235, 0]    # CHIN_RIGHT
     
     landmarks = Landmarks(
         points=points,
@@ -129,6 +131,8 @@ def symmetrical_face_landmarks():
     points[17] = [320, 340, 0]     # LOWER_LIP
     points[148] = [180, 360, 0]    # chin contour left
     points[377] = [460, 360, 0]    # chin contour right
+    points[176] = [250, 365, 0]    # CHIN_LEFT (mental tubercle)
+    points[400] = [390, 365, 0]    # CHIN_RIGHT (mental tubercle, chin_width = 140)
     
     landmarks = Landmarks(
         points=points,
@@ -233,35 +237,30 @@ class TestRatioMeasurements:
     
     def test_measure_eye_to_brow_distance(self, scorer, symmetrical_face_landmarks):
         """
-        Requirement 5.7: Compute eye to eyebrow distance to eye height ratio.
+        Requirement 5.7: Compute eye to eyebrow distance to inner-eye distance ratio (Batch 5).
         
-        Eye-eyebrow distance: from eye top (159) to eyebrow bottom (70)
-        Eye height: from eye top (159) to eye bottom (145)
+        Eye-eyebrow distance: from eye top (159) to eyebrow bottom (70) = 15
+        Inner-eye distance: from inner eye (133) to inner eye (362) = 140
         """
         points = symmetrical_face_landmarks.points
         ratio = scorer._measure_eye_to_brow_distance(points)
         
-        # Expected: eye_to_brow distance from (225, 190) to (225, 175) = 15
-        # eye_height distance from (225, 190) to (225, 210) = 20
-        # ratio ≈ 0.75
-        assert 0.2 < ratio < 2.0
-        # Points: eye_top=(225, 190), eyebrow=(225, 175), eye_bottom=(225, 210)
-        # distance eye_top to eyebrow = 15, distance eye_top to eye_bottom = 20
-        assert ratio == pytest.approx(15.0 / 20.0, rel=0.01)
+        assert 0.05 < ratio < 1.0
+        assert ratio == pytest.approx(15.0 / 140.0, rel=0.01)
     
     def test_measure_chin_to_nose_width(self, scorer, symmetrical_face_landmarks):
         """
-        Requirement 5.8: Compute chin width to nose width ratio.
+        Requirement 5.8: Compute jaw width to chin width ratio (Batch 5).
         
-        Chin width: measured at jaw points (172 to 397)
-        Nose width: measured at nostril points (219 to 439)
+        Jaw width: measured at jaw points (172 to 397) = 280
+        Chin width: measured at chin points (176 to 400) = 140
         """
         points = symmetrical_face_landmarks.points
-        ratio = scorer._measure_chin_to_nose_width(points)
+        ratio = scorer._measure_jaw_to_chin_width(points)
         
-        # Expected: chin_width = 280, nose_width = 40, ratio = 7.0
-        assert 1.0 < ratio < 15.0
-        assert ratio == pytest.approx(280.0 / 40.0, rel=0.01)
+        # Expected: jaw_width = 280, chin_width = 140, ratio = 2.0
+        assert 0.5 < ratio < 5.0
+        assert ratio == pytest.approx(280.0 / 140.0, rel=0.01)
 
 
 class TestScoringFormula:
@@ -399,8 +398,8 @@ class TestOverallScoreCalculation:
             "Nose Width ÷ Mouth Width",
             "Mouth Width ÷ Face Width",
             "Nose-Chin ÷ Hairline-Nose (Vertical Thirds)",
-            "Eye-Eyebrow Distance ÷ Eye Height",  # May have asymmetric variants
-            "Chin Width ÷ Nose Width",
+            "Eye-Eyebrow Distance ÷ Inner-Eye Distance",  # May have asymmetric variants
+            "Jaw Width ÷ Chin Width",
         ]
         
         for expected in expected_features:
@@ -504,7 +503,7 @@ class TestRatioValidation:
         result = scorer.score_all(golden_face_landmarks)
         
         for feature in result.features:
-            assert 0.1 < feature.measured_ratio < 10.0, \
+            assert 0.05 < feature.measured_ratio < 10.0, \
                 f"Ratio {feature.feature} is out of reasonable range: {feature.measured_ratio}"
     
     def test_all_scores_in_bounds(self, scorer, golden_face_landmarks):
@@ -578,7 +577,7 @@ class TestIntegration:
         assert result.overall_score > 0
         assert len(result.features) == 8
         assert all(0 <= f.score <= 100 for f in result.features)
-        assert all(0.1 < f.measured_ratio < 10 for f in result.features)
+        assert all(0.05 < f.measured_ratio < 10 for f in result.features)
     
     def test_scorer_is_deterministic(self, scorer, golden_face_landmarks):
         """Running scorer twice should produce identical results."""

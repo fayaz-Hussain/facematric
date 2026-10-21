@@ -342,14 +342,14 @@ class AnalysisResponse(BaseModel):
                                     "deviation": -0.023
                                 },
                                 {
-                                    "feature": "Eye to Eyebrow Distance ÷ Eye Height",
+                                    "feature": "Eye-Eyebrow Distance ÷ Inner-Eye Distance",
                                     "measured_ratio": 1.450,
                                     "ideal_ratio": 1.618,
                                     "score": 89.6,
                                     "deviation": -0.168
                                 },
                                 {
-                                    "feature": "Chin Width ÷ Nose Width",
+                                    "feature": "Jaw Width ÷ Chin Width",
                                     "measured_ratio": 1.680,
                                     "ideal_ratio": 1.618,
                                     "score": 96.2,
@@ -429,14 +429,14 @@ class AnalysisResponse(BaseModel):
                                     "deviation": -0.118
                                 },
                                 {
-                                    "feature": "Eye to Eyebrow Distance ÷ Eye Height",
+                                    "feature": "Eye-Eyebrow Distance ÷ Inner-Eye Distance",
                                     "measured_ratio": 1.350,
                                     "ideal_ratio": 1.618,
                                     "score": 83.4,
                                     "deviation": -0.268
                                 },
                                 {
-                                    "feature": "Chin Width ÷ Nose Width",
+                                    "feature": "Jaw Width ÷ Chin Width",
                                     "measured_ratio": 1.590,
                                     "ideal_ratio": 1.618,
                                     "score": 98.3,

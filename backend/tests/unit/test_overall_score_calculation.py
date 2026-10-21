@@ -325,8 +325,8 @@ class TestOverallScoreCalculation:
         4. Nose Width ÷ Mouth Width
         5. Mouth Width ÷ Face Width
         6. Nose-Chin ÷ Hairline-Nose (Vertical Thirds)
-        7. Eye-Eyebrow Distance ÷ Eye Height
-        8. Chin Width ÷ Nose Width
+        7. Eye-Eyebrow Distance ÷ Inner-Eye Distance
+        8. Jaw Width ÷ Chin Width
         """
         result = golden_ratio_scorer.score_all(perfect_landmarks)
         
@@ -340,8 +340,8 @@ class TestOverallScoreCalculation:
             "Nose Width ÷ Mouth Width",
             "Mouth Width ÷ Face Width",
             "Nose-Chin ÷ Hairline-Nose (Vertical Thirds) - Approx. Hairline",
-            "Eye-Eyebrow Distance ÷ Eye Height",  # Bilateral feature
-            "Chin Width ÷ Nose Width",
+            "Eye-Eyebrow Distance ÷ Inner-Eye Distance",  # Bilateral feature
+            "Jaw Width ÷ Chin Width",
         ]
         
         actual_feature_names = [f.feature for f in result.features]
