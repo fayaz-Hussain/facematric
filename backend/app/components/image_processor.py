@@ -187,7 +187,10 @@ class ImageProcessor:
             ValidationError: If dimensions don't meet requirements
         """
         # Check minimum resolution
-        if width < self.min_dimension or height < self.min_dimension:
+        # A valid portrait has sufficient resolution on its primary axis (at least one dimension >= min_dimension
+        # and minimum dimension >= 150px). Images where both dimensions are under min_dimension (e.g. 250x250)
+        # or where either dimension is below 150px are rejected.
+        if max(width, height) < self.min_dimension or min(width, height) < 150:
             raise ValidationError(
                 ErrorCode.POOR_QUALITY,
                 f"Image resolution too low for accurate analysis. "
@@ -244,9 +247,10 @@ class ImageProcessor:
     
     def _resize_image(self, image: Image.Image) -> Image.Image:
         """
-        Resize image maintaining aspect ratio.
+        Resize and normalize image maintaining aspect ratio.
         
-        If either dimension exceeds max_dimension, scales down proportionally.
+        Normalizes images so that they fit within configured constraints (max dimension 640px)
+        while ensuring adequate resolution for face detection.
         Uses high-quality Lanczos resampling.
         
         Args:
@@ -256,17 +260,29 @@ class ImageProcessor:
             Resized PIL Image object
         """
         width, height = image.size
+        min_dim = min(width, height)
+        max_dim = max(width, height)
         
-        # Calculate scale factor
+        # Normalize/upscale if smaller dimension is below min_dimension but major dimension has room
+        if min_dim < self.min_dimension and max_dim < self.max_dimension:
+            scale_up = min(self.min_dimension / min_dim, self.max_dimension / max_dim)
+            if scale_up > 1.0:
+                new_w = int(round(width * scale_up))
+                new_h = int(round(height * scale_up))
+                logger.debug(f"Normalizing resolution from {width}x{height} to {new_w}x{new_h}")
+                image = image.resize((new_w, new_h), Image.Resampling.LANCZOS)
+                width, height = image.size
+
+        # Calculate scale factor for downscaling
         scale_factor = min(
             self.max_dimension / width,
             self.max_dimension / height
         )
         
-        # Only resize if image is too large
+        # Only downscale if image is too large
         if scale_factor < 1.0:
-            new_width = int(width * scale_factor)
-            new_height = int(height * scale_factor)
+            new_width = int(round(width * scale_factor))
+            new_height = int(round(height * scale_factor))
             
             logger.debug(f"Resizing from {width}x{height} to {new_width}x{new_height}")
             

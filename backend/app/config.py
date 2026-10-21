@@ -51,8 +51,8 @@ class Settings(BaseSettings):
     landmark_confidence_threshold: float = 0.6
     
     # Pose Quality Gates
-    max_pose_yaw_deg: float = 25.0
-    max_pose_roll_deg: float = 20.0
+    max_pose_yaw_deg: float = 38.0
+    max_pose_roll_deg: float = 45.0
     
     class Config:
         env_file = ".env"

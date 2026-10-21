@@ -1,4 +1,4 @@
-﻿/**
+/**
  * upload.js
  * Handles file upload and drag-and-drop functionality
  */
@@ -8,7 +8,12 @@ class UploadManager {
         this.dropZone = null;
         this.fileInput = null;
         this.maxFileSize = 10 * 1024 * 1024; // 10MB
-        this.allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+        this.allowedTypes = [
+            'image/jpeg', 'image/jpg', 'image/png', 'image/webp',
+            'image/heic', 'image/heif', 'image/bmp', 'image/gif',
+            'image/jfif', 'image/pjpeg', 'image/x-png'
+        ];
+        this.allowedExtensions = ['.jpg', '.jpeg', '.png', '.webp', '.heic', '.heif', '.jfif', '.bmp', '.gif'];
         this.init();
     }
 
@@ -62,16 +67,91 @@ class UploadManager {
         }
     }
 
+    isValidImage(file) {
+        if (!file) return false;
+        const type = (file.type || '').toLowerCase();
+        if (type && this.allowedTypes.includes(type)) {
+            return true;
+        }
+        const filename = (file.name || '').toLowerCase();
+        return this.allowedExtensions.some(ext => filename.endsWith(ext));
+    }
+
+    showError(title, message) {
+        const existing = document.getElementById('upload-error-modal');
+        if (existing) existing.remove();
+
+        const modal = document.createElement('div');
+        modal.id = 'upload-error-modal';
+        modal.style.cssText = `
+            position: fixed;
+            inset: 0;
+            background: rgba(10, 20, 24, 0.85);
+            backdrop-filter: blur(8px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 99999;
+            padding: 1.5rem;
+            animation: fadeIn 0.25s ease-out;
+        `;
+        modal.innerHTML = `
+            <div style="
+                background: var(--surface-bg, #122329);
+                border: 1px solid var(--accent-teal, #40CCA2);
+                border-radius: 16px;
+                max-width: 440px;
+                width: 100%;
+                padding: 2rem;
+                text-align: center;
+                box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6), 0 0 25px rgba(64, 204, 162, 0.2);
+                color: var(--text-primary, #FFFFFF);
+                font-family: inherit;
+            ">
+                <div style="
+                    width: 56px;
+                    height: 56px;
+                    margin: 0 auto 1.25rem;
+                    border-radius: 50%;
+                    background: rgba(64, 204, 162, 0.15);
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    color: var(--accent-teal, #40CCA2);
+                ">
+                    <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"/>
+                        <line x1="12" y1="8" x2="12" y2="12"/>
+                        <line x1="12" y1="16" x2="12.01" y2="16"/>
+                    </svg>
+                </div>
+                <h3 style="font-size: 1.25rem; margin-bottom: 0.75rem; color: #FFFFFF;">${title}</h3>
+                <p style="font-size: 0.95rem; line-height: 1.5; color: var(--text-secondary, #A0B2B8); margin-bottom: 1.5rem;">${message}</p>
+                <button onclick="document.getElementById('upload-error-modal').remove()" style="
+                    background: var(--accent-teal, #40CCA2);
+                    color: #0A1418;
+                    border: none;
+                    border-radius: 8px;
+                    padding: 0.75rem 1.75rem;
+                    font-weight: 600;
+                    cursor: pointer;
+                    font-size: 0.95rem;
+                ">OK</button>
+            </div>
+        `;
+        document.body.appendChild(modal);
+    }
+
     processFile(file) {
         // Validate file type
-        if (!this.allowedTypes.includes(file.type)) {
-            alert('Please upload an image file (JPG, PNG, WEBP)');
+        if (!this.isValidImage(file)) {
+            this.showError('Invalid File Format', 'Please upload a supported image file (JPEG, PNG, WebP, HEIC, BMP, GIF).');
             return;
         }
 
         // Validate file size
         if (file.size > this.maxFileSize) {
-            alert('File size exceeds 10MB limit');
+            this.showError('File Too Large', 'File size exceeds the 10MB limit. Please upload a smaller image.');
             return;
         }
 
