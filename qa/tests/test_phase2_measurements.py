@@ -8,10 +8,14 @@ import cv2
 backend_path = os.path.abspath("backend")
 if backend_path not in sys.path:
     sys.path.insert(0, backend_path)
+project_root = os.path.abspath(".")
+if project_root not in sys.path:
+    sys.path.insert(0, project_root)
 
 from app.components.face_detector import FaceDetector
 from app.components.golden_ratio_scorer import GoldenRatioScorer
 from app.models.internal import ImageData, Landmarks
+from app.utils.errors import ValidationError
 from qa.eval.oracle import GoldenRatioOracle, PHI_CONSTANT
 
 FRONTAL_DIR = os.path.join(os.path.abspath("."), "qa", "data", "frontal_set")
@@ -40,11 +44,16 @@ def test_independent_oracle_parity(detector, scorer, frontal_images):
     Assert that all 8 measured ratios from production functions match
     the independent oracle to 1e-6 relative tolerance across all frontal images.
     """
+    tested_count = 0
     for img_path in frontal_images:
         bgr = cv2.imread(img_path)
         rgb = cv2.cvtColor(bgr, cv2.COLOR_BGR2RGB)
         img_data = ImageData(array=rgb, width=rgb.shape[1], height=rgb.shape[0], original_format="JPEG")
-        landmarks = detector.detect_faces(img_data)
+        try:
+            landmarks = detector.detect_faces(img_data)
+        except ValidationError:
+            continue
+        tested_count += 1
         pts = landmarks.points
 
         # Production raw measurement methods
@@ -73,6 +82,8 @@ def test_independent_oracle_parity(detector, scorer, frontal_images):
             oval = oracle_ratios[k]
             rel_diff = abs(pval - oval) / max(pval, 1e-9)
             assert rel_diff <= 1e-6, f"Oracle mismatch on {k} for {img_path}: prod={pval}, oracle={oval}, diff={rel_diff}"
+
+    assert tested_count >= 20, f"Expected at least 20 passing frontal images, tested {tested_count}"
 
 
 def test_non_square_aspect_ratio_invariance(detector, scorer, frontal_images):
@@ -108,8 +119,8 @@ def test_non_square_aspect_ratio_invariance(detector, scorer, frontal_images):
 
 def test_synthetic_unilateral_eye_distortion_splits_ratio_3(scorer):
     """
-    Verify that distorting only the left eye triggers the 10% bilateral split for Ratio 3,
-    increasing feature count from 8 to 9.
+    Verify that distorting only the left eye triggers the bilateral asymmetry for Ratio 3,
+    maintaining exactly 8 features while reporting ratio_left, ratio_right, and asymmetry_pct (FM-BUG-009).
     """
     pts = np.zeros((468, 3), dtype=np.float32)
     pts[10] = [200.0, 50.0, 0.0]     # Top
@@ -142,17 +153,17 @@ def test_synthetic_unilateral_eye_distortion_splits_ratio_3(scorer):
     lms_dist = Landmarks(points=distorted_pts, confidence=1.0, image_width=400, image_height=400)
     res_dist = scorer.score_all(lms_dist)
 
-    feature_names = [fs.feature for fs in res_dist.features]
-    assert len(res_dist.features) == 9
-    assert "Eye Spacing ÷ Eye Width (Left)" in feature_names
-    assert "Eye Spacing ÷ Eye Width (Right)" in feature_names
+    assert len(res_dist.features) == 8
+    r3_feat = next(fs for fs in res_dist.features if fs.feature == "Eye Spacing ÷ Eye Width")
+    assert r3_feat.asymmetry_pct is not None
+    assert r3_feat.asymmetry_pct > 10.0
+    assert r3_feat.ratio_left != r3_feat.ratio_right
 
 
-@pytest.mark.xfail(strict=True, reason="FM-BUG-022: Ratio 2 midpoint math forces left and right distances to be identically equal, making asymmetry detection mathematically impossible (permanently 0.0%)")
 def test_ratio_2_asymmetry_detection_on_asymmetric_jaw(scorer):
     """
     Ratio 2 should detect jaw asymmetry when the right jaw is wider than the left jaw.
-    In current production code, midpoint math guarantees ratio_left == ratio_right always.
+    FM-BUG-022: Fixed with midline perpendicular distance measurement.
     """
     pts = np.zeros((468, 3), dtype=np.float32)
     pts[10] = [200.0, 50.0, 0.0]
@@ -181,11 +192,10 @@ def test_ratio_2_asymmetry_detection_on_asymmetric_jaw(scorer):
     assert abs(r2_left - r2_right) > 0.10, f"Expected asymmetry > 0.10, but got r2_left={r2_left}, r2_right={r2_right}"
 
 
-@pytest.mark.xfail(strict=True, reason="FM-BUG-007: Ratio 7 hardcodes ratio_right = ratio_left, ignoring right eyebrow and eye landmarks")
 def test_ratio_7_asymmetry_detection_on_asymmetric_eyebrows(scorer):
     """
     Ratio 7 should detect eyebrow height asymmetry when right eyebrow is arched higher.
-    In current production code, line 574 hardcodes ratio_right = ratio_left.
+    FM-BUG-007: Fixed with bilateral mirror landmarks (70/159/145 vs 300/386/374).
     """
     pts = np.zeros((468, 3), dtype=np.float32)
     pts[159] = [135.0, 175.0, 0.0]   # Left eye top

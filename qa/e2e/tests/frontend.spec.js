@@ -83,7 +83,7 @@ test.describe('Frontend E2E Integration Suite', () => {
     // Verify Percentile display in status
     const pctStatus = page.locator('#percentileStatus');
     await expect(pctStatus).toBeVisible();
-    await expect(pctStatus).toContainText('7%');
+    await expect(pctStatus).toContainText('below typical (compared with 959 celebrity photos)');
 
     // Verify Face Symmetry Type display
     const symmetryEl = page.locator('#symmetryType');

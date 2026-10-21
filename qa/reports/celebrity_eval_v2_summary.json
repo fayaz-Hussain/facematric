@@ -1,0 +1,95 @@
+{
+  "evaluation_timestamp": "2026-10-21T01:12:11Z",
+  "total_database_identities": 275,
+  "validation_queries_total": 12094,
+  "validation_fallbacks_count": 6824,
+  "validation_top1": {
+    "correct": 11813,
+    "total": 12094,
+    "accuracy": 0.9767653381842236,
+    "ci_95": [
+      0.9739251660717249,
+      0.9793027221161978
+    ]
+  },
+  "validation_top5": {
+    "correct": 12019,
+    "total": 12094,
+    "accuracy": 0.9937985778071771,
+    "ci_95": [
+      0.9922340813751368,
+      0.9950494684441961
+    ]
+  },
+  "validation_strength_breakdown": {
+    "strong_ge_055": {
+      "count": 11807,
+      "rate": 0.9762692244087977,
+      "ci_95": [
+        0.9734014424755066,
+        0.9788345332377146
+      ]
+    },
+    "moderate_040_to_055": {
+      "count": 264,
+      "rate": 0.021829006118736564,
+      "ci_95": [
+        0.01937251007640411,
+        0.024589183057352904
+      ]
+    },
+    "weak_lt_040": {
+      "count": 23,
+      "rate": 0.0019017694724656855,
+      "ci_95": [
+        0.0012676216820675485,
+        0.002852253717855029
+      ]
+    }
+  },
+  "validation_operating_point_055": {
+    "coverage": 0.9762692244087977,
+    "returned_count": 11807,
+    "precision": 0.9865334123824849,
+    "precision_ci_95": [
+      0.98429040662777,
+      0.9884599179553654
+    ]
+  },
+  "unknown_set_total": 240,
+  "unknown_fallbacks_count": 0,
+  "unknown_strength_breakdown": {
+    "strong_ge_055_false_matches": {
+      "count": 14,
+      "rate": 0.058333333333333334,
+      "ci_95": [
+        0.03506211241962321,
+        0.09552102023698665
+      ]
+    },
+    "moderate_040_to_055_false_matches": {
+      "count": 93,
+      "rate": 0.3875,
+      "ci_95": [
+        0.3280974586094397,
+        0.45044730159554575
+      ]
+    },
+    "weak_lt_040_correctly_rejected": {
+      "count": 133,
+      "rate": 0.5541666666666667,
+      "ci_95": [
+        0.4909183741838832,
+        0.6157082227544571
+      ]
+    },
+    "total_false_matches_at_040": {
+      "count": 107,
+      "rate": 0.44583333333333336,
+      "ci_95": [
+        0.38429177724554286,
+        0.5090816258161168
+      ]
+    }
+  }
+}

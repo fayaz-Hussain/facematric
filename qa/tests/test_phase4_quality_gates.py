@@ -114,7 +114,10 @@ class TestImageFormatHandling:
         assert resp.status_code == 200
         assert resp.json()["status"] == "success"
 
-    def test_exif_rotated_phone_photo(self, client, sample_face_bytes):
+    def test_exif_rotated_phone_photo(self, client):
+        files = sorted(glob.glob(os.path.join(FRONTAL_DIR, "*.*")))
+        with open(files[3], "rb") as f:
+            sample_face_bytes = f.read()
         im = Image.open(io.BytesIO(sample_face_bytes))
         sideways = im.transpose(Image.Transpose.ROTATE_270)
         exif = sideways.getexif()

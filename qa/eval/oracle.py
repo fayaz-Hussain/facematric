@@ -17,6 +17,18 @@ def score_ratio_oracle(ratio: float, phi: float = PHI_CONSTANT) -> float:
     raw_score = 100.0 * (1.0 - abs(ratio - phi) / phi)
     return max(0.0, min(100.0, raw_score))
 
+def perp_dist(p0: Union[np.ndarray, list, tuple], p1: Union[np.ndarray, list, tuple], p2: Union[np.ndarray, list, tuple]) -> float:
+    """Perpendicular distance from point p0 to line passing through p1 and p2."""
+    x0, y0 = float(p0[0]), float(p0[1])
+    x1, y1 = float(p1[0]), float(p1[1])
+    x2, y2 = float(p2[0]), float(p2[1])
+    dx = x2 - x1
+    dy = y2 - y1
+    line_len = math.sqrt(dx * dx + dy * dy)
+    if line_len == 0.0:
+        return math.sqrt((x0 - x1) ** 2 + (y0 - y1) ** 2)
+    return abs(dx * (y1 - y0) - (x1 - x0) * dy) / line_len
+
 def euclidean_dist(p1: Union[np.ndarray, list, tuple], p2: Union[np.ndarray, list, tuple]) -> float:
     """Euclidean distance in 2D space: sqrt((x2 - x1)^2 + (y2 - y1)^2)"""
     x1, y1 = float(p1[0]), float(p1[1])
@@ -125,15 +137,15 @@ class GoldenRatioOracle:
         # R1: Face Length / Face Width
         r1 = euclidean_dist(points[cls.FACE_TOP], points[cls.FACE_BOTTOM]) / euclidean_dist(points[cls.FACE_LEFT], points[cls.FACE_RIGHT])
 
-        # R2: Bilateral Face width / Jaw width
-        p_fl = points[cls.FACE_LEFT]
-        p_fr = points[cls.FACE_RIGHT]
-        p_fc = (p_fl + p_fr) / 2.0
-        p_jl = points[cls.JAW_LEFT]
-        p_jr = points[cls.JAW_RIGHT]
-        p_jc = (p_jl + p_jr) / 2.0
-        r2_l = euclidean_dist(p_fl, p_fc) / euclidean_dist(p_jl, p_jc)
-        r2_r = euclidean_dist(p_fc, p_fr) / euclidean_dist(p_jc, p_jr)
+        # R2: Bilateral Face width / Jaw width relative to facial midline (FM-BUG-022)
+        p_top = points[168][:2]
+        p_bot = points[152][:2]
+        d_c_l = perp_dist(points[cls.FACE_LEFT][:2], p_top, p_bot)
+        d_j_l = perp_dist(points[cls.JAW_LEFT][:2], p_top, p_bot)
+        d_c_r = perp_dist(points[cls.FACE_RIGHT][:2], p_top, p_bot)
+        d_j_r = perp_dist(points[cls.JAW_RIGHT][:2], p_top, p_bot)
+        r2_l = d_c_l / d_j_l if d_j_l > 0 else 0.0
+        r2_r = d_c_r / d_j_r if d_j_r > 0 else 0.0
         r2 = (r2_l + r2_r) / 2.0
 
         # R3: Bilateral Eye Spacing / Eye Width
@@ -144,8 +156,8 @@ class GoldenRatioOracle:
         r3_r = eye_spacing / right_eye_w
         r3 = (r3_l + r3_r) / 2.0
 
-        # R4: Nose Width / Mouth Width
-        wid_nose = euclidean_dist(points[cls.NOSE_LEFT], points[cls.NOSE_RIGHT])
+        # R4: Nose Width / Mouth Width (outer alar wings 129, 358)
+        wid_nose = euclidean_dist(points[129], points[358])
         wid_mouth = euclidean_dist(points[cls.MOUTH_LEFT], points[cls.MOUTH_RIGHT])
         r4 = wid_nose / wid_mouth
 
@@ -156,16 +168,32 @@ class GoldenRatioOracle:
         # R6: Vertical Thirds (Nose-Chin / Hairline-Nose)
         r6 = euclidean_dist(points[cls.NOSE_BRIDGE], points[cls.FACE_BOTTOM]) / euclidean_dist(points[cls.FACE_TOP], points[cls.NOSE_BRIDGE])
 
-        # R7: Eye-to-Brow / Eye Height (Left Eye used for both in production)
+        # R7: Eye-to-Brow / Eye Height (bilateral mirror landmarks: FM-BUG-007)
         dist_brow_l = euclidean_dist(points[cls.LEFT_EYE_TOP], points[cls.LEFT_EYEBROW_BOTTOM])
         h_eye_l = euclidean_dist(points[cls.LEFT_EYE_TOP], points[cls.LEFT_EYE_BOTTOM])
-        r7_l = dist_brow_l / h_eye_l
-        r7_r = r7_l  # Production hardcodes r7_right = r7_left
+        r7_l = dist_brow_l / h_eye_l if h_eye_l > 0 else 0.0
+        dist_brow_r = euclidean_dist(points[cls.RIGHT_EYE_TOP], points[cls.RIGHT_EYEBROW_BOTTOM])
+        h_eye_r = euclidean_dist(points[cls.RIGHT_EYE_TOP], points[cls.RIGHT_EYE_BOTTOM])
+        r7_r = dist_brow_r / h_eye_r if h_eye_r > 0 else 0.0
         r7 = (r7_l + r7_r) / 2.0
 
-        # R8: Chin Width / Nose Width (using JAW_LEFT, JAW_RIGHT)
-        dist_chin = euclidean_dist(points[cls.JAW_LEFT], points[cls.JAW_RIGHT])
-        r8 = dist_chin / wid_nose
+        # R8: Chin Width / Nose Width (chin contour points: FM-BUG-026)
+        y_lip = points[17][1]
+        y_chin = points[152][1]
+        y_mid = (y_lip + y_chin) / 2.0
+        x_mid = points[152][0]
+        face_oval = [10, 338, 297, 332, 284, 251, 389, 356, 454, 323, 361, 288, 397, 365, 379, 378,
+                     400, 377, 152, 148, 176, 149, 150, 136, 172, 58, 132, 93, 234, 127, 162, 21,
+                     54, 103, 67, 109]
+        left_contour = [idx for idx in face_oval if points[idx][0] < x_mid]
+        right_contour = [idx for idx in face_oval if points[idx][0] >= x_mid]
+        if left_contour and right_contour:
+            best_left = min(left_contour, key=lambda idx: abs(points[idx][1] - y_mid))
+            best_right = min(right_contour, key=lambda idx: abs(points[idx][1] - y_mid))
+            chin_width = abs(float(points[best_right][0] - points[best_left][0]))
+            r8 = chin_width / wid_nose if wid_nose > 0 else 0.0
+        else:
+            r8 = 0.0
 
         return {
             "r1": r1, "r2": r2, "r3": r3, "r4": r4,

@@ -1,36 +1,36 @@
 {
   "repeatability": {
     "n_identities": 15,
-    "total_photos": 72,
-    "pooled_within_sd": 3.694,
-    "mean_person_sd": 3.291,
-    "median_person_sd": 3.21,
-    "max_person_sd": 7.64,
-    "pct_meeting_target_sd_le_3": 40.0,
+    "total_photos": 67,
+    "pooled_within_sd": 3.118,
+    "mean_person_sd": 2.922,
+    "median_person_sd": 3.27,
+    "max_person_sd": 5.05,
+    "pct_meeting_target_sd_le_3": 46.7,
     "per_ratio_sd": {
-      "Face Length \u00f7 Face Width": 2.86,
-      "Cheekbone to Jaw Width": 1.83,
-      "Eye Spacing \u00f7 Eye Width": 4.39,
-      "Nose Width \u00f7 Mouth Width": 3.32,
-      "Mouth Width \u00f7 Face Width": 3.24,
-      "Vertical Thirds": 9.32,
-      "Eye-Eyebrow Distance \u00f7 Eye Height": 18.6,
-      "Chin Width \u00f7 Nose Width": 15.24
+      "Face Length \u00f7 Face Width": 2.26,
+      "Cheekbone to Jaw Width": 1.84,
+      "Eye Spacing \u00f7 Eye Width": 4.95,
+      "Nose Width \u00f7 Mouth Width": 2.83,
+      "Mouth Width \u00f7 Face Width": 3.03,
+      "Vertical Thirds": 7.95,
+      "Eye-Eyebrow Distance \u00f7 Eye Height": 21.64,
+      "Chin Width \u00f7 Nose Width": 12.33
     }
   },
   "variance_decomposition": {
     "K_identities": 15,
-    "N_photos": 72,
-    "k0": 4.8,
-    "MSB": 37.193,
-    "MSW": 14.124,
-    "F_statistic": 2.633,
-    "p_value": 0.00513443513495504,
-    "sigma2_between": 4.81,
-    "sigma2_within": 14.124,
-    "pct_var_between": 25.4,
-    "pct_var_within": 74.6,
-    "ICC1": 0.254
+    "N_photos": 67,
+    "k0": 4.45,
+    "MSB": 26.128,
+    "MSW": 10.053,
+    "F_statistic": 2.599,
+    "p_value": 0.006397594442722032,
+    "sigma2_between": 3.609,
+    "sigma2_within": 10.053,
+    "pct_var_between": 26.4,
+    "pct_var_within": 73.6,
+    "ICC1": 0.2642
   },
   "percentile_calibration": {
     "engine_distribution": "Normal(mu=70.0, sigma=10.0)",
@@ -38,44 +38,44 @@
     "comparisons": [
       {
         "score": 55,
-        "engine_percentile": 7,
+        "engine_percentile": 9,
         "empirical_percentile": 71,
-        "discrepancy": -64,
+        "discrepancy": -62,
         "note": "Engine labels below-average (7th pct); actually above average (71st pct)!"
       },
       {
         "score": 60,
-        "engine_percentile": 16,
+        "engine_percentile": 39,
         "empirical_percentile": 95,
-        "discrepancy": -79,
+        "discrepancy": -56,
         "note": "Engine labels low-tier (16th pct); actually top 5% of population (95th pct)!"
       },
       {
         "score": 65,
-        "engine_percentile": 31,
+        "engine_percentile": 79,
         "empirical_percentile": 100,
-        "discrepancy": -69,
+        "discrepancy": -21,
         "note": "Engine labels bottom third (31st pct); actually top 0.3% (99.7th pct)!"
       },
       {
         "score": 70,
-        "engine_percentile": 50,
+        "engine_percentile": 97,
         "empirical_percentile": 100,
-        "discrepancy": -50,
+        "discrepancy": -3,
         "note": "Engine median (50th pct); practically impossible in real faces (>99.99th pct)!"
       },
       {
         "score": 75,
-        "engine_percentile": 69,
+        "engine_percentile": 100,
         "empirical_percentile": 100,
-        "discrepancy": -31,
+        "discrepancy": 0,
         "note": "Biologically unreachable; engine ranks 69\u201384%, reality is 100.0%!"
       },
       {
         "score": 80,
-        "engine_percentile": 84,
+        "engine_percentile": 100,
         "empirical_percentile": 100,
-        "discrepancy": -16,
+        "discrepancy": 0,
         "note": "Biologically unreachable; engine ranks 69\u201384%, reality is 100.0%!"
       }
     ],
