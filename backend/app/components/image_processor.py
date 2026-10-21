@@ -67,13 +67,33 @@ class ImageProcessor:
         """
         # Decode input
         if base64_str:
+            clean_str = base64_str
+            if "," in clean_str and clean_str.startswith("data:"):
+                clean_str = clean_str.split(",", 1)[1]
+            clean_str = clean_str.strip()
+            
+            # Enforce 10MB limit on decoded size early without full decode (Requirement 3c)
+            max_size = settings.max_image_size_mb * 1024 * 1024
+            estimated_size = (len(clean_str) * 3) // 4
+            if estimated_size > max_size:
+                raise ValidationError(
+                    ErrorCode.FILE_TOO_LARGE,
+                    f"File size exceeds {settings.max_image_size_mb}MB limit"
+                )
+                
             try:
-                image_bytes = base64.b64decode(base64_str)
+                image_bytes = base64.b64decode(clean_str, validate=True)
             except Exception as e:
                 logger.error(f"Base64 decode failed: {str(e)}")
                 raise ValidationError(
                     ErrorCode.INVALID_IMAGE,
-                    "Failed to decode base64 image data"
+                    "Malformed base64 image data"
+                )
+                
+            if len(image_bytes) > max_size:
+                raise ValidationError(
+                    ErrorCode.FILE_TOO_LARGE,
+                    f"File size exceeds {settings.max_image_size_mb}MB limit"
                 )
         elif file_bytes:
             image_bytes = file_bytes

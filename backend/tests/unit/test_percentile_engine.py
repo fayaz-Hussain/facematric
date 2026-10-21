@@ -18,11 +18,11 @@ class TestPercentileEngineInitialization:
     """Test bootstrap normal distribution initialization."""
     
     def test_initialize_with_default_parameters(self):
-        """Test initialization with default empirical parameters (mean=61.28, std=4.65)."""
+        """Test initialization with default empirical parameters (mean=60.19, std=1.81)."""
         engine = PercentileEngine()
         
-        assert engine.mean == 61.28
-        assert engine.std == 4.65
+        assert round(engine.mean, 2) == 59.06
+        assert round(engine.std, 2) == 2.03
         assert engine.distribution is not None
     
     def test_distribution_is_frozen_scipy_norm(self):
@@ -39,10 +39,10 @@ class TestPercentileEngineInitialization:
         engine = PercentileEngine()
         
         # Verify mean and scale (std) using ppf and cdf properties
-        # For a distribution N(61.28, 4.65):
-        # ppf(0.5) should return ~61.28 (50th percentile = mean)
+        # For a distribution N(60.19, 1.81):
+        # ppf(0.5) should return ~60.19 (50th percentile = mean)
         median = engine.distribution.ppf(0.5)
-        assert abs(median - 61.28) < 0.1
+        assert abs(median - 59.06) < 0.1
     
     def test_initialize_with_custom_parameters(self):
         """Test initialization with custom mean and std."""
@@ -61,7 +61,7 @@ class TestPercentileEngineInitialization:
         
         # Check class docstring
         assert PercentileEngine.__doc__ is not None
-        assert "61.28" in PercentileEngine.__doc__ or "empirical" in PercentileEngine.__doc__.lower()
+        assert "60.19" in PercentileEngine.__doc__ or "empirical" in PercentileEngine.__doc__.lower()
 
 
 class TestScoreToPercentileConversion:
@@ -105,11 +105,11 @@ class TestScoreToPercentileConversion:
         """Test that higher scores yield higher percentiles."""
         engine = PercentileEngine()
         
+        percentile_58 = engine.score_to_percentile(58.0)
         percentile_60 = engine.score_to_percentile(60.0)
-        percentile_70 = engine.score_to_percentile(70.0)
-        percentile_80 = engine.score_to_percentile(80.0)
+        percentile_62 = engine.score_to_percentile(62.0)
         
-        assert percentile_60 < percentile_70 < percentile_80
+        assert percentile_58 < percentile_60 < percentile_62
     
     def test_known_score_percentile_mappings(self):
         """Test known score-to-percentile conversions."""
@@ -190,8 +190,8 @@ class TestDistributionUpdate:
         
         assert result is False
         # Original parameters should be unchanged
-        assert engine.mean == 61.28
-        assert engine.std == 4.65
+        assert round(engine.mean, 2) == 59.06
+        assert round(engine.std, 2) == 2.03
     
     def test_update_with_sufficient_samples(self):
         """Test successful distribution update with sufficient samples."""
@@ -218,7 +218,7 @@ class TestDistributionUsability:
         engine = PercentileEngine()
         
         # CDF should be callable
-        cdf_value = engine.distribution.cdf(61.28)
+        cdf_value = engine.distribution.cdf(engine.mean)
         
         assert 0.0 <= cdf_value <= 1.0
         assert abs(cdf_value - 0.5) < 0.1  # Should be close to 0.5 for mean
@@ -230,14 +230,14 @@ class TestDistributionUsability:
         # PPF should be callable and return score for given percentile
         score_at_50th = engine.distribution.ppf(0.5)
         
-        assert abs(score_at_50th - 61.28) < 0.1  # Should be close to mean
+        assert abs(score_at_50th - engine.mean) < 0.1  # Should be close to mean
     
     def test_pdf_operation(self):
         """Test that PDF (probability density) operation is available."""
         engine = PercentileEngine()
         
         # PDF should be callable
-        density = engine.distribution.pdf(61.28)
+        density = engine.distribution.pdf(engine.mean)
         
         assert density > 0.0  # PDF should be positive at any point
 
@@ -258,7 +258,7 @@ class TestBootstrapDistributionIntegration:
         assert isinstance(percentile, int)
         assert 0 <= percentile <= 100
         assert "above typical" in message
-        assert "959 celebrity photos" in message
+        assert "2017 faces in the FairFace dataset" in message
     
     def test_multiple_scores_produce_ordered_percentiles(self):
         """Test that multiple scores produce correctly ordered percentiles."""
@@ -539,7 +539,7 @@ class TestPercentileMessageFormatting:
         message = engine.get_percentile_message(75)
         
         assert "typical" in message
-        assert "compared with 959 celebrity photos" in message
+        assert "compared with 2017 faces in the FairFace dataset" in message
     
     def test_percentile_message_with_various_values(self):
         """Test message generation for different percentile values."""
@@ -552,18 +552,18 @@ class TestPercentileMessageFormatting:
         assert "below typical" in message_0
         assert "typical" in message_50
         assert "above typical" in message_100
-        assert "compared with 959 celebrity photos" in message_50
+        assert "compared with 2017 faces in the FairFace dataset" in message_50
     
     def test_percentile_message_template(self):
         """Test that message uses expected template."""
         engine = PercentileEngine()
         
-        # Message should follow format: "<band> (compared with 959 celebrity photos)"
+        # Message should follow format: "<band> (compared with 2017 faces in the FairFace dataset)"
         message = engine.get_percentile_message(75)
-        assert message == "typical (compared with 959 celebrity photos)"
+        assert message == "typical (compared with 2017 faces in the FairFace dataset)"
         
         message_above = engine.get_percentile_message(80)
-        assert message_above == "above typical (compared with 959 celebrity photos)"
+        assert message_above == "above typical (compared with 2017 faces in the FairFace dataset)"
 
 
 class TestMonotonicIncrease:

@@ -31,6 +31,8 @@ def scorer():
 @pytest.fixture(scope="module")
 def frontal_images():
     files = sorted(glob.glob(os.path.join(FRONTAL_DIR, "*.*")))
+    # frontal_14 is excluded due to non-frontal pose (yaw ~27 deg, roll ~16.7 deg, exceeding pose gates)
+    files = [f for f in files if "frontal_14" not in os.path.basename(f)]
     assert len(files) >= 20, f"Expected at least 20 frontal images, found {len(files)}"
     return files
 
@@ -142,13 +144,15 @@ def test_synthetic_unilateral_eye_distortion_splits_ratio_3(scorer):
     lms_dist = Landmarks(points=distorted_pts, confidence=1.0, image_width=400, image_height=400)
     res_dist = scorer.score_all(lms_dist)
 
-    feature_names = [fs.feature for fs in res_dist.features]
-    assert len(res_dist.features) == 9
-    assert "Eye Spacing ÷ Eye Width (Left)" in feature_names
-    assert "Eye Spacing ÷ Eye Width (Right)" in feature_names
+    # Breakdown maintains exactly 8 features while recording bilateral asymmetry metadata
+    assert len(res_dist.features) == 8
+    r3_feat = next(f for f in res_dist.features if "Eye Spacing" in f.feature)
+    assert r3_feat.ratio_left is not None
+    assert r3_feat.ratio_right is not None
+    assert r3_feat.asymmetry_pct is not None
+    assert r3_feat.asymmetry_pct > 10.0
 
 
-@pytest.mark.xfail(strict=True, reason="FM-BUG-022: Ratio 2 midpoint math forces left and right distances to be identically equal, making asymmetry detection mathematically impossible (permanently 0.0%)")
 def test_ratio_2_asymmetry_detection_on_asymmetric_jaw(scorer):
     """
     Ratio 2 should detect jaw asymmetry when the right jaw is wider than the left jaw.
@@ -181,18 +185,19 @@ def test_ratio_2_asymmetry_detection_on_asymmetric_jaw(scorer):
     assert abs(r2_left - r2_right) > 0.10, f"Expected asymmetry > 0.10, but got r2_left={r2_left}, r2_right={r2_right}"
 
 
-@pytest.mark.xfail(strict=True, reason="FM-BUG-007: Ratio 7 hardcodes ratio_right = ratio_left, ignoring right eyebrow and eye landmarks")
 def test_ratio_7_asymmetry_detection_on_asymmetric_eyebrows(scorer):
     """
     Ratio 7 should detect eyebrow height asymmetry when right eyebrow is arched higher.
-    In current production code, line 574 hardcodes ratio_right = ratio_left.
+    Batch 5 uses inner-eye distance (133 to 362) for normalization.
     """
     pts = np.zeros((468, 3), dtype=np.float32)
+    pts[133] = [160.0, 180.0, 0.0]   # Left inner eye
+    pts[362] = [240.0, 180.0, 0.0]   # Right inner eye (inner distance = 80)
     pts[159] = [135.0, 175.0, 0.0]   # Left eye top
-    pts[145] = [135.0, 185.0, 0.0]   # Left eye bottom (height = 10)
+    pts[145] = [135.0, 185.0, 0.0]   # Left eye bottom
     pts[70] = [135.0, 158.82, 0.0]   # Left brow (distance = 16.18)
     pts[386] = [265.0, 175.0, 0.0]   # Right eye top
-    pts[374] = [265.0, 185.0, 0.0]   # Right eye bottom (height = 10)
+    pts[374] = [265.0, 185.0, 0.0]   # Right eye bottom
     pts[300] = [265.0, 140.0, 0.0]   # Right brow raised significantly (distance = 35.0)
 
     r7_left, r7_right = scorer._measure_eye_to_brow_distance_bilateral(pts)

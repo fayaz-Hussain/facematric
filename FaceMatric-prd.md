@@ -118,8 +118,8 @@ All scoring is based purely on **golden ratio (φ = 1.618) comparisons** of faci
 5. Mouth width ÷ face width
 6. Nose bridge to chin ÷ forehead top to nose bridge (vertical thirds, approx. hairline)
    - *Limitation (FM-BUG-016):* MediaPipe Face Mesh does not detect actual hairline boundaries; landmark 10 (top center of the forehead mesh) is used as an anatomical proxy for the trichion. On individuals with high foreheads, receding hairlines, or balding, landmark 10 sits lower than the true biological hairline, causing forehead height to be approximate.
-7. Eye-to-eyebrow distance ÷ eye height
-8. Chin width ÷ nose width
+7. Eye-to-eyebrow distance ÷ inner-eye distance (intercanthal distance)
+8. Jaw width ÷ chin width
 
 **Per-feature scoring:**
 - For each ratio, calculate: `score_i = 100 × (1 - |ratio_i - φ| / φ)`
@@ -170,7 +170,7 @@ Backend returns structured response (see API Contract below) containing:
 - Face symmetry type (classification label)
 - Per-feature breakdown with individual scores
 - Visual overlay data (landmarks, golden ratio guides)
-- Celebrity match (consistent object shape when matcher ran, with similarity, strength, and confidence; name is null if weak < 0.40; null only when matcher is unavailable)
+- Celebrity match (consistent object shape when matcher ran, with similarity, strength, and confidence; name is null if weak < 0.55; always shows the three closest celebrity faces; null only when matcher is unavailable)
 
 ## 9. API Contract
 
@@ -439,10 +439,10 @@ Backend returns structured response (see API Contract below) containing:
 - **Non-frontal photos:** Will skew ratios; v1 relies on user following guidance (acceptable tradeoff)
 - **MediaPipe accuracy:** Occasional landmark errors on difficult photos (handle via quality validation)
 - **Occlusion detection limitations:** Occlusion detection is limited to landmark heuristics (z-depth variance and aspect ratios) without semantic segmentation; thin frames and partial obstructions may not be reliably detected.
-- **Celebrity dataset licensing:** Both datasets are public Kaggle datasets for educational/research use; keep project framed as portfolio/educational (not commercial)
+- **Celebrity dataset licensing:** The celebrity images come from the Pins Face Recognition dataset (originally from Pinterest) and a Bollywood faces dataset; their licences must be checked before public deployment. Keep project framed strictly as portfolio/educational.
 
 ### Open Questions
-- **Percentile calibration:** Need initial dataset to establish distribution (bootstrap from first 100-200 users?)
+- **Percentile calibration & FairFace attribution:** The percentile ranking compares photos against a public reference dataset, not everyone. Calibrated empirically on 2,017 adult faces from the FairFace dataset (balanced across 7 race groups and gender). Attribution: Karkkainen, K., & Joo, J. (2021). FairFace: Face Attribute Dataset for Balanced Race, Gender, and Age for Bias Measurement and Mitigation. WACV 2021. Licensed under CC BY 4.0.
 - **Golden ratio weights:** Are all 8 ratios equally important, or should some be weighted higher?
 - **Timeout threshold tuning:** 30 seconds reasonable, or too long for UX?
 

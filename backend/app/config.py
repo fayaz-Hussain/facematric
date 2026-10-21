@@ -41,9 +41,9 @@ class Settings(BaseSettings):
     phi: float = 1.618
     
     # Celebrity Matching Thresholds
-    celebrity_threshold_strong: float = 0.55
-    celebrity_threshold_moderate: float = 0.40
-    celebrity_confidence_threshold: float = 0.55  # Deprecated alias pointing to strong threshold
+    celebrity_threshold_strong: float = 0.70
+    celebrity_threshold_moderate: float = 0.55
+    celebrity_confidence_threshold: float = 0.70  # Deprecated alias pointing to strong threshold
     
     # MediaPipe Configuration
     mediapipe_max_faces: int = 1

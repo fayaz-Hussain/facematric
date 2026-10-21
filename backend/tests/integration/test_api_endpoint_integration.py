@@ -143,7 +143,7 @@ def create_mock_golden_ratio_result():
             deviation=-0.168
         ),
         FeatureScoreInternal(
-            feature="Chin Width ÷ Nose Width",
+            feature="Jaw Width ÷ Chin Width",
             measured_ratio=1.680,
             ideal_ratio=1.618,
             score=96.2,
